@@ -4,7 +4,12 @@ import java.io.IOException;
 
 public class Main {
     public static void main(String[] args) throws IOException {
-        AnalizadorLexico al = new AnalizadorLexico("Path");
-        al.yylex();
+        AnalizadorLexico al = AnalizadorLexico.getInstance("Programas/pruebaLexico.txt");
+        int x;
+        do {
+            x = al.yylex();
+            System.out.println("Reconoce token " + x);
+        } while (x != 0);
+
     }
 }

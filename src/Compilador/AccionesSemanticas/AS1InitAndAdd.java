@@ -3,7 +3,7 @@ package Compilador.AccionesSemanticas;
 import Compilador.Lexer.AnalizadorLexico;
 import Compilador.Lexer.TokenType;
 
-public class AS1initAndAdd implements AccionSemantica{
+public class AS1InitAndAdd implements AccionSemantica{
 
     @Override
     public int ejecutar(char ch){

@@ -2,6 +2,8 @@ package Compilador.Lexer;
 import Compilador.AccionesSemanticas.*;
 
 import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
 
 
 public class AnalizadorLexico {
@@ -37,10 +39,18 @@ public class AnalizadorLexico {
 
     private static AnalizadorLexico instance;
 
+    private List<AccionSemantica> accionesSemanticas;
+
     public AnalizadorLexico(String filename) throws IOException {
         this.reader = new PushbackMyReader(filename);
-        this.transiciones = new int[30][16];
-        this.acciones = new AccionSemantica[30][16];
+        this.transiciones = MatrizLoader.cargarTransiciones(
+                "src/Compilador/Lexer/Matrices/matriz_transiciones.csv",
+                estadoError
+        );
+        imprimirMatriz( this.transiciones);
+        this.acciones = MatrizLoader.cargarAcciones(
+                "src/Compilador/Lexer/Matrices/matriz_acciones_semanticas.csv"
+        );
     }
 
     public static AnalizadorLexico getInstance(String filename) throws IOException {
@@ -62,19 +72,6 @@ public class AnalizadorLexico {
         }
     }
 
-    public void leerMatrizTransiciones() throws IOException {
-        try (BufferedReader br = new BufferedReader(new FileReader("Matrices/matriz_transiciones.csv"))) {
-            String line;
-            int row = 0;
-            while ((line = br.readLine()) != null && row < transiciones.length) {
-                String[] values = line.split(",");
-                for (int col = 0; col < transiciones[row].length; col++) {
-                    transiciones[row][col] = Integer.parseInt(values[col].trim());
-                }
-                row++;
-            }
-        }
-    }
     
     public int getColumna(char c) {
         switch (c) {
@@ -91,24 +88,35 @@ public class AnalizadorLexico {
             case '/': return 7;
             case '{': return 7;
             case '}': return 7;
+            case '_': return 7;
             case '+': return 8;
             case '-': return 9;
-            case '_': return 10;
-            case '.': return 11;
-            case '%': return 12;
-            case '\n': return 13;  // salto linea
-            case ' ': return 14;
-            case '\t': return 14;
-
+            case '.': return 10;
+            case '%': return 11;
+            case '\n': return 12;  // salto linea
+            case ' ': return 13;
+            case '\t': return 13;
+            case '\r': return 13;
+            case (char)-1: return 13;
             default:
-                if (Character.isDigit(c)) return 15;      // d digito
-                if (Character.isUpperCase(c)) return 16;  // Lmayus
-                if (Character.isLowerCase(c)) return 17;  // Lminus
-
+                if (Character.isDigit(c)) return 14;      // d digito
+                if (Character.isUpperCase(c)) return 15;  // Lmayus
+                if (Character.isLowerCase(c)) return 16;  // Lminus
                 return 30; //ponemos el estado de error mas lejos
 
         }
     }
+
+    public void imprimirMatriz(int[][] matriz) {
+        for (int[] fila : matriz) {
+            for (int val : fila) {
+                System.out.print(val + "\t"); // tab para que quede alineado
+            }
+            System.out.println();
+        }
+        System.out.println("Hay " + matriz.length + " filas y " + matriz[0].length + " columnas");
+    }
+
 
     public int yylex(){
         int estadoActual = 0; //estado inicial
@@ -117,22 +125,24 @@ public class AnalizadorLexico {
         while (estadoActual != estadoError ){
             //leo un caracter del archivo fuente
             int c = reader.read();
-            if (c == MyReader.EOF){ // caracter de fin.
-                return 0; // no se si esto, habria q ver el token en construccion capaz
+            if (c == MyReader.EOF && buffer.isEmpty()){ // caracter de fin.
+                return 0;
             }
             char ch = (char) c;
 
             //busco el proximo estado y su accion semantica asociada
             int columna = getColumna(ch);
-            estadoActual = this.transiciones[estadoActual][columna];
             AccionSemantica as = this.acciones[estadoActual][columna];
-
             if (as != null){
                 int resultadoAS = as.ejecutar(ch);
-                if (resultadoAS != TokenType.sinFinalizar)
+                if (resultadoAS != TokenType.sinFinalizar) {
+                    buffer.setLength(0);
                     return resultadoAS;
+                }
             }
-            
+            estadoActual = this.transiciones[estadoActual][columna];
+
+
         }
         // aca va tratamiento de error 
         return -1; //ver aca error o que onda

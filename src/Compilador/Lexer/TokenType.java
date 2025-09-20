@@ -3,7 +3,7 @@ package Compilador.Lexer;
 public class TokenType{
     public static final int sinFinalizar = -1;
     public static final int ID = 257;
-    public static final int CTE = 258;
+    public static final int CTEL = 258;
     public static final int IF = 259;
     public static final int ELSE = 260;
     public static final int ENDIF = 261;
@@ -22,4 +22,5 @@ public class TokenType{
     public static final int TRUNK = 274;
     public static final int CR = 275;
     public static final int STRING = 276;
+    public static final int CTEF = 277;
 }
