@@ -21,7 +21,7 @@ public class PushbackMyReader implements MyReader {
     @Override
     public void unread(int c) {
         try {
-            if (c != -1) reader.unread(c);
+            reader.unread(c);
         } catch (IOException e) {
             throw new RuntimeException("Error en unread()", e);
         }

@@ -19,16 +19,20 @@ public class AnalizadorLexico {
         this.lineNumber +=1;
     }
 
-    public void addToToken(char ch){
+    public void addToBuffer(char ch){
         buffer.append(ch);
     }
 
-    public String getTokenString(){
+    public String getBufferString(){
         return buffer.toString();   //pasa lo q hay en el buffer a un string
     }
 
-    public void emptyToken(){
+    public void emptyBuffer(){
         buffer.setLength(0);    // vacía el contenido
+    }
+
+    public void goBackReader(int c){
+        reader.unread(c); //le paso el codigo del char y lo mete de vuelta al reader
     }
 
     private static AnalizadorLexico instance;
@@ -51,10 +55,11 @@ public class AnalizadorLexico {
 
     public static AnalizadorLexico getInstance() {
         AnalizadorLexico al = instance;
-        if (instance != null ){
-            return instance;
+        if (al != null ){
+            return al;
+        } else {
+            throw new IllegalStateException("No se ha inicializado el analizador lexico");
         }
-        return null;
     }
 
     public void leerMatrizTransiciones() throws IOException {
@@ -132,7 +137,9 @@ public class AnalizadorLexico {
         // aca va tratamiento de error 
         return -1; //ver aca error o que onda
     }
-    
-    
-    
+
+
+    public void setYylval(String strLexVal) {
+
+    }
 }
