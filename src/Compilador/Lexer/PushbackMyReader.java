@@ -14,7 +14,7 @@ public class PushbackMyReader implements MyReader {
         try {
             return reader.read();
         } catch (IOException e) {
-            return -1;
+            return MyReader.EOF;
         }
     }
 
