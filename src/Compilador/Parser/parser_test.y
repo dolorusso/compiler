@@ -3,6 +3,11 @@
 %token ASIGNAR MENORIGUAL MAYORIGUAL IGUALIGUAL DISTINTO FLECHA
 %token CR CTEF CTEL
 
+%{
+  import Compilador.Lexer.AnalizadorLexico;
+%}
+
+
 %start programa
 
 %%

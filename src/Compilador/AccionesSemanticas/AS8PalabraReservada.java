@@ -21,7 +21,7 @@ public class AS8PalabraReservada implements AccionSemantica{
                 case "lambda" -> TokenType.LAMBDA;
                 case "do" -> TokenType.DO;
                 case "until" -> TokenType.UNTIL;
-                case "trunk" -> TokenType.TRUNK;
+                case "trunc" -> TokenType.TRUNC;
                 case "cr" -> TokenType.CR;
                 case "long" -> TokenType.LONG;
                 default -> throw new IllegalStateException("Posible palabra reservada no reconocida: " + palabra);
