@@ -19,7 +19,7 @@ public class TokenType{
     public static final int LONG = 271;
     public static final int DO = 272;
     public static final int UNTIL = 273;
-    public static final int TRUNK = 274;
+    public static final int TRUNC = 274;
     public static final int CR = 275;
     public static final int STRING = 276;
     public static final int CTEF = 277;

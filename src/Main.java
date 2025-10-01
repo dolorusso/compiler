@@ -9,7 +9,7 @@ public class Main {
         do {
             x = al.yylex();
             System.out.println("Reconoce token " + x);
-        } while (x <= 0);
+        } while (x > 0);
 
     }
 }
