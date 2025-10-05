@@ -4,7 +4,7 @@ import java.io.IOException;
 
 public class Main {
     public static void main(String[] args) throws IOException {
-        AnalizadorLexico al = AnalizadorLexico.getInstance("Programas/pruebaSintactio.txt");
+        AnalizadorLexico al = AnalizadorLexico.getInstance("Programas/pruebaLexico.txt");
         Parser p = new Parser();
         p.run();
 //        int x;

@@ -1,11 +1,9 @@
-%token ID CTELONG CTEFLOAT STRING
-%token IF ELSE ENDIF PRINT RETURN LAMBDA LONG DO UNTIL TRUNC
-%token ASIGNAR MENORIGUAL MAYORIGUAL IGUALIGUAL DISTINTO FLECHA
-%token CR CTEF CTEL
+%token ID CTEL IF ELSE ENDIF PRINT RETURN LAMBDA ASIGNAR MENORIGUAL MAYORIGUAL IGUALIGUAL DISTINTO FLECHA LONG DO UNTIL TRUNC CR STRING CTEF
+
 
 %{
-  import Compilador.Lexer.AnalizadorLexico;
-
+    import Compilador.Lexer.AnalizadorLexico;
+    import Compilador.Lexer.TokenNames;
 %}
 
 
@@ -16,7 +14,11 @@
 programa    
 	: ID '{'
 	    lista_sentencias
-	'}'
+	'}' { System.out.println("Declaracion de programa detectada. Linea: " + al.getLine()); }
+	| error '{'
+	    lista_sentencias
+    '}' { System.out.println("Declaracion de programa invalida, identificador invalido. Linea: " + al.getLine()); }
+
 	;
 
 sentencia    
@@ -25,27 +27,27 @@ sentencia
 	;
 
 sentencia_declarativa
-	: declaracion_variable   { System.out.println("Declaración de variable detectada"); }
-	| declaracion_funcion    { System.out.println("Declaración de función detectada"); }
+	: declaracion_variable   { System.out.println("Declaracion de variable detectada. Linea: " + al.getLine()); }
+	| declaracion_funcion    { System.out.println("Declaracion de función detectada. Linea: " + al.getLine()); }
 	;
 
 sentencia_ejecutable
-	: asignacion ';'         { System.out.println("Asignación detectada"); }
+	: asignacion ';'
 	| control
-	| llamada_funcion ';'    { System.out.println("Llamada a función detectada"); }
-	| print ';'              { System.out.println("Print detectado"); }
+	| llamada_funcion ';'
+	| print ';'
 	;
 
 declaracion_variable
-	: tipo lista_identificadores
-	| tipo asignacion
+	: tipo lista_identificadores { System.out.println("Declaracion de variable detectada. Linea: " + al.getLine()); }
+	| tipo asignacion { System.out.println("Declaracion de variable detectada. Linea: " + al.getLine()); }
 	;
 
 declaracion_funcion
 	: tipo ID '(' lista_parametros_formales ')' '{'
 			lista_sentencias
 			retorno
-		'}'
+		'}' { System.out.println("Declaracion de funcion detectada. Linea: " + al.getLine()); }
 	;
 
 lista_sentencias 
@@ -74,14 +76,14 @@ lista_identificadores
 	;
 
 parametro_formal
-	: CR tipo ID
-	| tipo ID
-	| LAMBDA tipo ID
-	| CR LAMBDA tipo ID
+	: CR tipo ID { System.out.println("Parametro formal copia resultado detectado. Linea: " + al.getLine()); }
+	| tipo ID { System.out.println("Parametro formal con semantica por defecto detectado. Linea: " + al.getLine()); }
+	| LAMBDA tipo ID { System.out.println("Parametro formal lambda detectado. Linea: " + al.getLine()); }
+	| CR LAMBDA tipo ID { System.out.println("Parametro formal lambda por copia resultado detectado. Linea: " + al.getLine()); }
 	;
 
 parametro_real_compuesto
-	: parametro_real FLECHA parametro_formal
+	: parametro_real FLECHA parametro_formal { System.out.println("Parametro real detectado. Linea: " + al.getLine()); }
 	;
 
 parametro_real
@@ -95,19 +97,19 @@ control
 	;
 
 sentencia_IF
-	: IF '(' condicion ')' '{' lista_sentencias_ejecutables '}' ENDIF
-	  { System.out.println("IF detectado (sin ELSE)"); }
-	| IF '(' condicion ')' '{' lista_sentencias_ejecutables '}' ELSE '{' lista_sentencias_ejecutables '}'
-	  { System.out.println("IF-ELSE detectado"); }
+	: IF '(' condicion ')' '{' lista_sentencias_ejecutables '}' ENDIF ';'
+	  { System.out.println("IF detectado (sin ELSE). Linea: " + al.getLine()); }
+	| IF '(' condicion ')' '{' lista_sentencias_ejecutables '}' ELSE '{' lista_sentencias_ejecutables '}' ENDIF ';'
+	  { System.out.println("IF-ELSE detectado. Linea: " + al.getLine()); }
 	;
 
 condicion
-	: expresion comparador expresion
+	: expresion comparador expresion { System.out.println("Condicion detectada. Linea: " + al.getLine()); }
 	;
 
 do_until
 	: DO '{' lista_sentencias_ejecutables '}' UNTIL '(' condicion ')'
-	  { System.out.println("DO-UNTIL detectado"); }
+	  { System.out.println("DO-UNTIL detectado. Linea: " + al.getLine()); }
 	;
 
 comparador
@@ -125,14 +127,14 @@ tipo
 	;
 
 asignacion
-	: ID ASIGNAR expresion
+	: ID ASIGNAR expresion { System.out.println("Asignacion detectada. Linea: " + al.getLine()); }
 	;
 
 expresion
 	: expresion '+' termino
 	| expresion '-' termino
 	| termino
-	| TRUNC '(' expresion ')'
+	| TRUNC '(' expresion ')' {System.out.println("Trunc detectado. Linea: " + al.getLine()); }
 	;
 
 termino
@@ -149,20 +151,20 @@ factor
 	;
 
 llamada_funcion
-	: ID '(' lista_parametros_reales ')'
+	: ID '(' lista_parametros_reales ')' {System.out.println("Llamado a funcion detectado. Linea: " + al.getLine());}
 	;
 
 print
-	: PRINT '(' STRING ')'
-	| PRINT '(' expresion ')'
+	: PRINT '(' STRING ')' {System.out.println("Print detectado. Linea: " + al.getLine());}
+	| PRINT '(' expresion ')' {System.out.println("Print detectado con expresion. Linea: " + al.getLine());}
 	;
 
 lambda
-	: '(' tipo ')' '{' lista_sentencias_ejecutables
+	: '(' tipo ')' '{' lista_sentencias_ejecutables {System.out.println("Definicion lambda detectada. Linea: " + al.getLine());}
 	;
 
 retorno
-	: RETURN '(' expresion ')'
+	: RETURN '(' expresion ')' {System.out.println("Retorno detectado. Linea: " + al.getLine());}
 	;
 
 %%
@@ -171,7 +173,7 @@ private AnalizadorLexico al;
 public int yylex(){
     this.al = AnalizadorLexico.getInstance();
     int token = al.yylex();
-    System.err.println("Se reconocio el token " + token);
+    System.err.println("Se reconocio el token " + token + " ("+ TokenNames.getTokenName(token) + ") En linea " + al.getLine());
     this.yylval = al.getYylval();
     return token;
 }

@@ -11,7 +11,7 @@
 
 %%
 programa    
-	: lista_sentencias    
+	: lista_sentencias
 	;
 	
 sentencia    

@@ -1,0 +1,52 @@
+package Compilador.Lexer;
+
+import java.util.HashMap;
+import java.util.Map;
+
+public class TokenNames {
+
+    private static final Map<Integer, String> tokenNames = new HashMap<>();
+
+    static {
+        tokenNames.put(TokenType.ID, "ID");
+        tokenNames.put(TokenType.CTEL, "CTEL");
+        tokenNames.put(TokenType.IF, "IF");
+        tokenNames.put(TokenType.ELSE, "ELSE");
+        tokenNames.put(TokenType.ENDIF, "ENDIF");
+        tokenNames.put(TokenType.PRINT, "PRINT");
+        tokenNames.put(TokenType.RETURN, "RETURN");
+        tokenNames.put(TokenType.LAMBDA, "LAMBDA");
+        tokenNames.put(TokenType.ASIGN, "ASIGNAR");
+        tokenNames.put(TokenType.MENORIGUAL, "MENORIGUAL");
+        tokenNames.put(TokenType.MAYORIGUAL, "MAYORIGUAL");
+        tokenNames.put(TokenType.IGUALIGUAL, "IGUALIGUAL");
+        tokenNames.put(TokenType.DISTINTO, "DISTINTO");
+        tokenNames.put(TokenType.FLECHA, "FLECHA");
+        tokenNames.put(TokenType.LONG, "LONG");
+        tokenNames.put(TokenType.DO, "DO");
+        tokenNames.put(TokenType.UNTIL, "UNTIL");
+        tokenNames.put(TokenType.TRUNC, "TRUNC");
+        tokenNames.put(TokenType.CR, "CR");
+        tokenNames.put(TokenType.STRING, "STRING");
+        tokenNames.put(TokenType.CTEF, "CTEF");
+    }
+
+    /**
+     * Devuelve el nombre legible del token.
+     * Si el código es menor a 257, se asume que representa un carácter ASCII.
+     */
+    public static String getTokenName(int tokenValue) {
+        if (tokenValue < 257) {
+            // Si es un ASCII imprimible
+            if (tokenValue >= 32 && tokenValue <= 126) {
+                return Character.toString((char) tokenValue);
+            } else {
+                // ASCII no imprimible (por ejemplo \n, \t)
+                return String.format("ASCII(%d)", tokenValue);
+            }
+        }
+
+        // Si es un token definido
+        return tokenNames.getOrDefault(tokenValue, "UNKNOWN(" + tokenValue + ")");
+    }
+}
