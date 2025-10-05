@@ -11,17 +11,14 @@ public class AS9Long implements AccionSemantica{
     @Override
     public int ejecutar(char ch) {
         AnalizadorLexico al = AnalizadorLexico.getInstance();
-
-        int num;
+        double num;
         try{
-            num = Integer.parseInt("-" + al.getBufferString()); //obtengo el valor numerico
-
-            //lo pongo negativo por que no quiero que el 255
-            // vaya al catch, ya que solo lo puedo checkear en la semantica.
+            num = Double.parseDouble(al.getBufferString());
         }
         catch (NumberFormatException e){
-            num = Integer.MIN_VALUE; //Guardo el valor mas chico y despues se le cambia el signo
-            System.out.println("ERROR, constante long fuera de rango");
+            System.out.println("Error. Constante long no valida. Insertando 0");
+            al.ts.insertar(al.getBufferString() + "L", new Atributo(0.0));
+            return TokenType.CTEL;
         }
 
         if (ch != 'L'){
