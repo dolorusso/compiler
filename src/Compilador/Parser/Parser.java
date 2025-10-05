@@ -13,9 +13,13 @@
 
 
 
+package Compilador.Parser;
 
 
 
+//#line 7 "parser_test.y"
+  import Compilador.Lexer.AnalizadorLexico;
+//#line 19 "Parser.java"
 
 
 
@@ -402,13 +406,13 @@ final static String yyrule[] = {
 "retorno : RETURN '(' expresion ')'",
 };
 
-//#line 161 "parser_test.y"
+//#line 166 "parser_test.y"
 
 /* Manejo de errores */
 public void yyerror(String s) {
     System.err.println("Error sintáctico: " + s);
 }
-//#line 340 "Parser.java"
+//#line 343 "Parser.java"
 //###############################################################
 // method: yylexdebug : check lexer state
 //###############################################################
@@ -563,38 +567,38 @@ boolean doaction;
       {
 //########## USER-SUPPLIED ACTIONS ##########
 case 4:
-//#line 20 "parser_test.y"
+//#line 25 "parser_test.y"
 { System.out.println("Declaración de variable detectada"); }
 break;
 case 5:
-//#line 21 "parser_test.y"
+//#line 26 "parser_test.y"
 { System.out.println("Declaración de función detectada"); }
 break;
 case 6:
-//#line 25 "parser_test.y"
+//#line 30 "parser_test.y"
 { System.out.println("Asignación detectada"); }
 break;
 case 8:
-//#line 27 "parser_test.y"
+//#line 32 "parser_test.y"
 { System.out.println("Llamada a función detectada"); }
 break;
 case 9:
-//#line 28 "parser_test.y"
+//#line 33 "parser_test.y"
 { System.out.println("Print detectado"); }
 break;
 case 32:
-//#line 91 "parser_test.y"
+//#line 96 "parser_test.y"
 { System.out.println("IF detectado (sin ELSE)"); }
 break;
 case 33:
-//#line 93 "parser_test.y"
+//#line 98 "parser_test.y"
 { System.out.println("IF-ELSE detectado"); }
 break;
 case 35:
-//#line 102 "parser_test.y"
+//#line 107 "parser_test.y"
 { System.out.println("DO-UNTIL detectado"); }
 break;
-//#line 521 "Parser.java"
+//#line 524 "Parser.java"
 //########## END OF USER-SUPPLIED ACTIONS ##########
     }//switch
     //#### Now let's reduce... ####
