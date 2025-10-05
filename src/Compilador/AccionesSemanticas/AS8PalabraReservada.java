@@ -28,7 +28,7 @@ public class AS8PalabraReservada implements AccionSemantica{
                 default -> throw new IllegalStateException("Posible palabra reservada no reconocida: " + palabra);
             };
         } catch (Exception e) {
-            System.out.println("Error en AS8PalabraReservada: " + e.getMessage());
+            System.out.println(e.getMessage());
             //hacer algo mas para el error?????????????????????
             return AnalizadorLexico.estadoError;
     }

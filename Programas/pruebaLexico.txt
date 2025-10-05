@@ -1,7 +1,5 @@
-PRUEBA {
-    long X;
-    long Y := 30L;
-    if ( Y > 10L ){
-       print(&funca&);
-    } endif;
+X {
+    long X(){
+
+    }
 }

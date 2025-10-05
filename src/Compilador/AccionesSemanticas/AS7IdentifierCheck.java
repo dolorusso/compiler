@@ -11,6 +11,11 @@ public class AS7IdentifierCheck implements AccionSemantica{
         AnalizadorLexico al = AnalizadorLexico.getInstance();
         al.goBackReader(ch);
         String ID = al.getBufferString();
+
+        if (ID.contains(".")){ //fix para los ID.ID
+            return AccionesFactory.get(12).ejecutar(ch);
+        }
+
         String VAL = ID;
         if (ID.length() > MAX_LENGTH) {
             VAL = VAL.substring(0, MAX_LENGTH);

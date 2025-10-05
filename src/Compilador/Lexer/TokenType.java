@@ -23,4 +23,5 @@ public class TokenType{
     public static final int CR = 275;
     public static final int STRING = 276;
     public static final int CTEF = 277;
+    public static final int IDCOMP = 278;
 }
