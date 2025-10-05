@@ -5,6 +5,7 @@
 
 %{
   import Compilador.Lexer.AnalizadorLexico;
+
 %}
 
 
@@ -13,7 +14,9 @@
 %%
 
 programa    
-	: lista_sentencias    
+	: ID '{'
+	    lista_sentencias
+	'}'
 	;
 
 sentencia    
@@ -163,8 +166,19 @@ retorno
 	;
 
 %%
+private AnalizadorLexico al;
+
+public int yylex(){
+    this.al = AnalizadorLexico.getInstance();
+    int token = al.yylex();
+    System.err.println("Se reconocio el token " + token);
+    this.yylval = al.getYylval();
+    return token;
+}
 
 /* Manejo de errores */
 public void yyerror(String s) {
     System.err.println("Error sintáctico: " + s);
+    System.err.println("Linea: " + al.getLine());
+
 }

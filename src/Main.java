@@ -4,6 +4,14 @@ import java.io.IOException;
 
 public class Main {
     public static void main(String[] args) throws IOException {
-      Parser p = new Parser();
+        AnalizadorLexico al = AnalizadorLexico.getInstance("Programas/pruebaSintactio.txt");
+        Parser p = new Parser();
+        p.run();
+//        int x;
+//
+//        do {
+//            x = al.yylex();
+//            System.out.println("Reconoce token " + x);
+//        } while (x != 0);
     }
 }

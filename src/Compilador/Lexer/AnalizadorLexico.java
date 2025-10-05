@@ -1,5 +1,6 @@
 package Compilador.Lexer;
 import Compilador.AccionesSemanticas.*;
+import Compilador.Parser.ParserVal;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -9,7 +10,7 @@ import java.util.List;
 public class AnalizadorLexico {
     private int[][] transiciones;
     private AccionSemantica[][] acciones;
-
+    private ParserVal yylvalActual;
     private int lineNumber = 1;
     private MyReader reader;
     private StringBuilder buffer = new StringBuilder();
@@ -20,6 +21,7 @@ public class AnalizadorLexico {
     public void addLine(){
         this.lineNumber +=1;
     }
+    public int getLine(){ return this.lineNumber;}
 
     public void addToBuffer(char ch){
         buffer.append(ch);
@@ -89,6 +91,7 @@ public class AnalizadorLexico {
             case '{': return 7;
             case '}': return 7;
             case '_': return 7;
+            case ';': return 7;
             case '+': return 8;
             case '-': return 9;
             case '.': return 10;
@@ -150,6 +153,10 @@ public class AnalizadorLexico {
 
 
     public void setYylval(String strLexVal) {
+        this.yylvalActual = new ParserVal(strLexVal);
+    }
 
+    public ParserVal getYylval() {
+        return yylvalActual;
     }
 }

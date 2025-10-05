@@ -1,0 +1,3 @@
+PRUEBA {
+    string X = &30&;
+}

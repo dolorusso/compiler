@@ -6,8 +6,6 @@ import Compilador.Lexer.TokenType;
 
 public class AS9Long implements AccionSemantica{
 
-
-
     @Override
     public int ejecutar(char ch) {
         AnalizadorLexico al = AnalizadorLexico.getInstance();
@@ -16,9 +14,9 @@ public class AS9Long implements AccionSemantica{
             num = Double.parseDouble(al.getBufferString());
         }
         catch (NumberFormatException e){
+            // No deberia pasar por aca, ya que manejamos con los estados.
             System.out.println("Error. Constante long no valida. Insertando 0");
-            al.ts.insertar(al.getBufferString() + "L", new Atributo(0.0));
-            return TokenType.CTEL;
+            num = 0.0;
         }
 
         if (ch != 'L'){
@@ -29,10 +27,10 @@ public class AS9Long implements AccionSemantica{
             al.addToBuffer(ch);
         }
 
-        //La clave va a ser el numero completo, sin truncar y con el sufijo??!?!?
+        //La clave va a ser el numero completo, sin truncar y con el sufijo
         String clave = al.getBufferString();
 
-        al.ts.insertar(clave,new Atributo(num));
+        al.ts.insertar(clave,new Atributo(Atributo.longType, num));
         al.setYylval(clave);
 
         return TokenType.CTEL;

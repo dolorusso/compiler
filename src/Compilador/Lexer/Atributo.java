@@ -9,15 +9,13 @@ public class Atributo {
     public static final int floatType = 1;
     public static final int stringType = 2;
 
-    public Atributo(int type, String strValue){
-        this.type = type;
-        this.strValue = strValue;
-    }
-    public Atributo(int type){
-        this.type = type;
-    }
     public Atributo(String strValue){
+        type = stringType;
         this.strValue = strValue;
     }
-    public Atributo(double numValue){ this.numValue = numValue;}
+
+    public Atributo(int type, double numValue){
+        this.type = type;
+        this.numValue = numValue;
+    }
 }
