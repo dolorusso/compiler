@@ -31,14 +31,14 @@ programa
          { System.out.println("Falta apertura del programa. Linea: " + al.getLine()); }
 	;
 
-sentencia    
+sentencia
 	: sentencia_declarativa
 	| sentencia_ejecutable
 	;
 
 sentencia_declarativa
 	: declaracion_variable ';'
-	| declaracion_variable { System.out.println("Falta delimitador de sentencias ;. Linea: " + al.getLine()); }
+	//| declaracion_variable { System.out.println("Falta delimitador de sentencias ;. Linea: " + al.getLine()); }
 	| declaracion_funcion
 	;
 
@@ -130,7 +130,7 @@ parametro_real
 
 control
 	: sentencia_IF ';'
-	| do_until ';'
+	| do_until
 	;
 
 sentencia_IF
