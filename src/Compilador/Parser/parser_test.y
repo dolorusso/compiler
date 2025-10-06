@@ -24,22 +24,23 @@ programa
           '}' { System.out.println("Declaracion de programa invalida, falta identificador. Linea: " + al.getLine()); }
     | ID
         lista_sentencias
-    '}' { System.out.println("Falta apertura del programa. Linea: " + al.getLine()); }
+    '}' { System.out.println("Falta apertura del programa '{'. Linea: " + al.getLine()); }
 
     | ID '{'
             lista_sentencias
-         { System.out.println("Falta apertura del programa. Linea: " + al.getLine()); }
+         { System.out.println("Falta cierre del programa '}'. Linea: " + al.getLine()); }
+    | ID lista_sentencias { System.out.println("Faltan delimitadores de programa '{' y '}' '}'. Linea: " + al.getLine()); }
 	;
 
 sentencia
 	: sentencia_declarativa
 	| sentencia_ejecutable ';'
-	| sentencia_ejecutable   { System.out.println("Falta delimitador de sentencias ;. Linea: " + al.getLine()); }
+	| sentencia_ejecutable { System.out.println("Falta delimitador de sentencias ;. Linea: " + al.getLine()); }
 	;
 
 sentencia_declarativa
 	: declaracion_variable ';'
-	//| declaracion_variable { System.out.println("Falta delimitador de sentencias ;. Linea: " + al.getLine()); }
+	| declaracion_variable { System.out.println("Falta delimitador de sentencias ;. Linea: " + al.getLine()); }
 	| declaracion_funcion
 	;
 
@@ -49,34 +50,28 @@ sentencia_ejecutable
 	| llamada_funcion
 	| print
 	| retorno { System.out.println("checkear valido"); }
-	;
-
-declaracion_variable
-	: tipo lista_identificadores
-	| error lista_identificadores { System.out.println("Tipo invalido/ausente"); }
-	| tipo asignacion { System.out.println("Declaracion de variable detectada. Linea: " + al.getLine()); }
-	| error asignacion { System.out.println("Tipo invalido/ausente"); }
+	| asignacion_multiple
 	;
 
 declaracion_funcion
-	: tipo ID '(' lista_parametros_formales ')' '{' // Declaracion completa
-			lista_sentencias
-		'}' { System.out.println("Declaracion de funcion detectada. Linea: " + al.getLine()); }
-	| tipo ID '(' ')' '{' // Declaracion sin argumentos
-            lista_sentencias
-        '}' { System.out.println("Declaracion de funcion sin parametros detectada. Linea: " + al.getLine()); }
-	| error ID '(' lista_parametros_formales ')' '{' // Declaracion tipo invalido
-            lista_sentencias
-        '}' { System.out.println("Tipo de funcion invalido/ausente. Linea: " + al.getLine()); }
-    | tipo ID '(' lista_parametros_formales ')' '{' // Declaracion sin cuerpo
 
-    '}' { System.out.println("Declaracion de funcion vacia detectada. Linea: " + al.getLine()); }
-    |  tipo ID '(' ')' '{' // Declaracion sin argumentos ni cuerpo
+	: tipo ID parametros_formales_opt cuerpo_funcion_opt
+	    { System.out.println("Declaracion de funcion detectada. Linea: " + al.getLine()); }
+    | ID parametros_formales_opt cuerpo_funcion_opt
+        { System.out.println("Funcion sin tipo. Linea: " + al.getLine()); }
+    | tipo parametros_formales_opt cuerpo_funcion_opt
+        { System.out.println("Funcion sin nombre. Linea: " + al.getLine()); }
+    ;
 
-    '}' { System.out.println("Declaracion de funcion vacia detectada. Linea: " + al.getLine());
-         System.out.println("Declaracion de funcion sin parametros detectada. Linea: " + al.getLine()); }
+parametros_formales_opt
+    : '(' lista_parametros_formales ')'
+    | '(' ')'
+    ;
 
-	;
+cuerpo_funcion_opt
+    : '{' lista_sentencias '}'
+    | '{' '}' { System.out.println("Falta el cuerpo del bloque. Linea: " + al.getLine()); }
+    ;
 
 
 lista_sentencias 
@@ -101,19 +96,29 @@ lista_parametros_reales
 	| lista_parametros_reales error parametro_real_compuesto{ System.out.println("Separador de parametros invalido. Utilizar ','. Linea: " + al.getLine()); }
 	;
 
+declaracion_variable
+	: lista_identificadores
+	| tipo asignacion { System.out.println("Declaracion de variable detectada. Linea: " + al.getLine()); }
+	| error asignacion { System.out.println("Tipo invalido/ausente"); }
+	;
+
 lista_identificadores
-	: IDCOMP { System.out.println("Declaracion de variable detectada. Linea: " + al.getLine()); }
+	: tipo IDCOMP { System.out.println("Declaracion de variable detectada. Linea: " + al.getLine()); }
 	| lista_identificadores ',' IDCOMP { System.out.println("Declaracion de variable detectada. Linea: " + al.getLine()); }
-	| lista_identificadores error IDCOMP { System.out.println("Separador de parametros invalido. Utilizar ','. Linea: " + al.getLine()); }
 	| ID { System.out.println("Falta prefijo obligatorio del ID. Linea: " + al.getLine()); }
+	| tipo ID { System.out.println("Falta prefijo obligatorio del ID. Linea: " + al.getLine()); }
 	| lista_identificadores ',' ID { System.out.println("Falta prefijo obligatorio del ID. Linea: " + al.getLine()); }
 	;
 
 parametro_formal
 	: CR tipo ID { System.out.println("Parametro formal copia resultado detectado. Linea: " + al.getLine()); }
+	| CR ID { System.out.println("Falta tipo de parametro formal. Linea: " + al.getLine()); }
+	| CR tipo { System.out.println("Falta nombre de parametro formal. Linea: " + al.getLine()); }
+	| CR { System.out.println("Falta tipo de parametro formal. Linea: " + al.getLine()); }
 	| tipo ID { System.out.println("Parametro formal con semantica por defecto detectado. Linea: " + al.getLine()); }
-	| LAMBDA tipo ID { System.out.println("Parametro formal lambda detectado. Linea: " + al.getLine()); }
-	| CR LAMBDA tipo ID { System.out.println("Parametro formal lambda por copia resultado detectado. Linea: " + al.getLine()); }
+	| ID { System.out.println("Falta tipo de parametro formal. Linea: " + al.getLine()); }
+	| LAMBDA ID { System.out.println("Parametro formal lambda detectado. Linea: " + al.getLine()); }
+	| CR LAMBDA ID { System.out.println("Parametro formal lambda por copia resultado detectado. Linea: " + al.getLine()); }
 	;
 
 parametro_real_compuesto
@@ -206,6 +211,27 @@ retorno
 	: RETURN '(' expresion ')' {System.out.println("Retorno detectado. Linea: " + al.getLine());}
 	;
 
+asignacion_multiple
+    : ids '=' lista_constantes { System.out.println("Asignacion multiple detectada. Linea: " + al.getLine());}
+    | error ids '=' lista_constantes  { System.out.println("Error en asignacion multiple, separador a utilizar: ,. Linea: " + al.getLine());}
+    | ids '=' error  { System.out.println("Error en asignacion multiple, separador a utilizar: ,. Linea: " + al.getLine());}
+    | error ids '=' error lista_constantes { System.out.println("Error en asignacion multiple, separador a utilizar: ,. Linea: " + al.getLine());}
+    ;
+
+ids
+    : IDCOMP
+    | ids ',' IDCOMP
+    ;
+
+lista_constantes
+    : lista_constantes ',' constante
+    | constante
+    ;
+
+constante
+    : CTEL
+    | CTEF
+;
 
 
 %%

@@ -92,6 +92,7 @@ public class AnalizadorLexico {
             case '}': return 7;
             case '_': return 7;
             case ';': return 7;
+            case ',': return 7;
             case '+': return 8;
             case '-': return 9;
             case '.': return 10;

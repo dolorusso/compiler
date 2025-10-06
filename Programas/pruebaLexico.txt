@@ -1,3 +1,5 @@
-X {
-    long X.Y
+X{
+    long (cr X){
+
+    }
 }
