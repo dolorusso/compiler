@@ -1,5 +1,3 @@
 X{
-    long (cr X){
-
-    }
+   long X.Z, X.Y;
 }

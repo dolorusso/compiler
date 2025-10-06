@@ -1,7 +1,7 @@
 package Compilador.Lexer;
 
 public class Atributo {
-    public int type; //Long 0, float 1
+    public int type;
     public String strValue;
     public double numValue;
 
