@@ -29,6 +29,7 @@ public class TokenNames {
         tokenNames.put(TokenType.CR, "CR");
         tokenNames.put(TokenType.STRING, "STRING");
         tokenNames.put(TokenType.CTEF, "CTEF");
+        tokenNames.put(TokenType.IDCOMP, "IDCOMP");
     }
 
     /**

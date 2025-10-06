@@ -33,7 +33,8 @@ programa
 
 sentencia
 	: sentencia_declarativa
-	| sentencia_ejecutable
+	| sentencia_ejecutable ';'
+	| sentencia_ejecutable   { System.out.println("Falta delimitador de sentencias ;. Linea: " + al.getLine()); }
 	;
 
 sentencia_declarativa
@@ -43,15 +44,11 @@ sentencia_declarativa
 	;
 
 sentencia_ejecutable
-	: asignacion ';'
-	| asignacion  { System.out.println("Falta delimitador de sentencias ;. Linea: " + al.getLine()); }
+	: asignacion
 	| control
-	| llamada_funcion ';'
-	| llamada_funcion { System.out.println("Falta delimitador de sentencias ;. Linea: " + al.getLine()); }
-	| print ';'
-	| print { System.out.println("Falta delimitador de sentencias ;. Linea: " + al.getLine()); }
-	| retorno ';' { System.out.println("checkear valido"); }
-	| retorno { System.out.println("Falta delimitador de sentencias ;. Linea: " + al.getLine()); }
+	| llamada_funcion
+	| print
+	| retorno { System.out.println("checkear valido"); }
 	;
 
 declaracion_variable
@@ -129,7 +126,7 @@ parametro_real
 	;
 
 control
-	: sentencia_IF ';'
+	: sentencia_IF
 	| do_until
 	;
 

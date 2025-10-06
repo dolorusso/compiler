@@ -7,11 +7,11 @@ public class Main {
         AnalizadorLexico al = AnalizadorLexico.getInstance("Programas/pruebaLexico.txt");
         Parser p = new Parser();
         p.run();
-//        int x;
-//
-//        do {
-//            x = al.yylex();
-//            System.out.println("Reconoce token " + x);
-//        } while (x != 0);
-    }
+        //    int x;
+        //
+        //    do {
+        //       x = al.yylex();
+        //        System.out.println("Reconoce token " + x);
+        //   } while (x != 0);
+   }
 }
