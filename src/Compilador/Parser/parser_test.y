@@ -135,12 +135,27 @@ control
 	| do_until
 	;
 
+
 sentencia_IF
-	: IF '(' condicion ')' '{' lista_sentencias_ejecutables '}' ENDIF
+	: IF condicional_opt cuerpo_opt ENDIF
 	  { System.out.println("IF detectado (sin ELSE). Linea: " + al.getLine()); }
-	| IF '(' condicion ')' '{' lista_sentencias_ejecutables '}' ELSE '{' lista_sentencias_ejecutables '}' ENDIF
+	| IF condicional_opt cuerpo_opt ELSE cuerpo_opt ENDIF
 	  { System.out.println("IF-ELSE detectado. Linea: " + al.getLine()); }
 	;
+
+condicional_opt
+    : '(' condicion ')'
+    | condicion ')'
+    | '(' condicion
+    ;
+
+cuerpo_opt
+    : '{' lista_sentencias_ejecutables '}'
+    | lista_sentencias_ejecutables
+    | '{' lista_sentencias_ejecutables
+    | lista_sentencias_ejecutables '}'
+    ;
+
 
 condicion
 	: expresion comparador expresion { System.out.println("Condicion detectada. Linea: " + al.getLine()); }
