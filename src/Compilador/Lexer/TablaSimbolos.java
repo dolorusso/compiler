@@ -16,4 +16,9 @@ public class TablaSimbolos {
     public Atributo obtener(String lexema) {
         return tabla.get(lexema);
     }
+
+    @Override
+    public String toString() {
+        return tabla.toString();
+    }
 }

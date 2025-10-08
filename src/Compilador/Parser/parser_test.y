@@ -6,6 +6,7 @@
     import Compilador.Lexer.AnalizadorLexico;
     import Compilador.Lexer.TokenNames;
     import Compilador.ErrorHandler.ErrorManager;
+    import Compilador.Lexer.Atributo;
 %}
 
 
@@ -240,6 +241,8 @@ cuerpo_opt
 condicion
 	: expresion comparador expresion
 	    { errManager.debug("Condicion detectada. Linea: " + al.getLine()); }
+	| expresion error
+	    { errManager.error("Comparador de condificion invalido/faltante", al.getLine()); }
 	;
 
 do_until
@@ -262,8 +265,7 @@ comparador
 	| DISTINTO
 	| '>'
 	| '<'
-	| //vacio
-	    { errManager.error("Falta comparador en condicion", al.getLine()); }
+
 	;
 
 tipo
@@ -320,7 +322,7 @@ llamada_funcion
 
 print
 	: PRINT cuerpo_expresion
-	    {errManager.debug("Print detectado con expresion", al.getLine());}	;
+	    { errManager.debug("Print detectado con expresion", al.getLine());}	;
 
 lambda
 	: '(' tipo ID')' '{' lista_sentencias_ejecutables '}'
@@ -376,6 +378,18 @@ lista_constantes
 constante
     : CTEL
     | CTEF
+    | '-' CTEL
+        {
+
+            errManager.debug("HAY: " + $$, al.getLine());
+            errManager.debug("HAY: " + $2.obj, al.getLine());
+            String lexema = $2.sval; // el lexema de la constante
+            errManager.debug("Constante negativa detectada: " + lexema, al.getLine());
+            // Almacenar como nueva entrada en tabla de simbolos
+            Atributo nuevoAtributo = new Atributo(Atributo.longType, -1 * al.ts.obtener(lexema).numValue);
+            al.ts.insertar("-" + lexema, nuevoAtributo); //medio ineficiente, mejorar despues
+        }
+    | '-' CTEF
     ;
 
 
@@ -393,11 +407,9 @@ public int yylex(){
     int token = al.yylex();
     errManager.debug("Se reconocio el token " + token + " ("+ TokenNames.getTokenName(token) + ")", al.getLine());
 
-    this.yylval = al.getYylval();
-    if(this.yylval == null)
-        yylval = new ParserVal(0);
     return token;
 }
+
 
 /* Manejo de errores */
 public void yyerror(String s) {
