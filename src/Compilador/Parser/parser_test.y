@@ -1,10 +1,11 @@
 %token ID CTEL IF ELSE ENDIF PRINT RETURN LAMBDA ASIGNAR MENORIGUAL MAYORIGUAL IGUALIGUAL DISTINTO
-%token FLECHA LONG DO UNTIL TRUNC CR STRING CTEF IDCOMP
+%token FLECHA LONG DO UNTIL TRUNC CR STRING CTEF IDCOMP CADENASTR
 
 
 %{
     import Compilador.Lexer.AnalizadorLexico;
     import Compilador.Lexer.TokenNames;
+    import Compilador.ErrorHandler.ErrorManager;
 %}
 
 
@@ -25,7 +26,10 @@ programa
     | ID '{'
             lista_sentencias
          { System.out.println("Falta cierre del programa '}'. Linea: " + al.getLine()); }
-    | ID lista_sentencias { System.out.println("Faltan delimitadores de programa '{' y '}' '}'. Linea: " + al.getLine()); }
+    | ID lista_sentencias { System.out.println("Faltan delimitadores de programa '{' y '}'. Linea: " + al.getLine()); }
+	| ID '{' '}' { System.out.println("Programa vacio. Linea: " + al.getLine()); }
+	| '{' '}' { System.out.println("Falta ID del programa. Linea: " + al.getLine()); }
+	//| ID { System.out.println("Faltan delimitadores de programa '{' y '}'. Linea: " + al.getLine()); }
 	;
 
 sentencia
@@ -40,18 +44,16 @@ sentencia_declarativa
 	;
 
 sentencia_ejecutable
-	: asignacion ';'
+	: asignacion { System.out.println("Asignacion detectada"); }
 	| control ';'
 	| llamada_funcion ';'
 	| print ';'
 	| retorno ';' { System.out.println("checkear valido"); }
-	| asignacion_multiple ';'
-    | asignacion error{ System.out.println("Falta delimitador de sentencias ; en asignacion. Linea: " + al.getLine()); }
-    | control error{ System.out.println("Falta delimitador de sentencias ;. Linea: " + al.getLine()); }
-    | llamada_funcion error{ System.out.println("Falta delimitador de sentencias ;. Linea: " + al.getLine()); }
-    | print error{ System.out.println("Falta delimitador de sentencias ;. Linea: " + al.getLine()); }
-    | retorno error{ System.out.println("Falta delimitador de sentencias ;. Linea: " + al.getLine()); }
-    | asignacion_multiple error{ System.out.println("Falta delimitador de sentencias ;. Linea: " + al.getLine()); }
+	| asignacion_multiple
+    | control error { System.out.println("Falta delimitador de sentencias ;. Linea: " + al.getLine()); }
+    | llamada_funcion error { System.out.println("Falta delimitador de sentencias ;. Linea: " + al.getLine()); }
+    | print error { System.out.println("Falta delimitador de sentencias ;. Linea: " + al.getLine()); }
+    | retorno error { System.out.println("Falta delimitador de sentencias ;. Linea: " + al.getLine()); }
 	;
 
 declaracion_funcion
@@ -61,17 +63,17 @@ declaracion_funcion
         { System.out.println("Funcion sin tipo. Linea: " + al.getLine()); }
     | tipo parametros_formales_opt cuerpo_funcion_opt
         { System.out.println("Funcion sin nombre. Linea: " + al.getLine()); }
-    | tipo parametros_formales_opt error '}'
     ;
 
 parametros_formales_opt
     : '(' lista_parametros_formales ')'
-    | '(' error ')'  { System.out.println("Parametros formales invalidos. Linea: " + al.getLine()); }
+    | '('  ')'  { System.out.println("Parametros formales invalidos. Linea: " + al.getLine()); }
     ;
 
 cuerpo_funcion_opt
     : '{' lista_sentencias '}'
     | '{' '}' { System.out.println("Falta el cuerpo del bloque. Linea: " + al.getLine()); }
+    | { System.out.println("Faltan llaves de la funcion. Linea: " + al.getLine()); }
     ;
 
 
@@ -79,7 +81,7 @@ lista_sentencias
 	: sentencia
 	| lista_sentencias sentencia
 	| error ';' { System.out.println("PROBLEMON. Linea: " + al.getLine()); } //Cuando no detecto absolutamente nada, descarto todo hasta encontrar el ';'
-	;
+    ;
 
 lista_sentencias_ejecutables
 	: sentencia_ejecutable
@@ -118,12 +120,13 @@ lista_identificadores
 	| ID { System.out.println("Falta prefijo obligatorio del ID. Linea: " + al.getLine()); }
 	| tipo ID { System.out.println("Falta prefijo obligatorio del ID. Linea: " + al.getLine()); }
 	| lista_identificadores ',' ID { System.out.println("Falta prefijo obligatorio del ID. Linea: " + al.getLine()); }
+	| lista_identificadores ID  { System.out.println("Falta separador de variable ','. Linea: " + al.getLine()); }
 	;
 
 
 
 parametro_real_compuesto
-	: parametro_real FLECHA parametro_formal { System.out.println("Parametro real detectado. Linea: " + al.getLine()); }
+	: parametro_real FLECHA ID { System.out.println("Parametro real detectado. Linea: " + al.getLine()); }
 	;
 
 parametro_real
@@ -182,14 +185,15 @@ tipo
 	;
 
 asignacion
-	: IDCOMP ASIGNAR expresion { System.out.println("Asignacion detectada. Linea: " + al.getLine()); }
+	: IDCOMP ASIGNAR expresion ';' { System.out.println("Asignacion detectada. Linea: " + al.getLine()); }
+	| IDCOMP ASIGNAR expresion error { System.out.println("Falta ;. Linea: " + al.getLine()); }
 	| ID ASIGNAR expresion { System.out.println("Falta prefijo obligatorio del ID. Linea: " + al.getLine()); }
 	;
 
 expresion
 	: expresion '+' termino
 	| expresion '-' termino
-	| termino
+	| termino {System.out.println("ENCONTRE TERMINO!. Linea: " + al.getLine()); }
 	| TRUNC '(' expresion ')' {System.out.println("Trunc detectado. Linea: " + al.getLine()); }
 	;
 
@@ -201,8 +205,8 @@ termino
 
 factor
 	: IDCOMP
-	| CTEL
-	| CTEF
+	| constante
+	| CADENASTR
 	| llamada_funcion
 	| ID { System.out.println("Falta prefijo obligatorio del ID. Linea: " + al.getLine()); }
 	;
@@ -210,12 +214,11 @@ factor
 llamada_funcion
 	: IDCOMP '(' lista_parametros_reales ')' {System.out.println("Llamado a funcion detectado. Linea: " + al.getLine());}
 	| ID '(' lista_parametros_reales ')' { System.out.println("Falta prefijo obligatorio del ID. Linea: " + al.getLine()); }
-    | IDCOMP '(' error ')' {System.out.println("Llamado a funcion sin parametros detectado. Linea: " + al.getLine());}
+    | IDCOMP '(' error ')' {System.out.println("Llamado a funcion con parametros invalidos. Linea: " + al.getLine());}
 	;
 
 print
-	: PRINT '(' STRING ')' {System.out.println("Print detectado. Linea: " + al.getLine());}
-	| PRINT '(' expresion ')' {System.out.println("Print detectado con expresion. Linea: " + al.getLine());}
+	: PRINT '(' expresion ')' {System.out.println("Print detectado con expresion. Linea: " + al.getLine());}
 	;
 
 lambda
@@ -227,10 +230,12 @@ retorno
 	;
 
 asignacion_multiple
-    : ids '=' lista_constantes { System.out.println("Asignacion multiple detectada. Linea: " + al.getLine());}
-    | ids error '=' lista_constantes  { System.out.println("Error en asignacion multiple, separador a utilizar: ,. Linea: " + al.getLine());}
-    | ids '=' error { System.out.println("Error en asignacion multiple, separador a utilizar: xd,. Linea: " + al.getLine());}
+    : ids '=' lista_constantes ';' { error.debug("Asignacion multiple detectada. Linea: " + al.getLine());}
+    | ids error '=' lista_constantes ';' { error.error("Error en asignacion multiple, separador a utilizar: ','", al.getLine());}
+    | ids '=' error { error.error("Error en asignacion multiple, separador a utilizar: ','", al.getLine());}
+    | ids '=' lista_constantes error { error.error("Falta separador ';'", al.getLine());}
     ;
+
 
 ids
     : IDCOMP
@@ -245,16 +250,23 @@ lista_constantes
 constante
     : CTEL
     | CTEF
-;
+    ;
 
 
 %%
 private AnalizadorLexico al;
+private ErrorManager error;
+
+public Parser(ErrorManager.Nivel nivel){
+    this.al = AnalizadorLexico.getInstance();
+    this.error = ErrorManager.getInstance();
+    //error.
+}
 
 public int yylex(){
-    this.al = AnalizadorLexico.getInstance();
     int token = al.yylex();
-    System.err.println("Se reconocio el token " + token + " ("+ TokenNames.getTokenName(token) + ") En linea " + al.getLine());
+    error.debug("Se reconocio el token " + token + " ("+ TokenNames.getTokenName(token) + ") En linea " + al.getLine());
+
     this.yylval = al.getYylval();
     if(this.yylval == null)
         yylval = new ParserVal(0);
@@ -263,6 +275,7 @@ public int yylex(){
 
 /* Manejo de errores */
 public void yyerror(String s) {
+
     System.err.println("Error sintáctico: " + s);
     System.err.println("Linea: " + al.getLine());
 
