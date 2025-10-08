@@ -1,6 +1,6 @@
 X {
     do {
-        X.Y := 3L;
+        X.Y := &HELLOOOOOOO&;
     } until  (X.Y >= 5L);
 
     if (X.Y > 3L){

@@ -14,22 +14,22 @@
 %%
 
 programa    
-	: ID '{'
-	    lista_sentencias
-	'}' { errManager.debug("Declaracion de programa detectada", al.getLine()); }
-    | '{'
-          lista_sentencias
-    '}' { errManager.error("Declaracion de programa invalida", al.getLine()); }
-    | ID
-        lista_sentencias
-    '}' { errManager.error("Falta apertura del programa '{'", al.getLine()); }
-    | ID '{'
-            lista_sentencias
-         { System.out.println("Falta cierre del programa '}'. Linea: " + al.getLine()); }
-    | ID lista_sentencias { System.out.println("Faltan delimitadores de programa '{' y '}'. Linea: " + al.getLine()); }
-	| ID '{' '}' { System.out.println("Programa vacio. Linea: " + al.getLine()); }
-	| '{' '}' { System.out.println("Falta ID del programa. Linea: " + al.getLine()); }
-	| ID { System.out.println("Faltan delimitadores de programa '{' y '}'. Linea: " + al.getLine()); }
+	: ID '{' lista_sentencias '}'
+	    { errManager.debug("Declaracion de programa detectada", al.getLine()); }
+    | '{' lista_sentencias '}'
+        { errManager.error("Falta identificador del programa", al.getLine()); }
+    | ID lista_sentencias '}'
+        { errManager.error("Falta apertura del programa '{'", al.getLine()); }
+    | ID '{' lista_sentencias
+        { errManager.error("Falta cierre del programa '{'", al.getLine()); }
+    | ID lista_sentencias
+        { errManager.error("Faltan delimitadores de programa de programa '{' '}'", al.getLine()); }
+	| ID '{' '}'
+	    { errManager.error("Programa vacio.", al.getLine()); }
+	| '{' '}'
+        { errManager.error("Falta identificador del programa", al.getLine()); }
+	| ID
+	    { errManager.error("Faltan delimitadores de programa de programa '{' '}'", al.getLine()); }
 	;
 
 sentencia
@@ -39,49 +39,54 @@ sentencia
 
 sentencia_declarativa
 	: lista_identificadores ';'
-	| lista_identificadores error { System.out.println("Falta delimitador de sentencias ;. Linea: " + al.getLine()); }
+	| lista_identificadores error
+        { errManager.error(" Falta delimitador de sentencias ;.", al.getLine()); }
 	| declaracion_funcion
 	;
 
 sentencia_ejecutable
-	: asignacion { System.out.println("Asignacion detectada"); }
+	: asignacion
 	| control
 	| llamada_funcion ';'
 	| print ';'
-	| retorno ';' { System.out.println("checkear valido"); }
+	| retorno ';'
 	| asignacion_multiple
-    | llamada_funcion error { System.out.println("Falta delimitador de sentencias ;. Linea: " + al.getLine()); }
-    | print error { System.out.println("Falta delimitador de sentencias ;. Linea: " + al.getLine()); }
-    | retorno error { System.out.println("Falta delimitador de sentencias ;. Linea: " + al.getLine()); }
+    | llamada_funcion error
+        { errManager.error(" Falta delimitador de sentencias ;.", al.getLine()); }
+    | print error
+        { errManager.error(" Falta delimitador de sentencias ;.", al.getLine()); }
+    | retorno error
+        { errManager.error(" Falta delimitador de sentencias ;.", al.getLine()); }
 	;
 
 declaracion_funcion
 	: tipo ID parametros_formales_opt cuerpo_funcion_opt
-	    { System.out.println("Declaracion de funcion detectada. Linea: " + al.getLine()); }
+	    { errManager.debug("Declaracion de funcion detectada.", al.getLine()); }
     | ID parametros_formales_opt cuerpo_funcion_opt
-        { System.out.println("Funcion sin tipo. Linea: " + al.getLine()); }
+         { errManager.error("Funcion sin tipo.", al.getLine()); }
     | tipo parametros_formales_opt cuerpo_funcion_opt
-        { System.out.println("Funcion sin nombre. Linea: " + al.getLine()); }
+        { errManager.error("Funcion sin nombre.", al.getLine()); }
     | tipo IDCOMP parametros_formales_opt cuerpo_funcion_opt
-        { System.out.println("No se debe especificar la unidad en declaracion de funcion. Linea: " + al.getLine()); }
+        { errManager.error("No se debe especificar la unidad en declaracion de funcion", al.getLine()); }
     ;
 
 parametros_formales_opt
     : '(' lista_parametros_formales ')'
-    | '('  ')'  { System.out.println("Parametros formales invalidos. Linea: " + al.getLine()); }
+    | '('  ')'  { errManager.error("Parametros formales faltantes", al.getLine()); }
     ;
 
 cuerpo_funcion_opt
     : '{' lista_sentencias '}'
-    | '{' '}' { System.out.println("Falta el cuerpo del bloque. Linea: " + al.getLine()); }
-    | { System.out.println("Faltan llaves de la funcion. Linea: " + al.getLine()); }
+    | '{' '}' { errManager.error("Faltan cuerpo de la funcion", al.getLine()); }
+    | { errManager.error("Faltan llaves de la funcion", al.getLine()); }
     ;
 
 
 lista_sentencias
 	: sentencia
 	| lista_sentencias sentencia
-	| error ';' { System.out.println("PROBLEMON. Linea: " + al.getLine()); } //Cuando no detecto absolutamente nada, descarto todo hasta encontrar el ';'
+	| error ';'
+        { errManager.error("Sentencia invalida.", al.getLine()); }
     ;
 
 lista_sentencias_ejecutables
@@ -92,42 +97,60 @@ lista_sentencias_ejecutables
 lista_parametros_formales
 	: parametro_formal
 	| lista_parametros_formales ',' parametro_formal
-	| lista_parametros_formales parametro_formal //ojo con estas y la de abajo, shift/reduce
+	| lista_parametros_formales parametro_formal
 	;
 
 lista_parametros_reales
 	: parametro_real_compuesto
 	| lista_parametros_reales ',' parametro_real_compuesto
-	| lista_parametros_reales parametro_real_compuesto{ System.out.println("Separador de parametros invalido. Utilizar ','. Linea: " + al.getLine()); }
+	| lista_parametros_reales parametro_real_compuesto
+	    { errManager.error("Falta separador de parametros ','", al.getLine()); }
 	;
 
 parametro_formal
-	: CR tipo ID { System.out.println("Parametro formal copia resultado detectado. Linea: " + al.getLine()); }
-	| CR ID { System.out.println("Falta tipo de parametro formal. Linea: " + al.getLine()); }
-	| CR tipo error { System.out.println("Falta nombre de parametro formal. Linea: " + al.getLine()); }
-	| tipo ID { System.out.println("Parametro formal con semantica por defecto detectado. Linea: " + al.getLine()); }
-	| ID { System.out.println("Falta tipo de parametro formal. Linea: " + al.getLine()); }
-	| LAMBDA ID { System.out.println("Parametro formal lambda detectado. Linea: " + al.getLine()); }
-	| CR LAMBDA ID { System.out.println("Parametro formal lambda por copia resultado detectado. Linea: " + al.getLine()); }
-	| CR error { System.out.println("Se espera un tipo pero se encontro .... Linea: " + al.getLine()); }
-	| tipo error { System.out.println("Se espera un Identifier para el parametro formal  Linea: " + al.getLine()); }
+	: CR tipo ID
+	    { errManager.debug("Parametro formal con semantica opia-resultado detectado.", al.getLine()); }
+	| CR ID
+	    { errManager.error("Se espera un tipo correspondiente al parametro formal", al.getLine()); }
+	| CR tipo error
+	    { errManager.error("Se espera un Identifier correspondiente al parametro formal", al.getLine()); }
+	| tipo ID
+	    { errManager.debug("Parametro formal con semantica por defecto detectado.", al.getLine()); }
+	| ID
+	    { errManager.error("Se espera un tipo correspondiente al parametro formal", al.getLine()); }
+	| LAMBDA ID
+	    { errManager.debug("Parametro formal lambda semantica copia-resultado detectado", al.getLine()); }
+	| CR LAMBDA ID
+	    { errManager.debug("Parametro formal lambda semantica copia-resultado detectado", al.getLine()); }
+	| CR error
+	    { errManager.error("Se espera un tipo correspondiente al parametro formal", al.getLine()); }
+	| tipo error
+	    { errManager.error("Se espera un Identifier correspondiente al parametro formal", al.getLine()); }
 	;
 
 
 lista_identificadores
-	: tipo IDCOMP { System.out.println("Declaracion de variable detectada. Linea: " + al.getLine()); }
-	| lista_identificadores ',' IDCOMP { System.out.println("Declaracion de variable detectada. Linea: " + al.getLine()); }
-	| lista_identificadores IDCOMP { System.out.println("Falta separador de variable ','. Linea: " + al.getLine()); }
-	| ID { System.out.println("Falta prefijo obligatorio del ID. Linea: " + al.getLine()); }
-	| tipo ID { System.out.println("Falta prefijo obligatorio del ID. Linea: " + al.getLine()); }
-	| lista_identificadores ',' ID { System.out.println("Falta prefijo obligatorio del ID. Linea: " + al.getLine()); }
-	| lista_identificadores ID  { System.out.println("Falta separador de variable ','. Linea: " + al.getLine()); }
+	: tipo IDCOMP
+	    { errManager.debug("Declaracion de variable detectada.",  al.getLine()); }
+	| lista_identificadores ',' IDCOMP
+	    { errManager.debug("Declaracion de variable detectada.",  al.getLine()); }
+	| lista_identificadores IDCOMP
+	    { errManager.error("Falta separador de variable ','", al.getLine()); }
+	| ID
+	    { errManager.error("Falta prefijo obligatorio del ID", al.getLine()); }
+	| tipo ID
+	    { errManager.error("Falta prefijo obligatorio del ID", al.getLine()); }
+	| lista_identificadores ',' ID
+	    { errManager.error("Falta prefijo obligatorio del ID", al.getLine()); }
+	| lista_identificadores ID
+	    { errManager.error("Falta separador de variable ','", al.getLine()); }
 	;
 
 
 
 parametro_real_compuesto
-	: parametro_real FLECHA ID { System.out.println("Parametro real detectado. Linea: " + al.getLine()); }
+	: parametro_real FLECHA ID
+	    { errManager.debug("Parametro real detectado", al.getLine()); }
 	;
 
 parametro_real
@@ -143,13 +166,13 @@ control
 
 sentencia_IF
 	: IF condicional_opt cuerpo_opt ENDIF ';'
-	    { System.out.println("IF detectado (sin ELSE). Linea: " + al.getLine()); }
+	    { errManager.debug("IF detectado (sin ELSE)", al.getLine()); }
 	| IF condicional_opt sentencia_ejecutable ENDIF ';'
-    	{ System.out.println("IF detectado (sin ELSE). Linea: " + al.getLine()); }
+    	{ errManager.debug("IF detectado (sin ELSE)", al.getLine()); }
 	| IF condicional_opt cuerpo_opt else_opt
-	    { System.out.println("IF-ELSE detectado. Linea: " + al.getLine()); }
+	    { errManager.debug("IF-ELSE detectado", al.getLine()); }
     | IF condicional_opt sentencia_ejecutable else_opt
-        { System.out.println("IF-ELSE detectado. Linea: " + al.getLine()); }
+        { errManager.debug("IF-ELSE detectado", al.getLine()); }
 	| IF condicional_opt cuerpo_opt ENDIF error
         { errManager.error(" Falta delimitador de sentencias ;.", al.getLine()); }
     | IF condicional_opt sentencia_ejecutable ENDIF error
@@ -157,7 +180,7 @@ sentencia_IF
 	| IF condicional_opt cuerpo_opt ';'
 	    { errManager.error("Falta cierre endif",  al.getLine()); }
 	| IF condicional_opt sentencia_ejecutable ';'
-    	    { errManager.error("Falta cierre endif",  al.getLine()); }
+        { errManager.error("Falta cierre endif",  al.getLine()); }
     | IF condicional_opt '{' ENDIF ';'
         { errManager.error("Falta llave de cierre", al.getLine()); }
     | IF condicional_opt '{' else_opt
@@ -195,21 +218,28 @@ else_opt
 
 condicional_opt
     : '(' condicion ')'
-    | condicion ')' { errManager.error("Falta parentesis de apertura de la condicion", al.getLine()); }
-    | '(' condicion { errManager.error("Falta parentesis de cierre de la condicion", al.getLine()); }
-    | condicion  { errManager.error("Faltan parentesis de cierre y apertura de la condicion", al.getLine()); }
+    | condicion ')'
+        { errManager.error("Falta parentesis de apertura de la condicion", al.getLine()); }
+    | '(' condicion
+        { errManager.error("Falta parentesis de cierre de la condicion", al.getLine()); }
+    | condicion
+        { errManager.error("Faltan parentesis de cierre y apertura de la condicion", al.getLine()); }
     ;
 
 cuerpo_opt
     : '{' lista_sentencias_ejecutables '}'
-    | '{' lista_sentencias_ejecutables error { errManager.error("Falta llave de cierre", al.getLine()); }
-    | lista_sentencias_ejecutables error { errManager.error("Falta llave de apertura", al.getLine()); }
-    | '{' '}' { errManager.error("Falta contenido en bloque", al.getLine()); }
+    | '{' lista_sentencias_ejecutables error
+        { errManager.error("Falta llave de cierre", al.getLine()); }
+    | lista_sentencias_ejecutables error
+        { errManager.error("Falta llave de apertura", al.getLine()); }
+    | '{' '}'
+        { errManager.error("Falta contenido en bloque", al.getLine()); }
     ;
 
 
 condicion
-	: expresion comparador expresion { errManager.debug("Condicion detectada. Linea: " + al.getLine()); }
+	: expresion comparador expresion
+	    { errManager.debug("Condicion detectada. Linea: " + al.getLine()); }
 	;
 
 do_until
@@ -232,7 +262,8 @@ comparador
 	| DISTINTO
 	| '>'
 	| '<'
-	| { errManager.error("Falta comparador", al.getLine()); }
+	| //vacio
+	    { errManager.error("Falta comparador en condicion", al.getLine()); }
 	;
 
 tipo
@@ -241,18 +272,24 @@ tipo
 	;
 
 asignacion
-	: IDCOMP ASIGNAR expresion ';' { System.out.println("Asignacion detectada. Linea: " + al.getLine()); }
-	| IDCOMP ASIGNAR expresion error { System.out.println("Falta ;. Linea: " + al.getLine()); }
-	| ID ASIGNAR expresion ';' { System.out.println("Falta prefijo obligatorio del ID. Linea: " + al.getLine()); }
-	| ID ASIGNAR expresion error { System.out.println("Falta prefijo obligatorio del ID. Linea: " + al.getLine()); }
+	: IDCOMP ASIGNAR expresion ';'
+	    { errManager.debug("Asignacion detectada", al.getLine()); }
+	| IDCOMP ASIGNAR expresion error
+	    { errManager.error(" Falta delimitador de sentencias ;.", al.getLine()); }
+	| ID ASIGNAR expresion ';'
+	    { errManager.error("Falta prefijo obligatorio del ID", al.getLine()); }
+	| ID ASIGNAR expresion error
+	    { errManager.error("Falta prefijo obligatorio del ID", al.getLine()); }
 	;
 
 expresion
 	: expresion '+' termino
 	| expresion '-' termino
-	| termino {System.out.println("ENCONTRE TERMINO!. Linea: " + al.getLine()); }
-	| TRUNC cuerpo_expresion {System.out.println("Trunc detectado. Linea: " + al.getLine()); }
-	| TRUNC error {System.out.println("Falta delimitadores trunc. Linea: " + al.getLine()); }
+	| termino
+	| TRUNC cuerpo_expresion
+	    { errManager.debug("Trunc detectado", al.getLine()); }
+	| TRUNC error
+	    { errManager.error("Cuerpo del trunc invalido", al.getLine()); }
 	;
 
 termino
@@ -266,22 +303,28 @@ factor
 	| constante
 	| CADENASTR
 	| llamada_funcion
-	| ID { System.out.println("Falta prefijo obligatorio del ID. Linea: " + al.getLine()); }
+	| ID
+	    { errManager.error("Falta prefijo obligatorio del ID", al.getLine()); }
 	;
 
 llamada_funcion
-	: IDCOMP '(' lista_parametros_reales ')' {System.out.println("Llamado a funcion detectado. Linea: " + al.getLine());}
-	| ID '(' lista_parametros_reales ')' { System.out.println("Falta prefijo obligatorio del ID. Linea: " + al.getLine()); }
-    | IDCOMP '(' error ')' {System.out.println("Llamado a funcion con parametros invalidos. Linea: " + al.getLine());}
-	| ID '(' error ')' {System.out.println("Llamado a funcion con parametros invalidos. Linea: " + al.getLine());}
+	: IDCOMP '(' lista_parametros_reales ')'
+	    { errManager.debug("Llamado a funcion detectado", al.getLine()); }
+	| ID '(' lista_parametros_reales ')'
+	    { errManager.error("Falta prefijo obligatorio del ID", al.getLine()); }
+    | IDCOMP '(' error ')'
+        { errManager.error("Llamado a funcion con parametros invalidos", al.getLine()); }
+	| ID '(' error ')'
+	    { errManager.error("Llamado a funcion con parametros invalidos", al.getLine()); }
 	;
 
 print
-	: PRINT cuerpo_expresion {System.out.println("Print detectado con expresion. Linea: " + al.getLine());}	;
+	: PRINT cuerpo_expresion
+	    {errManager.debug("Print detectado con expresion", al.getLine());}	;
 
 lambda
 	: '(' tipo ID')' '{' lista_sentencias_ejecutables '}'
-	    { errManager.debug("Definicion lambda detectada. Linea: " + al.getLine()); }
+	    { errManager.debug("Definicion lambda detectada", al.getLine()); }
 	| '(' tipo ID ')' '{' lista_sentencias_ejecutables
 	    { errManager.error("Falta llave de cierre en lambda", al.getLine()); }
 	| '(' tipo ID ')' lista_sentencias_ejecutables '}'
@@ -291,23 +334,33 @@ lambda
 	;
 
 retorno
-	: RETURN cuerpo_expresion {System.out.println("Retorno detectado. Linea: " + al.getLine());}
+	: RETURN cuerpo_expresion
+	    {errManager.debug("Retorno detectado. Linea: " + al.getLine());}
 	;
 
 cuerpo_expresion
     : '(' expresion ')'
     | expresion ')'
+        {errManager.error("Falta parentesis de apertura", al.getLine());}
     | '(' expresion error
-    | '(' ')' {System.out.println("Faltan argumentos. Linea: " + al.getLine());}
-    | '(' error {System.out.println("Falta parentesis de cierre. Linea: " + al.getLine());}
-    | ')' {System.out.println("Falta parentesis de apertura. Linea: " + al.getLine());}
+        {errManager.error("Falta parentesis de cierre", al.getLine());}
+    | '(' ')'
+        {errManager.error("Faltan argumentos", al.getLine());}
+    | '(' error
+        {errManager.error("Falta parentesis de cierre", al.getLine());}
+    | ')'
+        {errManager.error("Falta parentesis de apertura", al.getLine());}
     ;
 
 asignacion_multiple
-    : ids '=' lista_constantes ';' { errManager.debug("Asignacion multiple detectada. Linea: " + al.getLine());}
-    | ids error '=' lista_constantes ';' { errManager.error("Error en asignacion multiple, separador a utilizar: ','", al.getLine());}
-    | ids '=' error { errManager.error("Error en asignacion multiple, separador a utilizar: ','", al.getLine());}
-    | ids '=' lista_constantes error { errManager.error("Falta separador ';'", al.getLine());}
+    : ids '=' lista_constantes ';'
+        { errManager.debug("Asignacion multiple detectada. Linea: " + al.getLine()); }
+    | ids error '=' lista_constantes ';'
+        { errManager.error("Error en asignacion multiple, separador a utilizar: ','", al.getLine()); }
+    | ids '=' error
+        { errManager.error("Error en asignacion multiple, separador a utilizar: ','", al.getLine()); }
+    | ids '=' lista_constantes error
+        { errManager.error("Falta separador ';'", al.getLine()); }
     ;
 
 ids
@@ -333,12 +386,12 @@ private ErrorManager errManager;
 public Parser(ErrorManager.Nivel nivel){
     this.al = AnalizadorLexico.getInstance();
     this.errManager = ErrorManager.getInstance();
-    //errManager.
+    errManager.setNivel(nivel);
 }
 
 public int yylex(){
     int token = al.yylex();
-    errManager.debug("Se reconocio el token " + token + " ("+ TokenNames.getTokenName(token) + ") En linea " + al.getLine());
+    errManager.debug("Se reconocio el token " + token + " ("+ TokenNames.getTokenName(token) + ")", al.getLine());
 
     this.yylval = al.getYylval();
     if(this.yylval == null)

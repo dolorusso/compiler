@@ -52,7 +52,7 @@ public class MatrizLoader {
                         int numero = Integer.parseInt(values[i].trim());
                         fila[i] = AccionesFactory.get(numero);
                     } else {
-                        fila[i] = null; // o una acción dummy
+                        fila[i] = null;
                     }
                 }
                 filas.add(fila);

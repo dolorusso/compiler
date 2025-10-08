@@ -33,22 +33,18 @@ public class TokenNames {
         tokenNames.put(TokenType.CADENASTR, "CADENASTR");
     }
 
-    /**
-     * Devuelve el nombre legible del token.
-     * Si el código es menor a 257, se asume que representa un carácter ASCII.
-     */
     public static String getTokenName(int tokenValue) {
         if (tokenValue < 257) {
-            // Si es un ASCII imprimible
+            // Si es un ASCII
             if (tokenValue >= 32 && tokenValue <= 126) {
                 return Character.toString((char) tokenValue);
             } else {
-                // ASCII no imprimible (por ejemplo \n, \t)
+                // ASCII no imprimible
                 return String.format("ASCII(%d)", tokenValue);
             }
         }
 
-        // Si es un token definido
+        // Si es un token definido O NO LO ENCUENTRA
         return tokenNames.getOrDefault(tokenValue, "UNKNOWN(" + tokenValue + ")");
     }
 }

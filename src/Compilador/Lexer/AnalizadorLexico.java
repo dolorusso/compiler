@@ -44,8 +44,11 @@ public class AnalizadorLexico {
 
     private List<AccionSemantica> accionesSemanticas;
 
+    private ErrorManager errManager;
+
     public AnalizadorLexico(String filename) throws IOException {
         this.reader = new PushbackMyReader(filename);
+        this.errManager = ErrorManager.getInstance();
         this.transiciones = MatrizLoader.cargarTransiciones(
                 "src/Compilador/Lexer/Matrices/matriz_transiciones.csv",
                 estadoError
@@ -115,11 +118,11 @@ public class AnalizadorLexico {
     public void imprimirMatriz(int[][] matriz) {
         for (int[] fila : matriz) {
             for (int val : fila) {
-                System.out.print(val + "\t"); // tab para que quede alineado
+                errManager.debug(val + "\t"); // tab para que quede alineado
             }
             System.out.println();
         }
-        ErrorManager.getInstance().debug("Hay " + matriz.length + " filas y " + matriz[0].length + " columnas");
+        errManager.debug("Hay " + matriz.length + " filas y " + matriz[0].length + " columnas");
     }
 
 
