@@ -1,5 +1,6 @@
 package Compilador.AccionesSemanticas;
 
+import Compilador.ErrorHandler.ErrorManager;
 import Compilador.Lexer.AnalizadorLexico;
 import Compilador.Lexer.TokenType;
 
@@ -28,8 +29,7 @@ public class AS8PalabraReservada implements AccionSemantica{
                 default -> throw new IllegalStateException("Posible palabra reservada no reconocida: " + palabra);
             };
         } catch (Exception e) {
-            System.out.println(e.getMessage());
-            //hacer algo mas para el error?????????????????????
+            ErrorManager.getInstance().error(e.getMessage(), al.getLine());
             return AnalizadorLexico.estadoError;
     }
 }

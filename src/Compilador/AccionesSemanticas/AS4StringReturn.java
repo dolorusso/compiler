@@ -19,6 +19,6 @@ public class AS4StringReturn implements AccionSemantica{
         al.setYylval(strLexVal);
 
 
-        return TokenType.STRING;
+        return TokenType.CADENASTR;
     };
 }

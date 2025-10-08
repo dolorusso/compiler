@@ -1,5 +1,6 @@
 package Compilador.Lexer;
 import Compilador.AccionesSemanticas.*;
+import Compilador.ErrorHandler.ErrorManager;
 import Compilador.Parser.ParserVal;
 
 import java.io.*;
@@ -118,7 +119,7 @@ public class AnalizadorLexico {
             }
             System.out.println();
         }
-        System.out.println("Hay " + matriz.length + " filas y " + matriz[0].length + " columnas");
+        ErrorManager.getInstance().debug("Hay " + matriz.length + " filas y " + matriz[0].length + " columnas");
     }
 
 

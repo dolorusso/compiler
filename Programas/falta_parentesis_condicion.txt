@@ -1,0 +1,24 @@
+X {
+    do {
+        X.Y := 3L;
+    } until  (X.Y >= 5L);
+
+    if (X.Y > 3L){
+        X.Y := 3L;
+        X.Y := 3L;
+    }endif;
+
+    do {
+        X.Y := 3L;
+    } until  X.Y >= 5L);
+
+    if (X.Y > 3L{
+        X.Y := 3L;
+        X.Y := 3L;
+    }endif;
+
+    do {
+        X.Y := 3L;
+    } until  X.Y >= 5L;
+
+}

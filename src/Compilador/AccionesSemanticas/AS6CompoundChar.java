@@ -17,7 +17,7 @@ public class AS6CompoundChar implements AccionSemantica{
                 return TokenType.MAYORIGUAL;
             case "<=":
                 return TokenType.MENORIGUAL;
-            case "!=":
+            case "=!":
                 return TokenType.DISTINTO;
             case "==":
                 return TokenType.IGUALIGUAL;

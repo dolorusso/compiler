@@ -1,0 +1,5 @@
+X {
+    long X(X){
+        long X;
+    }
+}

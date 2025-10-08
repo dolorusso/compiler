@@ -16,20 +16,20 @@
 programa    
 	: ID '{'
 	    lista_sentencias
-	'}' { System.out.println("Declaracion de programa detectada. Linea: " + al.getLine()); }
+	'}' { errManager.debug("Declaracion de programa detectada", al.getLine()); }
     | '{'
-              lista_sentencias
-          '}' { System.out.println("Declaracion de programa invalida, falta identificador. Linea: " + al.getLine()); }
+          lista_sentencias
+    '}' { errManager.error("Declaracion de programa invalida", al.getLine()); }
     | ID
         lista_sentencias
-    '}' { System.out.println("Falta apertura del programa '{'. Linea: " + al.getLine()); }
+    '}' { errManager.error("Falta apertura del programa '{'", al.getLine()); }
     | ID '{'
             lista_sentencias
          { System.out.println("Falta cierre del programa '}'. Linea: " + al.getLine()); }
     | ID lista_sentencias { System.out.println("Faltan delimitadores de programa '{' y '}'. Linea: " + al.getLine()); }
 	| ID '{' '}' { System.out.println("Programa vacio. Linea: " + al.getLine()); }
 	| '{' '}' { System.out.println("Falta ID del programa. Linea: " + al.getLine()); }
-	//| ID { System.out.println("Faltan delimitadores de programa '{' y '}'. Linea: " + al.getLine()); }
+	| ID { System.out.println("Faltan delimitadores de programa '{' y '}'. Linea: " + al.getLine()); }
 	;
 
 sentencia
@@ -137,20 +137,27 @@ parametro_real
 
 control
 	: sentencia_IF
-	| do_until ';'
-	| do_until error
+	| do_until
 	;
 
 
 sentencia_IF
 	: IF condicional_opt cuerpo_opt ENDIF ';'
 	    { System.out.println("IF detectado (sin ELSE). Linea: " + al.getLine()); }
+	| IF condicional_opt sentencia_ejecutable ENDIF ';'
+    	{ System.out.println("IF detectado (sin ELSE). Linea: " + al.getLine()); }
 	| IF condicional_opt cuerpo_opt else_opt
 	    { System.out.println("IF-ELSE detectado. Linea: " + al.getLine()); }
+    | IF condicional_opt sentencia_ejecutable else_opt
+        { System.out.println("IF-ELSE detectado. Linea: " + al.getLine()); }
 	| IF condicional_opt cuerpo_opt ENDIF error
+        { errManager.error(" Falta delimitador de sentencias ;.", al.getLine()); }
+    | IF condicional_opt sentencia_ejecutable ENDIF error
         { errManager.error(" Falta delimitador de sentencias ;.", al.getLine()); }
 	| IF condicional_opt cuerpo_opt ';'
 	    { errManager.error("Falta cierre endif",  al.getLine()); }
+	| IF condicional_opt sentencia_ejecutable ';'
+    	    { errManager.error("Falta cierre endif",  al.getLine()); }
     | IF condicional_opt '{' ENDIF ';'
         { errManager.error("Falta llave de cierre", al.getLine()); }
     | IF condicional_opt '{' else_opt
@@ -167,9 +174,14 @@ sentencia_IF
 
 else_opt
     : ELSE cuerpo_opt ENDIF ';'
+    | ELSE sentencia_ejecutable ENDIF ';'
     | ELSE cuerpo_opt ENDIF error
         { errManager.error(" Falta delimitador de sentencias ;.", al.getLine()); }
+    | ELSE sentencia_ejecutable ENDIF error
+        { errManager.error(" Falta delimitador de sentencias ;.", al.getLine()); }
     | ELSE cuerpo_opt ';'
+        { errManager.error("Falta cierre endif",  al.getLine()); }
+    | ELSE sentencia_ejecutable ';'
         { errManager.error("Falta cierre endif",  al.getLine()); }
     | ELSE ';'
         { errManager.error("Falta cierre endif",  al.getLine()); }
@@ -190,9 +202,8 @@ condicional_opt
 
 cuerpo_opt
     : '{' lista_sentencias_ejecutables '}'
-    | sentencia_ejecutable //una unica sentencia sin { }
-    | '{' lista_sentencias_ejecutables { errManager.error("Falta llave de cierre", al.getLine()); }
-    | lista_sentencias_ejecutables '}' { errManager.error("Falta llave de apertura", al.getLine()); }
+    | '{' lista_sentencias_ejecutables error { errManager.error("Falta llave de cierre", al.getLine()); }
+    | lista_sentencias_ejecutables error { errManager.error("Falta llave de apertura", al.getLine()); }
     | '{' '}' { errManager.error("Falta contenido en bloque", al.getLine()); }
     ;
 
@@ -202,8 +213,16 @@ condicion
 	;
 
 do_until
-	: DO cuerpo_opt UNTIL condicional_opt { errManager.debug("DO-UNTIL detectado", al.getLine()); }
-	| DO UNTIL condicional_opt { errManager.error("Falta cuerpo de DO", al.getLine()); }
+	: DO cuerpo_opt UNTIL condicional_opt ';'
+	    { errManager.debug("DO-UNTIL detectado", al.getLine()); }
+	| DO cuerpo_opt UNTIL condicional_opt error
+        { errManager.error(" Falta delimitador de sentencias ;.", al.getLine()); }
+	| DO UNTIL condicional_opt ';'
+	    { errManager.error("Falta cuerpo de DO", al.getLine()); }
+	| DO UNTIL condicional_opt error
+        { errManager.error(" Falta delimitador de sentencias ;.", al.getLine()); }
+	| DO cuerpo_opt condicional_opt ';'
+	    { errManager.error("Falta cierre de bloque UNTIL", al.getLine()); }
 	;
 
 comparador
@@ -224,7 +243,7 @@ tipo
 asignacion
 	: IDCOMP ASIGNAR expresion ';' { System.out.println("Asignacion detectada. Linea: " + al.getLine()); }
 	| IDCOMP ASIGNAR expresion error { System.out.println("Falta ;. Linea: " + al.getLine()); }
-	| ID ASIGNAR expresion { System.out.println("Falta prefijo obligatorio del ID. Linea: " + al.getLine()); }
+	| ID ASIGNAR expresion ';' { System.out.println("Falta prefijo obligatorio del ID. Linea: " + al.getLine()); }
 	| ID ASIGNAR expresion error { System.out.println("Falta prefijo obligatorio del ID. Linea: " + al.getLine()); }
 	;
 
@@ -261,9 +280,14 @@ print
 	: PRINT cuerpo_expresion {System.out.println("Print detectado con expresion. Linea: " + al.getLine());}	;
 
 lambda
-	: '(' tipo ')' '{' lista_sentencias_ejecutables '}'  {errManager.debug("Definicion lambda detectada. Linea: " + al.getLine());}
-	| '(' tipo ')' '{' lista_sentencias_ejecutables { errManager.error("Falta llave de cierre en lambda", al.getLine()); }
-	| '(' tipo ')' lista_sentencias_ejecutables '}'
+	: '(' tipo ID')' '{' lista_sentencias_ejecutables '}'
+	    { errManager.debug("Definicion lambda detectada. Linea: " + al.getLine()); }
+	| '(' tipo ID ')' '{' lista_sentencias_ejecutables
+	    { errManager.error("Falta llave de cierre en lambda", al.getLine()); }
+	| '(' tipo ID ')' lista_sentencias_ejecutables '}'
+	    { errManager.error("Falta llave de apertura en lambda", al.getLine()); }
+    | '(' tipo ID ')'
+        { errManager.error("Faltan llaves en lambda", al.getLine()); }
 	;
 
 retorno

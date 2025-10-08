@@ -1,5 +1,6 @@
 package Compilador.AccionesSemanticas;
 
+import Compilador.ErrorHandler.ErrorManager;
 import Compilador.Lexer.AnalizadorLexico;
 import Compilador.Lexer.Atributo;
 import Compilador.Lexer.TokenType;
@@ -18,7 +19,7 @@ public class AS7IdentifierCheck implements AccionSemantica{
         String VAL = ID;
         if (ID.length() > MAX_LENGTH) {
             VAL = VAL.substring(0, MAX_LENGTH);
-            System.out.println("WARNING! Identificador muy largo. Truncando a " + MAX_LENGTH + " characters");
+            ErrorManager.getInstance().warning("Identificador muy largo. Truncando a " + MAX_LENGTH + " characters", al.getLine());
         }
 
         al.ts.insertar(ID, new Atributo(VAL));
