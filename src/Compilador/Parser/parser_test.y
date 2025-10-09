@@ -9,9 +9,6 @@
     import Compilador.Lexer.Atributo;
 %}
 
-%token <sval> CTEL CTEF
-%type <sval> constante
-
 %start programa
 
 %%
@@ -287,7 +284,15 @@ asignacion
 
 expresion
 	: expresion '+' termino
+	| expresion '+' error 
+		{ errManager.error("Falta el segundo operando en la suma", al.getLine()); }
+	| '+'
+		{ errManager.debug("Faltan los dos operandos", al.getLine()); }
 	| expresion '-' termino
+	| expresion '-' error 
+		{ errManager.error("Falta el segundo operando en la resta", al.getLine()); }
+	| '-'
+		{ errManager.debug("Faltan los dos operandos", al.getLine()); }
 	| termino
 	| TRUNC cuerpo_expresion
 	    { errManager.debug("Trunc detectado", al.getLine()); }
@@ -297,7 +302,19 @@ expresion
 
 termino
 	: termino '*' factor
+	| '*' factor
+		{ errManager.debug("Falta el primer operando en la multiplicacion", al.getLine()); }
+	| termino '*' error
+		{ errManager.error("Falta el segundo operando en la multiplicacion", al.getLine()); }
+	| '*' error
+		{ errManager.debug("Faltan los dos operandos en la multiplicacion", al.getLine()); }
 	| termino '/' factor
+	| '/' factor
+		{ errManager.debug("Falta el primer operando en la division", al.getLine()); }
+	| termino '/' error
+		{ errManager.error("Falta el segundo operando en la division", al.getLine()); }
+	| '/' error
+		{ errManager.debug("Faltan los dos operandos en la division", al.getLine()); }
 	| factor
 	;
 
@@ -379,26 +396,9 @@ lista_constantes
 constante
     : CTEL
     | CTEF
-    | '-' CTEL
-        {
-            this.yylval = al.getYylval();
-            errManager.debug($2);
-
-
-            errManager.debug("String value" + this.yylval);
-            errManager.debug(al.ts.toString());
-            errManager.debug(al.ts.obtener("30L").toString());
-            errManager.debug("HAY: " + $$, al.getLine());
-            errManager.debug("HAY: " + $2, al.getLine());
-            String lexema = $2; // el lexema de la constante
-            errManager.debug("Constante negativa detectada: " + lexema, al.getLine());
-            // Almacenar como nueva entrada en tabla de simbolos
-            Atributo nuevoAtributo = new Atributo(Atributo.longType, -1 * al.ts.obtener(lexema).numValue);
-            al.ts.insertar("-" + lexema, nuevoAtributo); //medio ineficiente, mejorar despues
-        }
-    | '-' CTEF
+	| '-' CTEL
+		| '-' CTEF
     ;
-
 
 %%
 private AnalizadorLexico al;
@@ -417,11 +417,8 @@ public int yylex(){
     return token;
 }
 
-
 /* Manejo de errores */
 public void yyerror(String s) {
-
     System.err.println("Error sintáctico: " + s);
     System.err.println("Linea: " + al.getLine());
-
 }
