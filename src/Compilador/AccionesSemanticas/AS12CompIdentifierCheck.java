@@ -1,5 +1,6 @@
 package Compilador.AccionesSemanticas;
 
+import Compilador.ErrorHandler.ErrorManager;
 import Compilador.Lexer.AnalizadorLexico;
 import Compilador.Lexer.Atributo;
 import Compilador.Lexer.TokenType;
@@ -21,7 +22,7 @@ public class AS12CompIdentifierCheck implements AccionSemantica{
         for (String subId : subIds) {
             if (subId.length() > MAX_LENGTH) {
                 VAL.append(subId, 0, MAX_LENGTH);
-                System.out.println("WARNING! Identificador"+ subId + " muy largo. Truncando a " + MAX_LENGTH + " characters");
+                ErrorManager.getInstance().warning("WARNING! Identificador"+ subId + " muy largo. Truncando a " + MAX_LENGTH + " characters");
             } else {
                 VAL.append(subId);
             }
