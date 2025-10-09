@@ -1,5 +1,6 @@
 package Compilador.AccionesSemanticas;
 
+import Compilador.ErrorHandler.ErrorManager;
 import Compilador.Lexer.AnalizadorLexico;
 import Compilador.Lexer.Atributo;
 import Compilador.Lexer.TokenType;
@@ -15,12 +16,12 @@ public class AS9Long implements AccionSemantica{
         }
         catch (NumberFormatException e){
             // No deberia pasar por aca, ya que manejamos con los estados.
-            System.out.println("Error. Constante long no valida. Insertando 0");
+            ErrorManager.getInstance().warning("Error. Constante long no valida. Insertando 0", al.getLine());
             num = 0.0;
         }
 
         if (ch != 'L'){
-            System.out.println("Error. Las constantes long deben terminar en L");
+            ErrorManager.getInstance().warning("Error. Las constantes long deben terminar en L",al.getLine());
             al.addToBuffer('L');
             al.goBackReader(ch);
         } else {

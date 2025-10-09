@@ -332,13 +332,13 @@ state 6
 	'-'  shift 43
 	.  error
 
-	llamada_funcion  goto 44
-	expresion  goto 45
-	condicional_opt  goto 46
-	condicion  goto 47
-	termino  goto 48
-	factor  goto 49
-	constante  goto 50
+	constante  goto 44
+	llamada_funcion  goto 45
+	expresion  goto 46
+	condicional_opt  goto 47
+	condicion  goto 48
+	termino  goto 49
+	factor  goto 50
 
 
 state 7
@@ -355,12 +355,12 @@ state 7
 	'-'  shift 43
 	.  error
 
-	llamada_funcion  goto 44
+	constante  goto 44
+	llamada_funcion  goto 45
 	expresion  goto 53
-	termino  goto 48
+	termino  goto 49
 	cuerpo_expresion  goto 54
-	factor  goto 49
-	constante  goto 50
+	factor  goto 50
 
 
 state 8
@@ -377,12 +377,12 @@ state 8
 	'-'  shift 43
 	.  error
 
-	llamada_funcion  goto 44
+	constante  goto 44
+	llamada_funcion  goto 45
 	expresion  goto 53
-	termino  goto 48
+	termino  goto 49
 	cuerpo_expresion  goto 55
-	factor  goto 49
-	constante  goto 50
+	factor  goto 50
 
 
 state 9
@@ -692,11 +692,11 @@ state 33
 	'-'  shift 43
 	.  error
 
-	llamada_funcion  goto 44
+	constante  goto 44
+	llamada_funcion  goto 45
 	expresion  goto 87
-	termino  goto 48
-	factor  goto 49
-	constante  goto 50
+	termino  goto 49
+	factor  goto 50
 
 
 state 34
@@ -721,7 +721,8 @@ state 34
 	'-'  shift 43
 	.  error
 
-	llamada_funcion  goto 44
+	constante  goto 44
+	llamada_funcion  goto 45
 	tipo  goto 94
 	lista_parametros_formales  goto 95
 	parametro_formal  goto 96
@@ -730,9 +731,8 @@ state 34
 	parametro_real  goto 99
 	expresion  goto 100
 	lambda  goto 101
-	termino  goto 48
-	factor  goto 49
-	constante  goto 50
+	termino  goto 49
+	factor  goto 50
 
 
 state 35
@@ -808,12 +808,12 @@ state 38
 	'-'  shift 43
 	.  error
 
-	llamada_funcion  goto 44
+	constante  goto 44
+	llamada_funcion  goto 45
 	expresion  goto 53
-	termino  goto 48
+	termino  goto 49
 	cuerpo_expresion  goto 106
-	factor  goto 49
-	constante  goto 50
+	factor  goto 50
 
 
 state 39
@@ -873,12 +873,12 @@ state 42
 	'-'  shift 43
 	.  error
 
-	llamada_funcion  goto 44
-	expresion  goto 45
+	constante  goto 44
+	llamada_funcion  goto 45
+	expresion  goto 46
 	condicion  goto 107
-	termino  goto 48
-	factor  goto 49
-	constante  goto 50
+	termino  goto 49
+	factor  goto 50
 
 
 state 43
@@ -891,12 +891,18 @@ state 43
 
 
 state 44
+	factor : constante .  (124)
+
+	.  reduce 124
+
+
+state 45
 	factor : llamada_funcion .  (126)
 
 	.  reduce 126
 
 
-state 45
+state 46
 	condicion : expresion . comparador expresion  (96)
 	condicion : expresion . error  (97)
 	expresion : expresion . '+' termino  (115)
@@ -916,7 +922,7 @@ state 45
 	comparador  goto 119
 
 
-state 46
+state 47
 	sentencia_IF : IF condicional_opt . cuerpo_opt ENDIF ';'  (64)
 	sentencia_IF : IF condicional_opt . sentencia_ejecutable ENDIF ';'  (65)
 	sentencia_IF : IF condicional_opt . cuerpo_opt else_opt  (66)
@@ -959,7 +965,7 @@ state 46
 	ids  goto 29
 
 
-state 47
+state 48
 	condicional_opt : condicion . ')'  (89)
 	condicional_opt : condicion .  (91)
 
@@ -978,7 +984,7 @@ state 47
 	';'  reduce 91
 
 
-state 48
+state 49
 	expresion : termino .  (117)
 	termino : termino . '*' factor  (120)
 	termino : termino . '/' factor  (121)
@@ -1009,16 +1015,10 @@ state 48
 	'-'  reduce 117
 
 
-state 49
+state 50
 	termino : factor .  (122)
 
 	.  reduce 122
-
-
-state 50
-	factor : constante .  (124)
-
-	.  reduce 124
 
 
 state 51
@@ -1038,11 +1038,11 @@ state 51
 	'-'  shift 43
 	.  error
 
-	llamada_funcion  goto 44
+	constante  goto 44
+	llamada_funcion  goto 45
 	expresion  goto 132
-	termino  goto 48
-	factor  goto 49
-	constante  goto 50
+	termino  goto 49
+	factor  goto 50
 
 
 state 52
@@ -1099,13 +1099,13 @@ state 57
 	'-'  shift 43
 	.  error
 
-	llamada_funcion  goto 44
-	expresion  goto 45
+	constante  goto 44
+	llamada_funcion  goto 45
+	expresion  goto 46
 	condicional_opt  goto 134
-	condicion  goto 47
-	termino  goto 48
-	factor  goto 49
-	constante  goto 50
+	condicion  goto 48
+	termino  goto 49
+	factor  goto 50
 
 
 state 58
@@ -1182,13 +1182,13 @@ state 61
 	'-'  shift 43
 	.  error
 
-	llamada_funcion  goto 44
-	expresion  goto 45
+	constante  goto 44
+	llamada_funcion  goto 45
+	expresion  goto 46
 	condicional_opt  goto 140
-	condicion  goto 47
-	termino  goto 48
-	factor  goto 49
-	constante  goto 50
+	condicion  goto 48
+	termino  goto 49
+	factor  goto 50
 
 
 state 62
@@ -1204,11 +1204,11 @@ state 62
 	'-'  shift 43
 	.  error
 
-	llamada_funcion  goto 44
+	constante  goto 44
+	llamada_funcion  goto 45
 	expresion  goto 141
-	termino  goto 48
-	factor  goto 49
-	constante  goto 50
+	termino  goto 49
+	factor  goto 50
 
 
 state 63
@@ -1226,15 +1226,15 @@ state 63
 	'-'  shift 43
 	.  error
 
-	llamada_funcion  goto 44
+	constante  goto 44
+	llamada_funcion  goto 45
 	lista_parametros_reales  goto 143
 	parametro_real_compuesto  goto 98
 	parametro_real  goto 99
 	expresion  goto 100
 	lambda  goto 101
-	termino  goto 48
-	factor  goto 49
-	constante  goto 50
+	termino  goto 49
+	factor  goto 50
 
 
 state 64
@@ -1590,14 +1590,14 @@ state 97
 	'-'  shift 43
 	.  error
 
-	llamada_funcion  goto 44
+	constante  goto 44
+	llamada_funcion  goto 45
 	parametro_real_compuesto  goto 172
 	parametro_real  goto 99
 	expresion  goto 100
 	lambda  goto 101
-	termino  goto 48
-	factor  goto 49
-	constante  goto 50
+	termino  goto 49
+	factor  goto 50
 
 
 state 98
@@ -1684,15 +1684,15 @@ state 104
 	'-'  shift 43
 	.  error
 
-	llamada_funcion  goto 44
+	constante  goto 44
+	llamada_funcion  goto 45
 	lista_parametros_reales  goto 97
 	parametro_real_compuesto  goto 98
 	parametro_real  goto 99
 	expresion  goto 100
 	lambda  goto 101
-	termino  goto 48
-	factor  goto 49
-	constante  goto 50
+	termino  goto 49
+	factor  goto 50
 
 
 state 105
@@ -1791,10 +1791,10 @@ state 117
 	'-'  shift 43
 	.  error
 
-	llamada_funcion  goto 44
+	constante  goto 44
+	llamada_funcion  goto 45
 	termino  goto 177
-	factor  goto 49
-	constante  goto 50
+	factor  goto 50
 
 
 state 118
@@ -1808,10 +1808,10 @@ state 118
 	'-'  shift 43
 	.  error
 
-	llamada_funcion  goto 44
+	constante  goto 44
+	llamada_funcion  goto 45
 	termino  goto 178
-	factor  goto 49
-	constante  goto 50
+	factor  goto 50
 
 
 state 119
@@ -1826,11 +1826,11 @@ state 119
 	'-'  shift 43
 	.  error
 
-	llamada_funcion  goto 44
+	constante  goto 44
+	llamada_funcion  goto 45
 	expresion  goto 179
-	termino  goto 48
-	factor  goto 49
-	constante  goto 50
+	termino  goto 49
+	factor  goto 50
 
 
 state 120
@@ -1980,9 +1980,9 @@ state 128
 	'-'  shift 43
 	.  error
 
-	llamada_funcion  goto 44
+	constante  goto 44
+	llamada_funcion  goto 45
 	factor  goto 198
-	constante  goto 50
 
 
 state 129
@@ -1996,9 +1996,9 @@ state 129
 	'-'  shift 43
 	.  error
 
-	llamada_funcion  goto 44
+	constante  goto 44
+	llamada_funcion  goto 45
 	factor  goto 199
-	constante  goto 50
 
 
 state 130
@@ -2100,13 +2100,13 @@ state 139
 	'-'  shift 43
 	.  error
 
-	llamada_funcion  goto 44
-	expresion  goto 45
+	constante  goto 44
+	llamada_funcion  goto 45
+	expresion  goto 46
 	condicional_opt  goto 206
-	condicion  goto 47
-	termino  goto 48
-	factor  goto 49
-	constante  goto 50
+	condicion  goto 48
+	termino  goto 49
+	factor  goto 50
 
 
 state 140
@@ -2153,14 +2153,14 @@ state 143
 	'-'  shift 43
 	.  error
 
-	llamada_funcion  goto 44
+	constante  goto 44
+	llamada_funcion  goto 45
 	parametro_real_compuesto  goto 172
 	parametro_real  goto 99
 	expresion  goto 100
 	lambda  goto 101
-	termino  goto 48
-	factor  goto 49
-	constante  goto 50
+	termino  goto 49
+	factor  goto 50
 
 
 state 144
@@ -2391,14 +2391,14 @@ state 171
 	'-'  shift 43
 	.  error
 
-	llamada_funcion  goto 44
+	constante  goto 44
+	llamada_funcion  goto 45
 	parametro_real_compuesto  goto 223
 	parametro_real  goto 99
 	expresion  goto 100
 	lambda  goto 101
-	termino  goto 48
-	factor  goto 49
-	constante  goto 50
+	termino  goto 49
+	factor  goto 50
 
 
 state 172

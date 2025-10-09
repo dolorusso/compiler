@@ -18,4 +18,9 @@ public class Atributo {
         this.type = type;
         this.numValue = numValue;
     }
+
+    @Override
+    public String toString() {
+        return "Atributo{" + "type=" + type + ", strValue=" + strValue + ", numValue=" + numValue + '}';
+    }
 }

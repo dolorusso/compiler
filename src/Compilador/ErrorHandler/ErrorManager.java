@@ -1,6 +1,8 @@
 package Compilador.ErrorHandler;
 
 public class ErrorManager {
+
+
     public enum Nivel {
         ERROR, WARNING, DEBUG
     }
@@ -28,6 +30,10 @@ public class ErrorManager {
             System.out.println("[WARNING] Línea " + linea + ": " + msg);
     }
 
+    public void warning(String msg) {
+        if (nivelActual.ordinal() >= Nivel.WARNING.ordinal())
+            System.out.println("[WARNING] " + msg);
+    }
 
     public void debug(String msg) {
         if (nivelActual.ordinal() >= Nivel.DEBUG.ordinal())
@@ -35,6 +41,6 @@ public class ErrorManager {
     }
     public void debug(String msg, int linea) {
         if (nivelActual.ordinal() >= Nivel.DEBUG.ordinal())
-            System.out.println("[DEBUG] Linea"+ linea +": " + msg);
+            System.out.println("[DEBUG] Linea "+ linea +": " + msg);
     }
 }
