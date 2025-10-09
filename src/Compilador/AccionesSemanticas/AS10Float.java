@@ -1,5 +1,6 @@
 package Compilador.AccionesSemanticas;
 
+import Compilador.ErrorHandler.ErrorManager;
 import Compilador.Lexer.AnalizadorLexico;
 import Compilador.Lexer.Atributo;
 import Compilador.Lexer.TokenType;
@@ -16,16 +17,16 @@ public class AS10Float implements AccionSemantica {
             val = Double.parseDouble(str);
         } catch (NumberFormatException e) {
             // No deberia pasar por aca, ya que manejamos con los estados.
-            System.out.println("ERROR, constante float invalida. Insertando 0");
+            ErrorManager.getInstance().error("Constante float invalida. Insertando 0", al.getLine());
             al.ts.insertar(str, new Atributo(Atributo.floatType,0.0));
             return TokenType.CTEF;
         }
 
         if (val > Float.MAX_VALUE) {
-            System.err.println("Overflow truncado a " + Float.MAX_VALUE);
+            ErrorManager.getInstance().warning("Overflow truncado a " + Float.MAX_VALUE, al.getLine());
             al.ts.insertar(str, new Atributo(Atributo.floatType, Float.MAX_VALUE));
         } else if (val < Float.MIN_VALUE && val != 0.0) {
-            System.err.println("Underflow truncado a 0");
+            ErrorManager.getInstance().warning("Underflow truncado a 0", al.getLine());
             al.ts.insertar(str, new Atributo(Atributo.floatType, 0.0));
         }
 
