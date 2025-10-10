@@ -25,4 +25,5 @@ public class TokenType{
     public static final int CTEF = 277;
     public static final int IDCOMP = 278;
     public static final int CADENASTR = 279;
+    public static final int INVALID = 280;
 }

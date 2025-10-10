@@ -31,6 +31,7 @@ public class TokenNames {
         tokenNames.put(TokenType.CTEF, "CTEF");
         tokenNames.put(TokenType.IDCOMP, "IDCOMP");
         tokenNames.put(TokenType.CADENASTR, "CADENASTR");
+        tokenNames.put(TokenType.INVALID, "INVALID");
     }
 
     public static String getTokenName(int tokenValue) {
