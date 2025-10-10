@@ -2,7 +2,7 @@ package Compilador.AccionesSemanticas;
 
 
 public class AccionesFactory {
-    private static final AccionSemantica[] acciones = new AccionSemantica[13];
+    private static final AccionSemantica[] acciones = new AccionSemantica[14];
 
     static {
         acciones[0]  = new AS0NewLine();
@@ -18,6 +18,7 @@ public class AccionesFactory {
         acciones[10] = new AS10Float();
         acciones[11] = new AS11FloatE();
         acciones[12] = new AS12CompIdentifierCheck();
+        acciones[13] = new AS13InvalidReturn();
     }
 
     public static AccionSemantica get(int numero) {

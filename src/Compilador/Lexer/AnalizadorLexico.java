@@ -17,7 +17,6 @@ public class AnalizadorLexico {
     private StringBuilder buffer = new StringBuilder();
     public TablaSimbolos ts = new TablaSimbolos();
 
-    public static final int estadoError = 30;
     
     public void addLine(){
         this.lineNumber +=1;
@@ -50,8 +49,7 @@ public class AnalizadorLexico {
         this.reader = new PushbackMyReader(filename);
         this.errManager = ErrorManager.getInstance();
         this.transiciones = MatrizLoader.cargarTransiciones(
-                "src/Compilador/Lexer/Matrices/matriz_transiciones.csv",
-                estadoError
+                "src/Compilador/Lexer/Matrices/matriz_transiciones.csv"
         );
         imprimirMatriz( this.transiciones);
         this.acciones = MatrizLoader.cargarAcciones(
@@ -110,7 +108,7 @@ public class AnalizadorLexico {
                 if (Character.isDigit(c)) return 14;      // d digito
                 if (Character.isUpperCase(c)) return 15;  // Lmayus
                 if (Character.isLowerCase(c)) return 16;  // Lminus
-                return 30; //ponemos el estado de error mas lejos
+                return TokenType.INVALID; // Si no detecta nada es un caracter invalido
 
         }
     }
@@ -118,11 +116,11 @@ public class AnalizadorLexico {
     public void imprimirMatriz(int[][] matriz) {
         for (int[] fila : matriz) {
             for (int val : fila) {
-                errManager.debug(val + "\t"); // tab para que quede alineado
+                System.out.print(val + "\t"); // tab para que quede alineado
             }
             System.out.println();
         }
-        errManager.debug("Hay " + matriz.length + " filas y " + matriz[0].length + " columnas");
+        System.out.println("Hay " + matriz.length + " filas y " + matriz[0].length + " columnas");
     }
 
 
@@ -130,7 +128,7 @@ public class AnalizadorLexico {
         int estadoActual = 0; //estado inicial
 
         //Mientras no estoy en estado de error o fin de texto, ciclo
-        while (estadoActual != estadoError ){
+        while ( true ){
             //leo un caracter del archivo fuente
             int c = reader.read();
             if (c == MyReader.EOF && buffer.isEmpty()){ // caracter de fin.
@@ -152,8 +150,6 @@ public class AnalizadorLexico {
 
 
         }
-        // aca va tratamiento de error 
-        return -1; //ver aca error o que onda
     }
 
 

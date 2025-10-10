@@ -6,7 +6,7 @@ import java.util.*;
 
 public class MatrizLoader {
 
-    public static int[][] cargarTransiciones(String path, int valorPorDefecto) throws IOException {
+    public static int[][] cargarTransiciones(String path) throws IOException {
         List<int[]> filas = new ArrayList<>();
         int colsCount = -1;
 
@@ -21,11 +21,8 @@ public class MatrizLoader {
 
                 int[] fila = new int[colsCount];
                 for (int i = 0; i < colsCount; i++) {
-                    if (i < values.length && !values[i].trim().isEmpty()) {
+                    if (i < values.length && !values[i].trim().isEmpty())
                         fila[i] = Integer.parseInt(values[i].trim());
-                    } else {
-                        fila[i] = valorPorDefecto;
-                    }
                 }
                 filas.add(fila);
             }

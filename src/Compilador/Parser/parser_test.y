@@ -1,5 +1,5 @@
 %token ID CTEL IF ELSE ENDIF PRINT RETURN LAMBDA ASIGNAR MENORIGUAL MAYORIGUAL IGUALIGUAL DISTINTO
-%token FLECHA LONG DO UNTIL TRUNC CR STRING CTEF IDCOMP CADENASTR
+%token FLECHA LONG DO UNTIL TRUNC CR STRING CTEF IDCOMP CADENASTR INVALID
 
 
 %{
@@ -16,6 +16,8 @@
 programa    
 	: ID '{' lista_sentencias '}'
 	    { errManager.debug("Declaracion de programa detectada", al.getLine()); }
+    | ID '{' lista_sentencias '}' error
+            { errManager.error("No se permiten sentencias luego del cierre de programa", al.getLine()); }
     | '{' lista_sentencias '}'
         { errManager.error("Falta identificador del programa", al.getLine()); }
     | ID lista_sentencias '}'
@@ -40,7 +42,7 @@ sentencia
 sentencia_declarativa
 	: lista_identificadores ';'
 	| lista_identificadores error
-        { errManager.error(" Falta delimitador de sentencias ;.", al.getLine()); }
+        { errManager.error("Falta delimitador de sentencias ;.", al.getLine()); }
 	| declaracion_funcion
 	;
 
@@ -52,11 +54,11 @@ sentencia_ejecutable
 	| retorno ';'
 	| asignacion_multiple
     | llamada_funcion error
-        { errManager.error(" Falta delimitador de sentencias ;.", al.getLine()); }
+        { errManager.error("Falta delimitador de sentencias ;.", al.getLine()); }
     | print error
-        { errManager.error(" Falta delimitador de sentencias ;.", al.getLine()); }
+        { errManager.error("Falta delimitador de sentencias ;.", al.getLine()); }
     | retorno error
-        { errManager.error(" Falta delimitador de sentencias ;.", al.getLine()); }
+        { errManager.error("Falta delimitador de sentencias ;.", al.getLine()); }
 	;
 
 declaracion_funcion
@@ -241,7 +243,7 @@ condicion
 	: expresion comparador expresion
 	    { errManager.debug("Condicion detectada. Linea: " + al.getLine()); }
 	| expresion error
-	    { errManager.error("Comparador de condificion invalido/faltante", al.getLine()); }
+	    { errManager.error("Comparador de condicion invalido/faltante", al.getLine()); }
 	;
 
 do_until
@@ -397,7 +399,12 @@ constante
     : CTEL
     | CTEF
 	| '-' CTEL
-		| '-' CTEF
+	    {
+	        this.yylval = al.getYylval();
+	    }
+	| '-' CTEF
+	| INVALID
+	    { errManager.error("factor invalido", al.getLine()); }
     ;
 
 %%

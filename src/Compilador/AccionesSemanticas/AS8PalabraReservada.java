@@ -30,7 +30,7 @@ public class AS8PalabraReservada implements AccionSemantica{
             };
         } catch (Exception e) {
             ErrorManager.getInstance().error(e.getMessage(), al.getLine());
-            return AnalizadorLexico.TokenType.INVALID;
+            return TokenType.INVALID;
     }
 }
 }

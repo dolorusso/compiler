@@ -1,3 +1,6 @@
-PRUEBA {
-    long X := 30L;
+PROGRAMA {
+    X.X := X.X;
+    if ( X.X X.Y > 30L) {
+        X.Y := 30L;
+    } endif;
 }
