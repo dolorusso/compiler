@@ -24,7 +24,7 @@ public class AS6CompoundChar implements AccionSemantica{
             case "->":
                 return TokenType.FLECHA;
             case ":=":
-                return TokenType.ASIGN;
+                return TokenType.ASIGNAR;
             default:
                 break;
         }

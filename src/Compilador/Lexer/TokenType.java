@@ -1,29 +1,31 @@
 package Compilador.Lexer;
 
-public class TokenType{
+import Compilador.Parser.Parser;
+
+public class TokenType {
     public static final int sinFinalizar = -1;
-    public static final int ID = 257;
-    public static final int CTEL = 258;
-    public static final int IF = 259;
-    public static final int ELSE = 260;
-    public static final int ENDIF = 261;
-    public static final int PRINT = 262;
-    public static final int RETURN = 263;
-    public static final int LAMBDA = 264;
-    public static final int ASIGN = 265;
-    public static final int MENORIGUAL = 266;
-    public static final int MAYORIGUAL = 267;
-    public static final int IGUALIGUAL = 268;
-    public static final int DISTINTO = 269;
-    public static final int FLECHA = 270;
-    public static final int LONG = 271;
-    public static final int DO = 272;
-    public static final int UNTIL = 273;
-    public static final int TRUNC = 274;
-    public static final int CR = 275;
-    public static final int STRING = 276;
-    public static final int CTEF = 277;
-    public static final int IDCOMP = 278;
-    public static final int CADENASTR = 279;
-    public static final int INVALID = 280;
+    public static final int ID = Parser.ID;
+    public static final int CTEL = Parser.CTEL;
+    public static final int IF = Parser.IF;
+    public static final int ELSE = Parser.ELSE;
+    public static final int ENDIF = Parser.ENDIF;
+    public static final int PRINT = Parser.PRINT;
+    public static final int RETURN = Parser.RETURN;
+    public static final int LAMBDA = Parser.LAMBDA;
+    public static final int ASIGNAR = Parser.ASIGNAR;
+    public static final int MENORIGUAL = Parser.MENORIGUAL;
+    public static final int MAYORIGUAL = Parser.MAYORIGUAL;
+    public static final int IGUALIGUAL = Parser.IGUALIGUAL;
+    public static final int DISTINTO = Parser.DISTINTO;
+    public static final int FLECHA = Parser.FLECHA;
+    public static final int LONG = Parser.LONG;
+    public static final int DO = Parser.DO;
+    public static final int UNTIL = Parser.UNTIL;
+    public static final int TRUNC = Parser.TRUNC;
+    public static final int CR = Parser.CR;
+    public static final int STRING = Parser.STRING;
+    public static final int CTEF = Parser.CTEF;
+    public static final int IDCOMP = Parser.IDCOMP;
+    public static final int CADENASTR = Parser.CADENASTR;
+    public static final int INVALID = Parser.INVALID;
 }

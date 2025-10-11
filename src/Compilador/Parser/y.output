@@ -336,11 +336,11 @@ state 6
 	sentencia_IF : IF . condicional_opt else_opt ';'  (78)
 
 	ID  shift 36
-	CTEL  shift 37
-	TRUNC  shift 38
-	CTEF  shift 39
-	IDCOMP  shift 40
-	CADENASTR  shift 41
+	TRUNC  shift 37
+	IDCOMP  shift 38
+	CADENASTR  shift 39
+	CTEL  shift 40
+	CTEF  shift 41
 	INVALID  shift 42
 	'('  shift 43
 	'+'  shift 44
@@ -349,24 +349,24 @@ state 6
 	'/'  shift 47
 	.  error
 
-	llamada_funcion  goto 48
-	expresion  goto 49
-	condicional_opt  goto 50
-	condicion  goto 51
-	termino  goto 52
-	factor  goto 53
-	constante  goto 54
+	constante  goto 48
+	llamada_funcion  goto 49
+	expresion  goto 50
+	condicional_opt  goto 51
+	condicion  goto 52
+	termino  goto 53
+	factor  goto 54
 
 
 state 7
 	print : PRINT . cuerpo_expresion  (143)
 
 	ID  shift 36
-	CTEL  shift 37
-	TRUNC  shift 38
-	CTEF  shift 39
-	IDCOMP  shift 40
-	CADENASTR  shift 41
+	TRUNC  shift 37
+	IDCOMP  shift 38
+	CADENASTR  shift 39
+	CTEL  shift 40
+	CTEF  shift 41
 	INVALID  shift 42
 	'('  shift 55
 	')'  shift 56
@@ -376,23 +376,23 @@ state 7
 	'/'  shift 47
 	.  error
 
-	llamada_funcion  goto 48
+	constante  goto 48
+	llamada_funcion  goto 49
 	expresion  goto 57
-	termino  goto 52
+	termino  goto 53
 	cuerpo_expresion  goto 58
-	factor  goto 53
-	constante  goto 54
+	factor  goto 54
 
 
 state 8
 	retorno : RETURN . cuerpo_expresion  (148)
 
 	ID  shift 36
-	CTEL  shift 37
-	TRUNC  shift 38
-	CTEF  shift 39
-	IDCOMP  shift 40
-	CADENASTR  shift 41
+	TRUNC  shift 37
+	IDCOMP  shift 38
+	CADENASTR  shift 39
+	CTEL  shift 40
+	CTEF  shift 41
 	INVALID  shift 42
 	'('  shift 55
 	')'  shift 56
@@ -402,12 +402,12 @@ state 8
 	'/'  shift 47
 	.  error
 
-	llamada_funcion  goto 48
+	constante  goto 48
+	llamada_funcion  goto 49
 	expresion  goto 57
-	termino  goto 52
+	termino  goto 53
 	cuerpo_expresion  goto 59
-	factor  goto 53
-	constante  goto 54
+	factor  goto 54
 
 
 state 9
@@ -710,11 +710,11 @@ state 33
 	asignacion : ID ASIGNAR . expresion error  (115)
 
 	ID  shift 36
-	CTEL  shift 37
-	TRUNC  shift 38
-	CTEF  shift 39
-	IDCOMP  shift 40
-	CADENASTR  shift 41
+	TRUNC  shift 37
+	IDCOMP  shift 38
+	CADENASTR  shift 39
+	CTEL  shift 40
+	CTEF  shift 41
 	INVALID  shift 42
 	'+'  shift 44
 	'-'  shift 45
@@ -722,11 +722,11 @@ state 33
 	'/'  shift 47
 	.  error
 
-	llamada_funcion  goto 48
+	constante  goto 48
+	llamada_funcion  goto 49
 	expresion  goto 91
-	termino  goto 52
-	factor  goto 53
-	constante  goto 54
+	termino  goto 53
+	factor  goto 54
 
 
 state 34
@@ -737,15 +737,15 @@ state 34
 
 	error  shift 92
 	ID  shift 93
-	CTEL  shift 37
 	LAMBDA  shift 94
 	LONG  shift 9
-	TRUNC  shift 38
+	TRUNC  shift 37
 	CR  shift 95
 	STRING  shift 11
-	CTEF  shift 39
-	IDCOMP  shift 40
-	CADENASTR  shift 41
+	IDCOMP  shift 38
+	CADENASTR  shift 39
+	CTEL  shift 40
+	CTEF  shift 41
 	INVALID  shift 42
 	'('  shift 96
 	')'  shift 97
@@ -755,7 +755,8 @@ state 34
 	'/'  shift 47
 	.  error
 
-	llamada_funcion  goto 48
+	constante  goto 48
+	llamada_funcion  goto 49
 	tipo  goto 98
 	lista_parametros_formales  goto 99
 	parametro_formal  goto 100
@@ -764,9 +765,8 @@ state 34
 	parametro_real  goto 103
 	expresion  goto 104
 	lambda  goto 105
-	termino  goto 52
-	factor  goto 53
-	constante  goto 54
+	termino  goto 53
+	factor  goto 54
 
 
 state 35
@@ -821,22 +821,16 @@ state 36
 
 
 state 37
-	constante : CTEL .  (163)
-
-	.  reduce 163
-
-
-state 38
 	expresion : TRUNC . cuerpo_expresion  (123)
 	expresion : TRUNC . error  (124)
 
 	error  shift 109
 	ID  shift 36
-	CTEL  shift 37
-	TRUNC  shift 38
-	CTEF  shift 39
-	IDCOMP  shift 40
-	CADENASTR  shift 41
+	TRUNC  shift 37
+	IDCOMP  shift 38
+	CADENASTR  shift 39
+	CTEL  shift 40
+	CTEF  shift 41
 	INVALID  shift 42
 	'('  shift 55
 	')'  shift 56
@@ -846,21 +840,15 @@ state 38
 	'/'  shift 47
 	.  error
 
-	llamada_funcion  goto 48
+	constante  goto 48
+	llamada_funcion  goto 49
 	expresion  goto 57
-	termino  goto 52
+	termino  goto 53
 	cuerpo_expresion  goto 110
-	factor  goto 53
-	constante  goto 54
+	factor  goto 54
 
 
-state 39
-	constante : CTEF .  (164)
-
-	.  reduce 164
-
-
-state 40
+state 38
 	factor : IDCOMP .  (134)
 	llamada_funcion : IDCOMP . '(' lista_parametros_reales ')'  (139)
 	llamada_funcion : IDCOMP . '(' error ')'  (141)
@@ -892,10 +880,22 @@ state 40
 	'/'  reduce 134
 
 
-state 41
+state 39
 	factor : CADENASTR .  (136)
 
 	.  reduce 136
+
+
+state 40
+	constante : CTEL .  (163)
+
+	.  reduce 163
+
+
+state 41
+	constante : CTEF .  (164)
+
+	.  reduce 164
 
 
 state 42
@@ -909,11 +909,11 @@ state 43
 	condicional_opt : '(' . condicion  (91)
 
 	ID  shift 36
-	CTEL  shift 37
-	TRUNC  shift 38
-	CTEF  shift 39
-	IDCOMP  shift 40
-	CADENASTR  shift 41
+	TRUNC  shift 37
+	IDCOMP  shift 38
+	CADENASTR  shift 39
+	CTEL  shift 40
+	CTEF  shift 41
 	INVALID  shift 42
 	'+'  shift 44
 	'-'  shift 45
@@ -921,12 +921,12 @@ state 43
 	'/'  shift 47
 	.  error
 
-	llamada_funcion  goto 48
-	expresion  goto 49
+	constante  goto 48
+	llamada_funcion  goto 49
+	expresion  goto 50
 	condicion  goto 111
-	termino  goto 52
-	factor  goto 53
-	constante  goto 54
+	termino  goto 53
+	factor  goto 54
 
 
 state 44
@@ -972,17 +972,17 @@ state 46
 
 	error  shift 114
 	ID  shift 36
-	CTEL  shift 37
-	CTEF  shift 39
-	IDCOMP  shift 40
-	CADENASTR  shift 41
+	IDCOMP  shift 38
+	CADENASTR  shift 39
+	CTEL  shift 40
+	CTEF  shift 41
 	INVALID  shift 42
 	'-'  shift 115
 	.  error
 
-	llamada_funcion  goto 48
+	constante  goto 48
+	llamada_funcion  goto 49
 	factor  goto 116
-	constante  goto 54
 
 
 state 47
@@ -991,26 +991,32 @@ state 47
 
 	error  shift 117
 	ID  shift 36
-	CTEL  shift 37
-	CTEF  shift 39
-	IDCOMP  shift 40
-	CADENASTR  shift 41
+	IDCOMP  shift 38
+	CADENASTR  shift 39
+	CTEL  shift 40
+	CTEF  shift 41
 	INVALID  shift 42
 	'-'  shift 115
 	.  error
 
-	llamada_funcion  goto 48
+	constante  goto 48
+	llamada_funcion  goto 49
 	factor  goto 118
-	constante  goto 54
 
 
 state 48
+	factor : constante .  (135)
+
+	.  reduce 135
+
+
+state 49
 	factor : llamada_funcion .  (137)
 
 	.  reduce 137
 
 
-state 49
+state 50
 	condicion : expresion . comparador expresion  (97)
 	condicion : expresion . error  (98)
 	expresion : expresion . '+' termino  (116)
@@ -1032,7 +1038,7 @@ state 49
 	comparador  goto 128
 
 
-state 50
+state 51
 	sentencia_IF : IF condicional_opt . cuerpo_opt ENDIF ';'  (65)
 	sentencia_IF : IF condicional_opt . sentencia_ejecutable ENDIF ';'  (66)
 	sentencia_IF : IF condicional_opt . cuerpo_opt else_opt  (67)
@@ -1075,7 +1081,7 @@ state 50
 	ids  goto 29
 
 
-state 51
+state 52
 	condicional_opt : condicion . ')'  (90)
 	condicional_opt : condicion .  (92)
 
@@ -1094,7 +1100,7 @@ state 51
 	';'  reduce 92
 
 
-state 52
+state 53
 	expresion : termino .  (122)
 	termino : termino . '*' factor  (125)
 	termino : termino . '*' error  (127)
@@ -1127,16 +1133,10 @@ state 52
 	'-'  reduce 122
 
 
-state 53
+state 54
 	termino : factor .  (133)
 
 	.  reduce 133
-
-
-state 54
-	factor : constante .  (135)
-
-	.  reduce 135
 
 
 state 55
@@ -1147,11 +1147,11 @@ state 55
 
 	error  shift 139
 	ID  shift 36
-	CTEL  shift 37
-	TRUNC  shift 38
-	CTEF  shift 39
-	IDCOMP  shift 40
-	CADENASTR  shift 41
+	TRUNC  shift 37
+	IDCOMP  shift 38
+	CADENASTR  shift 39
+	CTEL  shift 40
+	CTEF  shift 41
 	INVALID  shift 42
 	')'  shift 140
 	'+'  shift 44
@@ -1160,11 +1160,11 @@ state 55
 	'/'  shift 47
 	.  error
 
-	llamada_funcion  goto 48
+	constante  goto 48
+	llamada_funcion  goto 49
 	expresion  goto 141
-	termino  goto 52
-	factor  goto 53
-	constante  goto 54
+	termino  goto 53
+	factor  goto 54
 
 
 state 56
@@ -1214,11 +1214,11 @@ state 61
 	do_until : DO UNTIL . condicional_opt error  (102)
 
 	ID  shift 36
-	CTEL  shift 37
-	TRUNC  shift 38
-	CTEF  shift 39
-	IDCOMP  shift 40
-	CADENASTR  shift 41
+	TRUNC  shift 37
+	IDCOMP  shift 38
+	CADENASTR  shift 39
+	CTEL  shift 40
+	CTEF  shift 41
 	INVALID  shift 42
 	'('  shift 43
 	'+'  shift 44
@@ -1227,13 +1227,13 @@ state 61
 	'/'  shift 47
 	.  error
 
-	llamada_funcion  goto 48
-	expresion  goto 49
+	constante  goto 48
+	llamada_funcion  goto 49
+	expresion  goto 50
 	condicional_opt  goto 143
-	condicion  goto 51
-	termino  goto 52
-	factor  goto 53
-	constante  goto 54
+	condicion  goto 52
+	termino  goto 53
+	factor  goto 54
 
 
 state 62
@@ -1300,12 +1300,12 @@ state 65
 	do_until : DO cuerpo_opt . condicional_opt ';'  (103)
 
 	ID  shift 36
-	CTEL  shift 37
 	UNTIL  shift 148
-	TRUNC  shift 38
-	CTEF  shift 39
-	IDCOMP  shift 40
-	CADENASTR  shift 41
+	TRUNC  shift 37
+	IDCOMP  shift 38
+	CADENASTR  shift 39
+	CTEL  shift 40
+	CTEF  shift 41
 	INVALID  shift 42
 	'('  shift 43
 	'+'  shift 44
@@ -1314,13 +1314,13 @@ state 65
 	'/'  shift 47
 	.  error
 
-	llamada_funcion  goto 48
-	expresion  goto 49
+	constante  goto 48
+	llamada_funcion  goto 49
+	expresion  goto 50
 	condicional_opt  goto 149
-	condicion  goto 51
-	termino  goto 52
-	factor  goto 53
-	constante  goto 54
+	condicion  goto 52
+	termino  goto 53
+	factor  goto 54
 
 
 state 66
@@ -1328,11 +1328,11 @@ state 66
 	asignacion : IDCOMP ASIGNAR . expresion error  (113)
 
 	ID  shift 36
-	CTEL  shift 37
-	TRUNC  shift 38
-	CTEF  shift 39
-	IDCOMP  shift 40
-	CADENASTR  shift 41
+	TRUNC  shift 37
+	IDCOMP  shift 38
+	CADENASTR  shift 39
+	CTEL  shift 40
+	CTEF  shift 41
 	INVALID  shift 42
 	'+'  shift 44
 	'-'  shift 45
@@ -1340,11 +1340,11 @@ state 66
 	'/'  shift 47
 	.  error
 
-	llamada_funcion  goto 48
+	constante  goto 48
+	llamada_funcion  goto 49
 	expresion  goto 150
-	termino  goto 52
-	factor  goto 53
-	constante  goto 54
+	termino  goto 53
+	factor  goto 54
 
 
 state 67
@@ -1353,11 +1353,11 @@ state 67
 
 	error  shift 151
 	ID  shift 36
-	CTEL  shift 37
-	TRUNC  shift 38
-	CTEF  shift 39
-	IDCOMP  shift 40
-	CADENASTR  shift 41
+	TRUNC  shift 37
+	IDCOMP  shift 38
+	CADENASTR  shift 39
+	CTEL  shift 40
+	CTEF  shift 41
 	INVALID  shift 42
 	'('  shift 96
 	'+'  shift 44
@@ -1366,15 +1366,15 @@ state 67
 	'/'  shift 47
 	.  error
 
-	llamada_funcion  goto 48
+	constante  goto 48
+	llamada_funcion  goto 49
 	lista_parametros_reales  goto 152
 	parametro_real_compuesto  goto 102
 	parametro_real  goto 103
 	expresion  goto 104
 	lambda  goto 105
-	termino  goto 52
-	factor  goto 53
-	constante  goto 54
+	termino  goto 53
+	factor  goto 54
 
 
 state 68
@@ -1582,8 +1582,8 @@ state 89
 	asignacion_multiple : ids '=' . lista_constantes error  (158)
 
 	error  shift 162
-	CTEL  shift 37
-	CTEF  shift 39
+	CTEL  shift 40
+	CTEF  shift 41
 	INVALID  shift 42
 	'-'  shift 115
 	.  error
@@ -1723,11 +1723,11 @@ state 101
 	llamada_funcion : ID '(' lista_parametros_reales . ')'  (140)
 
 	ID  shift 36
-	CTEL  shift 37
-	TRUNC  shift 38
-	CTEF  shift 39
-	IDCOMP  shift 40
-	CADENASTR  shift 41
+	TRUNC  shift 37
+	IDCOMP  shift 38
+	CADENASTR  shift 39
+	CTEL  shift 40
+	CTEF  shift 41
 	INVALID  shift 42
 	'('  shift 96
 	')'  shift 179
@@ -1738,14 +1738,14 @@ state 101
 	'/'  shift 47
 	.  error
 
-	llamada_funcion  goto 48
+	constante  goto 48
+	llamada_funcion  goto 49
 	parametro_real_compuesto  goto 181
 	parametro_real  goto 103
 	expresion  goto 104
 	lambda  goto 105
-	termino  goto 52
-	factor  goto 53
-	constante  goto 54
+	termino  goto 53
+	factor  goto 54
 
 
 state 102
@@ -1825,11 +1825,11 @@ state 108
 
 	error  shift 92
 	ID  shift 36
-	CTEL  shift 37
-	TRUNC  shift 38
-	CTEF  shift 39
-	IDCOMP  shift 40
-	CADENASTR  shift 41
+	TRUNC  shift 37
+	IDCOMP  shift 38
+	CADENASTR  shift 39
+	CTEL  shift 40
+	CTEF  shift 41
 	INVALID  shift 42
 	'('  shift 96
 	'+'  shift 44
@@ -1838,15 +1838,15 @@ state 108
 	'/'  shift 47
 	.  error
 
-	llamada_funcion  goto 48
+	constante  goto 48
+	llamada_funcion  goto 49
 	lista_parametros_reales  goto 101
 	parametro_real_compuesto  goto 102
 	parametro_real  goto 103
 	expresion  goto 104
 	lambda  goto 105
-	termino  goto 52
-	factor  goto 53
-	constante  goto 54
+	termino  goto 53
+	factor  goto 54
 
 
 state 109
@@ -1973,20 +1973,20 @@ state 126
 
 	error  shift 186
 	ID  shift 36
-	CTEL  shift 37
-	CTEF  shift 39
-	IDCOMP  shift 40
-	CADENASTR  shift 41
+	IDCOMP  shift 38
+	CADENASTR  shift 39
+	CTEL  shift 40
+	CTEF  shift 41
 	INVALID  shift 42
 	'-'  shift 115
 	'*'  shift 46
 	'/'  shift 47
 	.  error
 
-	llamada_funcion  goto 48
+	constante  goto 48
+	llamada_funcion  goto 49
 	termino  goto 187
-	factor  goto 53
-	constante  goto 54
+	factor  goto 54
 
 
 state 127
@@ -1995,31 +1995,31 @@ state 127
 
 	error  shift 188
 	ID  shift 36
-	CTEL  shift 37
-	CTEF  shift 39
-	IDCOMP  shift 40
-	CADENASTR  shift 41
+	IDCOMP  shift 38
+	CADENASTR  shift 39
+	CTEL  shift 40
+	CTEF  shift 41
 	INVALID  shift 42
 	'-'  shift 115
 	'*'  shift 46
 	'/'  shift 47
 	.  error
 
-	llamada_funcion  goto 48
+	constante  goto 48
+	llamada_funcion  goto 49
 	termino  goto 189
-	factor  goto 53
-	constante  goto 54
+	factor  goto 54
 
 
 state 128
 	condicion : expresion comparador . expresion  (97)
 
 	ID  shift 36
-	CTEL  shift 37
-	TRUNC  shift 38
-	CTEF  shift 39
-	IDCOMP  shift 40
-	CADENASTR  shift 41
+	TRUNC  shift 37
+	IDCOMP  shift 38
+	CADENASTR  shift 39
+	CTEL  shift 40
+	CTEF  shift 41
 	INVALID  shift 42
 	'+'  shift 44
 	'-'  shift 45
@@ -2027,11 +2027,11 @@ state 128
 	'/'  shift 47
 	.  error
 
-	llamada_funcion  goto 48
+	constante  goto 48
+	llamada_funcion  goto 49
 	expresion  goto 190
-	termino  goto 52
-	factor  goto 53
-	constante  goto 54
+	termino  goto 53
+	factor  goto 54
 
 
 state 129
@@ -2176,17 +2176,17 @@ state 137
 
 	error  shift 209
 	ID  shift 36
-	CTEL  shift 37
-	CTEF  shift 39
-	IDCOMP  shift 40
-	CADENASTR  shift 41
+	IDCOMP  shift 38
+	CADENASTR  shift 39
+	CTEL  shift 40
+	CTEF  shift 41
 	INVALID  shift 42
 	'-'  shift 115
 	.  error
 
-	llamada_funcion  goto 48
+	constante  goto 48
+	llamada_funcion  goto 49
 	factor  goto 210
-	constante  goto 54
 
 
 state 138
@@ -2195,17 +2195,17 @@ state 138
 
 	error  shift 211
 	ID  shift 36
-	CTEL  shift 37
-	CTEF  shift 39
-	IDCOMP  shift 40
-	CADENASTR  shift 41
+	IDCOMP  shift 38
+	CADENASTR  shift 39
+	CTEL  shift 40
+	CTEF  shift 41
 	INVALID  shift 42
 	'-'  shift 115
 	.  error
 
-	llamada_funcion  goto 48
+	constante  goto 48
+	llamada_funcion  goto 49
 	factor  goto 212
-	constante  goto 54
 
 
 state 139
@@ -2300,11 +2300,11 @@ state 148
 	do_until : DO cuerpo_opt UNTIL . condicional_opt error  (100)
 
 	ID  shift 36
-	CTEL  shift 37
-	TRUNC  shift 38
-	CTEF  shift 39
-	IDCOMP  shift 40
-	CADENASTR  shift 41
+	TRUNC  shift 37
+	IDCOMP  shift 38
+	CADENASTR  shift 39
+	CTEL  shift 40
+	CTEF  shift 41
 	INVALID  shift 42
 	'('  shift 43
 	'+'  shift 44
@@ -2313,13 +2313,13 @@ state 148
 	'/'  shift 47
 	.  error
 
-	llamada_funcion  goto 48
-	expresion  goto 49
+	constante  goto 48
+	llamada_funcion  goto 49
+	expresion  goto 50
 	condicional_opt  goto 219
-	condicion  goto 51
-	termino  goto 52
-	factor  goto 53
-	constante  goto 54
+	condicion  goto 52
+	termino  goto 53
+	factor  goto 54
 
 
 state 149
@@ -2357,11 +2357,11 @@ state 152
 	llamada_funcion : IDCOMP '(' lista_parametros_reales . ')'  (139)
 
 	ID  shift 36
-	CTEL  shift 37
-	TRUNC  shift 38
-	CTEF  shift 39
-	IDCOMP  shift 40
-	CADENASTR  shift 41
+	TRUNC  shift 37
+	IDCOMP  shift 38
+	CADENASTR  shift 39
+	CTEL  shift 40
+	CTEF  shift 41
 	INVALID  shift 42
 	'('  shift 96
 	')'  shift 224
@@ -2372,14 +2372,14 @@ state 152
 	'/'  shift 47
 	.  error
 
-	llamada_funcion  goto 48
+	constante  goto 48
+	llamada_funcion  goto 49
 	parametro_real_compuesto  goto 181
 	parametro_real  goto 103
 	expresion  goto 104
 	lambda  goto 105
-	termino  goto 52
-	factor  goto 53
-	constante  goto 54
+	termino  goto 53
+	factor  goto 54
 
 
 state 153
@@ -2455,8 +2455,8 @@ state 159
 state 160
 	asignacion_multiple : ids error '=' . lista_constantes ';'  (156)
 
-	CTEL  shift 37
-	CTEF  shift 39
+	CTEL  shift 40
+	CTEF  shift 41
 	INVALID  shift 42
 	'-'  shift 115
 	.  error
@@ -2604,11 +2604,11 @@ state 180
 	lista_parametros_reales : lista_parametros_reales ',' . parametro_real_compuesto  (42)
 
 	ID  shift 36
-	CTEL  shift 37
-	TRUNC  shift 38
-	CTEF  shift 39
-	IDCOMP  shift 40
-	CADENASTR  shift 41
+	TRUNC  shift 37
+	IDCOMP  shift 38
+	CADENASTR  shift 39
+	CTEL  shift 40
+	CTEF  shift 41
 	INVALID  shift 42
 	'('  shift 96
 	'+'  shift 44
@@ -2617,14 +2617,14 @@ state 180
 	'/'  shift 47
 	.  error
 
-	llamada_funcion  goto 48
+	constante  goto 48
+	llamada_funcion  goto 49
 	parametro_real_compuesto  goto 237
 	parametro_real  goto 103
 	expresion  goto 104
 	lambda  goto 105
-	termino  goto 52
-	factor  goto 53
-	constante  goto 54
+	termino  goto 53
+	factor  goto 54
 
 
 state 181
@@ -3082,8 +3082,8 @@ state 230
 state 231
 	lista_constantes : lista_constantes ',' . constante  (161)
 
-	CTEL  shift 37
-	CTEF  shift 39
+	CTEL  shift 40
+	CTEF  shift 41
 	INVALID  shift 42
 	'-'  shift 115
 	.  error

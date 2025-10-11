@@ -16,7 +16,7 @@ public class TokenNames {
         tokenNames.put(TokenType.PRINT, "PRINT");
         tokenNames.put(TokenType.RETURN, "RETURN");
         tokenNames.put(TokenType.LAMBDA, "LAMBDA");
-        tokenNames.put(TokenType.ASIGN, "ASIGNAR");
+        tokenNames.put(TokenType.ASIGNAR, "ASIGNAR");
         tokenNames.put(TokenType.MENORIGUAL, "MENORIGUAL");
         tokenNames.put(TokenType.MAYORIGUAL, "MAYORIGUAL");
         tokenNames.put(TokenType.IGUALIGUAL, "IGUALIGUAL");

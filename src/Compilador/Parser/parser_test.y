@@ -1,5 +1,5 @@
-%token ID CTEL IF ELSE ENDIF PRINT RETURN LAMBDA ASIGNAR MENORIGUAL MAYORIGUAL IGUALIGUAL DISTINTO
-%token FLECHA LONG DO UNTIL TRUNC CR STRING CTEF IDCOMP CADENASTR INVALID
+%token ID IF ELSE ENDIF PRINT RETURN LAMBDA ASIGNAR MENORIGUAL MAYORIGUAL IGUALIGUAL DISTINTO
+%token FLECHA LONG DO UNTIL TRUNC CR STRING IDCOMP CADENASTR
 
 
 %{
@@ -10,6 +10,9 @@
 %}
 
 %start programa
+
+%type <sval> constante
+%token <sval> CTEL CTEF INVALID
 
 %%
 
@@ -129,7 +132,6 @@ parametro_formal
 	| tipo error
 	    { errManager.error("Se espera un Identifier correspondiente al parametro formal", al.getLine()); }
 	;
-
 
 lista_identificadores
 	: tipo IDCOMP
@@ -398,11 +400,16 @@ lista_constantes
 constante
     : CTEL
     | CTEF
+        {
+
+        }
 	| '-' CTEL
 	    {
-	        this.yylval = al.getYylval();
+	        errManager.debug("TEST: " + $2, al.getLine());
+	        al.ts.insertar('-'+$2,new Atributo(Atributo.longType,-1 * al.ts.obtener($2).numValue));
+	        $$ = '-' + $2;
 	    }
-	| '-' CTEF
+	| '-' CTEF { $$ = '-' + $2;}
 	| INVALID
 	    { errManager.error("factor invalido", al.getLine()); }
     ;
@@ -420,6 +427,13 @@ public Parser(ErrorManager.Nivel nivel){
 public int yylex(){
     int token = al.yylex();
     errManager.debug("Se reconocio el token " + token + " ("+ TokenNames.getTokenName(token) + ")", al.getLine());
+    ParserVal val = al.getYylval();
+
+    if (val != null)
+        this.yylval = val;
+    else
+        this.yylval = null;
+
 
     return token;
 }
