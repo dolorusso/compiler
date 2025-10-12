@@ -33,6 +33,6 @@ public class TablaSimbolos {
 
     @Override
     public String toString() {
-        return tabla.toString();
+        return tabla.toString().replace("}, ", "}\n");
     }
 }

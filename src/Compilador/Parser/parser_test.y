@@ -462,9 +462,14 @@ public void tratarNegativos(String lexemaAnterior){
     }
 }
 
+public void run()
+{
+  yyparse();
+  errManager.debug("Tabla de simbolos resultante" + '\n' +  al.ts.toString());
 
-/* Manejo de errores */
+}
+
 public void yyerror(String s) {
-    System.err.println("Error sintáctico: " + s);
+    System.err.println("Error generico: " + s);
     System.err.println("Linea: " + al.getLine());
 }

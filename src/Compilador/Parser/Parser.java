@@ -806,13 +806,18 @@ public void tratarNegativos(String lexemaAnterior){
     }
 }
 
+public void run()
+{
+  yyparse();
+  errManager.debug("Tabla de simbolos resultante" + '\n' +  al.ts.toString());
 
-/* Manejo de errores */
+}
+
 public void yyerror(String s) {
-    System.err.println("Error sintáctico: " + s);
+    System.err.println("Error generico: " + s);
     System.err.println("Linea: " + al.getLine());
 }
-//#line 743 "Parser.java"
+//#line 748 "Parser.java"
 //###############################################################
 // method: yylexdebug : check lexer state
 //###############################################################
@@ -1438,7 +1443,7 @@ case 167:
 //#line 426 "parser_test.y"
 { errManager.error("factor invalido", al.getLine()); }
 break;
-//#line 1364 "Parser.java"
+//#line 1369 "Parser.java"
 //########## END OF USER-SUPPLIED ACTIONS ##########
     }//switch
     //#### Now let's reduce... ####
@@ -1483,15 +1488,7 @@ break;
 
 
 //## run() --- for Thread #######################################
-/**
- * A default run method, used for operating this parser
- * object in the background.  It is intended for extending Thread
- * or implementing Runnable.  Turn off with -Jnorun .
- */
-public void run()
-{
-  yyparse();
-}
+//## The -Jnorun option was used ##
 //## end of method run() ########################################
 
 
