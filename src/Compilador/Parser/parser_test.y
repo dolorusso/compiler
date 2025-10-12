@@ -399,17 +399,29 @@ lista_constantes
 
 constante
     : CTEL
-    | CTEF
         {
+            Atributo atributoActual = al.ts.obtener($1);
+            if (atributoActual.ref == 1){
+                if (atributoActual.numValue == (2147483648L)) {
+                    errManager.warning("Constante long fuera de rango, truncando.");
+                    atributoActual.numValue -= 1;
+                }
+            }
 
+            $$ = $1;
         }
+    | CTEF
+
 	| '-' CTEL
 	    {
-	        errManager.debug("TEST: " + $2, al.getLine());
-	        al.ts.insertar('-'+$2,new Atributo(Atributo.longType,-1 * al.ts.obtener($2).numValue));
+	        tratarNegativos($2);
 	        $$ = '-' + $2;
 	    }
-	| '-' CTEF { $$ = '-' + $2;}
+	| '-' CTEF
+	    {
+           tratarNegativos($2);
+           $$ = '-' + $2;
+        }
 	| INVALID
 	    { errManager.error("factor invalido", al.getLine()); }
     ;
@@ -434,9 +446,22 @@ public int yylex(){
     else
         this.yylval = null;
 
-
     return token;
 }
+
+public void tratarNegativos(String lexemaAnterior){
+    errManager.debug("Tratando numero negativo " + lexemaAnterior,al.getLine());
+    Atributo atributoAnterior = al.ts.obtener(lexemaAnterior);
+    if(atributoAnterior.ref > 1){
+        Atributo atributoNuevo = new Atributo(Atributo.longType,-1 * atributoAnterior.numValue);
+        al.ts.insertar('-'+lexemaAnterior, atributoNuevo);
+        atributoAnterior.ref -= 1;
+    } else {
+        atributoAnterior.numValue = -1 * atributoAnterior.numValue;
+        al.ts.modificar(lexemaAnterior,'-'+lexemaAnterior, atributoAnterior);
+    }
+}
+
 
 /* Manejo de errores */
 public void yyerror(String s) {

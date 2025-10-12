@@ -8,11 +8,6 @@ public class Main {
         AnalizadorLexico al = AnalizadorLexico.getInstance("Programas/pruebaLexico.txt");
         Parser p = new Parser(ErrorManager.Nivel.DEBUG);
         p.run();
-        //    int x;
-        //
-        //    do {
-        //       x = al.yylex();
-        //        System.out.println("Reconoce token " + x);
-        //   } while (x != 0);
+
    }
 }
