@@ -43,11 +43,8 @@ public class AnalizadorLexico {
 
     private List<AccionSemantica> accionesSemanticas;
 
-    private ErrorManager errManager;
-
     public AnalizadorLexico(String filename) throws IOException {
         this.reader = new PushbackMyReader(filename);
-        this.errManager = ErrorManager.getInstance();
         this.transiciones = MatrizLoader.cargarTransiciones(
                 "src/Compilador/Lexer/Matrices/matriz_transiciones.csv"
         );

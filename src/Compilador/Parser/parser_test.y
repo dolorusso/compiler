@@ -500,11 +500,7 @@ public void run()
 {
   yyparse();
   errManager.debug("Tabla de simbolos resultante" + '\n' +  al.ts.toString());
-
 }
 
 public void yyerror(String s) {
-    //if (errManager.estaTratado == false){
-    //    errManager.error("Error no tratado de manera completa: " + s, al.getLine());
-    //}
 }
