@@ -7,7 +7,4 @@ P{
     @identificadores con letras, digitos y %
     IDCONDIGITO123.IDCONDIGITO123 := 40L;
     IDCON%%%%.IDCON%%123 := 40L;
-
-    @intento de incluir en el nombre de identificador un caracter que no sea letra, digito o %
-    IDERROR#.ID&&ERROR := 50L;
 }

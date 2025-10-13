@@ -5,8 +5,6 @@ import Compilador.Lexer.AnalizadorLexico;
 import Compilador.Lexer.Atributo;
 import Compilador.Lexer.TokenType;
 
-import java.util.ArrayList;
-
 public class AS12CompIdentifierCheck implements AccionSemantica{
 
     @Override
@@ -22,7 +20,7 @@ public class AS12CompIdentifierCheck implements AccionSemantica{
         for (String subId : subIds) {
             if (subId.length() > MAX_LENGTH) {
                 VAL.append(subId, 0, MAX_LENGTH);
-                ErrorManager.getInstance().warning("WARNING! Identificador"+ subId + " muy largo. Truncando a " + MAX_LENGTH + " characters");
+                ErrorManager.getInstance().warning("Identificador \"" + subId + "\" muy largo. Truncando a " + MAX_LENGTH + " caracteres");
             } else {
                 VAL.append(subId);
             }

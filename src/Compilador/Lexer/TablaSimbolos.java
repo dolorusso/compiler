@@ -1,7 +1,6 @@
 package Compilador.Lexer;
 
 import Compilador.ErrorHandler.ErrorManager;
-
 import java.util.HashMap;
 import java.util.Map;
 
