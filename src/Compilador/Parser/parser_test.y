@@ -20,7 +20,10 @@ programa
 	: ID '{' lista_sentencias '}'
 	    { errManager.debug("Declaracion de programa detectada", al.getLine()); }
     | ID '{' lista_sentencias '}' error
-            { errManager.error("No se permiten sentencias luego del cierre de programa", al.getLine()); }
+        {
+            errManager.debug("Declaracion de programa detectada", al.getLine());
+            errManager.error("No se permiten sentencias luego del cierre de programa", al.getLine());
+        }
     | '{' lista_sentencias '}'
         { errManager.error("Falta identificador del programa", al.getLine()); }
     | ID lista_sentencias '}'
@@ -295,7 +298,7 @@ expresion
 	| expresion '-' termino
 	| expresion '-' error 
 		{ errManager.error("Falta el segundo operando en la resta", al.getLine()); }
-	| '-'
+	| '-' error
 		{ errManager.debug("Faltan los dos operandos", al.getLine()); }
 	| termino
 	| TRUNC cuerpo_expresion
@@ -329,6 +332,13 @@ factor
 	| llamada_funcion
 	| ID
 	    { errManager.error("Falta prefijo obligatorio del ID", al.getLine()); }
+    | '-' llamada_funcion
+    | '-' IDCOMP
+        { errManager.debug("Identificador con -", al.getLine()); }
+    | '-' ID
+        { errManager.error("Falta prefijo obligatorio del ID", al.getLine()); }
+    | '-' CADENASTR
+        { errManager.error("Operador '-' no permitido en este contexto", al.getLine()); }
 	;
 
 llamada_funcion
@@ -400,30 +410,33 @@ lista_constantes
 constante
     : CTEL
         {
-            Atributo atributoActual = al.ts.obtener($1);
-            if (atributoActual.ref == 1){
-                if (atributoActual.numValue == (2147483648L)) {
-                    errManager.warning("Constante long fuera de rango, truncando.");
-                    atributoActual.numValue -= 1;
-                }
-            }
-
+            checkearRango($1);
             $$ = $1;
         }
     | CTEF
-
+        {
+            errManager.debug("CTEF detectada sin signo " + $1 ,al.getLine());
+            $$ = $1;
+        }
 	| '-' CTEL
 	    {
 	        tratarNegativos($2);
-	        $$ = '-' + $2;
+	        $$ = "-" + $2;
 	    }
 	| '-' CTEF
 	    {
            tratarNegativos($2);
-           $$ = '-' + $2;
+           $$ = "-" + $2;
         }
 	| INVALID
 	    { errManager.error("factor invalido", al.getLine()); }
+    | '+' CTEL
+        {
+            checkearRango($2);
+            $$ = $2;
+        }
+    | '+' CTEF
+        { $$ = $2; }
     ;
 
 %%
@@ -441,8 +454,10 @@ public int yylex(){
     errManager.debug("Se reconocio el token " + token + " ("+ TokenNames.getTokenName(token) + ")", al.getLine());
     ParserVal val = al.getYylval();
 
-    if (val != null)
+    if (val != null){
         this.yylval = val;
+        errManager.debug("Se almaceno el yylval " + val);
+    }
     else
         this.yylval = null;
 
@@ -452,14 +467,27 @@ public int yylex(){
 public void tratarNegativos(String lexemaAnterior){
     errManager.debug("Tratando numero negativo " + lexemaAnterior,al.getLine());
     Atributo atributoAnterior = al.ts.obtener(lexemaAnterior);
+    String nuevoLexema = "-" + lexemaAnterior;
     if(atributoAnterior.ref > 1){
         Atributo atributoNuevo = new Atributo(Atributo.longType,-1 * atributoAnterior.numValue);
-        al.ts.insertar('-'+lexemaAnterior, atributoNuevo);
+        al.ts.insertar(nuevoLexema, atributoNuevo);
         atributoAnterior.ref -= 1;
     } else {
         atributoAnterior.numValue = -1 * atributoAnterior.numValue;
-        al.ts.modificar(lexemaAnterior,'-'+lexemaAnterior, atributoAnterior);
+        al.ts.modificar(lexemaAnterior, nuevoLexema, atributoAnterior);
     }
+}
+
+public void checkearRango(String lexemaActual){
+    errManager.debug("Checkeando rango de constante " + lexemaActual,al.getLine());
+    Atributo atributoActual = al.ts.obtener(lexemaActual);
+    if (atributoActual.ref == 1){
+        if (atributoActual.numValue == (2147483648L)) {
+            errManager.warning("Constante long fuera de rango, truncando.");
+            atributoActual.numValue -= 1;
+        }
+    }
+
 }
 
 public void run()

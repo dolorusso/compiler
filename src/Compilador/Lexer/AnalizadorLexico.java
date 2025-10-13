@@ -108,7 +108,7 @@ public class AnalizadorLexico {
                 if (Character.isDigit(c)) return 14;      // d digito
                 if (Character.isUpperCase(c)) return 15;  // Lmayus
                 if (Character.isLowerCase(c)) return 16;  // Lminus
-                return TokenType.INVALID; // Si no detecta nada es un caracter invalido
+                return 17;
 
         }
     }
@@ -158,6 +158,8 @@ public class AnalizadorLexico {
     }
 
     public ParserVal getYylval() {
-        return yylvalActual;
+        ParserVal yylval = this.yylvalActual;
+        this.yylvalActual = null;
+        return yylval;
     }
 }
