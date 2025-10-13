@@ -1,13 +1,5 @@
 P{
-    @identificador con nombre mayor a 20 caracteres
-    ESTOSVANASERMASDEVEINTECARACTERES.ESTOSVANASERMASDEVEINTECARACTERES := 30L;
-    @identificador con nombre menor a 20 caracteres
-    MENOSDEVEINTE.MENOSDEVEINTE := 30L;
+    @cadena mal escrita
+    A.A := & blablabla ;
 
-    @identificadores con letras, digitos y %
-    IDCONDIGITO123.IDCONDIGITO123 := 40L;
-    IDCON%%%%.IDCON%%123 := 40L;
-
-    @intento de incluir en el nombre de identificador un caracter que no sea letra, digito o %
-    IDERROR#.ID&&ERROR := 50L;
 }

@@ -1,0 +1,4 @@
+P{
+    @esto es un comentario
+    mal escrito
+}

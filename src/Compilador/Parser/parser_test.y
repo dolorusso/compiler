@@ -18,7 +18,9 @@
 
 programa    
 	: ID '{' lista_sentencias '}'
-	    { errManager.debug("Declaracion de programa detectada", al.getLine()); }
+		{ errManager.debug("Declaracion de programa detectada", al.getLine()); }
+	| ID '{' error '}'
+		{ errManager.error("Programa con error detectado", al.getLine()); }
     | ID '{' lista_sentencias '}' error
         {
             errManager.debug("Declaracion de programa detectada", al.getLine());
@@ -442,6 +444,7 @@ constante
 %%
 private AnalizadorLexico al;
 private ErrorManager errManager;
+private static final ParserVal dummyParserVal = new ParserVal();
 
 public Parser(ErrorManager.Nivel nivel){
     this.al = AnalizadorLexico.getInstance();
@@ -458,8 +461,9 @@ public int yylex(){
         this.yylval = val;
         errManager.debug("Se almaceno el yylval " + val);
     }
-    else
-        this.yylval = null;
+    else	
+		this.yylval = dummyParserVal;
+        //this.yylval = null; esto no funciona.
 
     return token;
 }
