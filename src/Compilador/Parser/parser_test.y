@@ -21,6 +21,8 @@ programa
 		{ errManager.debug("Declaracion de programa detectada", al.getLine()); }
 	| ID '{' error '}'
 		{ errManager.error("Programa con error detectado", al.getLine()); }
+	| ID '{' error
+	    { errManager.error("Programa con error detectado", al.getLine()); }
     | ID '{' lista_sentencias '}' error
         {
             errManager.debug("Declaracion de programa detectada", al.getLine());
@@ -229,8 +231,8 @@ condicional_opt
     : '(' condicion ')'
     | condicion ')'
         { errManager.error("Falta parentesis de apertura de la condicion", al.getLine()); }
-    | '(' condicion
-        { errManager.error("Falta parentesis de cierre de la condicion", al.getLine()); }
+    | '(' condicion error
+         { errManager.error("Falta parentesis de cierre de la condicion", al.getLine()); }
     | condicion
         { errManager.error("Faltan parentesis de cierre y apertura de la condicion", al.getLine()); }
     ;
@@ -298,7 +300,7 @@ expresion
 	| '+'
 		{ errManager.debug("Faltan los dos operandos", al.getLine()); }
 	| expresion '-' termino
-	| expresion '-' error 
+	| expresion '-' error
 		{ errManager.error("Falta el segundo operando en la resta", al.getLine()); }
 	| '-' error
 		{ errManager.debug("Faltan los dos operandos", al.getLine()); }
@@ -502,6 +504,7 @@ public void run()
 }
 
 public void yyerror(String s) {
-    System.err.println("Error generico: " + s);
-    System.err.println("Linea: " + al.getLine());
+    //if (errManager.estaTratado == false){
+    //    errManager.error("Error no tratado de manera completa: " + s, al.getLine());
+    //}
 }

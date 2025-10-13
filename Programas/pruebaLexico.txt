@@ -1,5 +1,11 @@
 P{
-    @cadena mal escrita
-    A.A := & blablabla ;
+    @palabras reservadas escritas en minusculas
+    if (A.A > B.B) {
+        C.C := 30L;
+    } endif;
 
+    @palabras reservadas escritas en mayusculas
+    IF (A.A > B.B) {
+        C.C := 30L;
+    } ENDIF;
 }

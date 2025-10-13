@@ -103,7 +103,7 @@ public class AnalizadorLexico {
             case ' ': return 13;
             case '\t': return 13;
             case '\r': return 13;
-            case (char)-1: return 13;
+            case (char)-1: return 18;
             default:
                 if (Character.isDigit(c)) return 14;      // d digito
                 if (Character.isUpperCase(c)) return 15;  // Lmayus
