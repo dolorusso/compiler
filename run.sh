@@ -12,7 +12,7 @@ fi
 INPUT_FILE="$1"
 
 if [ ! -f "$OUT_DIR/$JAR_NAME" ]; then
-    echo "❌ No se encontró $OUT_DIR/$JAR_NAME. Ejecuta primero build.sh."
+    echo "No se encontro $OUT_DIR/$JAR_NAME. Ejecuta primero build.sh."
     exit 1
 fi
 
