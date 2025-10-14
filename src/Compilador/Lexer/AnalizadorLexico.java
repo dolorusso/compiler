@@ -48,7 +48,7 @@ public class AnalizadorLexico {
         this.transiciones = MatrizLoader.cargarTransiciones(
                 "src/Compilador/Lexer/Matrices/matriz_transiciones.csv"
         );
-        imprimirMatriz( this.transiciones);
+        //imprimirMatriz( this.transiciones);
         this.acciones = MatrizLoader.cargarAcciones(
                 "src/Compilador/Lexer/Matrices/matriz_acciones_semanticas.csv"
         );
