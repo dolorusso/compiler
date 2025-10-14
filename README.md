@@ -73,8 +73,8 @@ El analizador procesará el archivo, mostrando por consola los tokens reconocido
   Definición de acciones semánticas que pueden aplicarse a distintos tipos de tokens sin duplicar código.
 
 - **Manejo especial de casos complejos:**  
-  Consideración de constantes negativas, tokens inválidos y identificadores largos.
+  Consideración de constantes negativas, tokens inválidos e identificadores largos.
 
 - **Gramática modular y segura:**  
-  Estructura de la gramática cuidadosamente diseñada para evitar conflictos **shift–reduce** y **reduce–reduce**.
+  Estructura de la gramática diseñada para evitar conflictos **shift–reduce** y **reduce–reduce**.
 
