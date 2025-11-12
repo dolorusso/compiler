@@ -7,12 +7,13 @@
     import Compilador.Lexer.TokenNames;
     import Compilador.ErrorHandler.ErrorManager;
     import Compilador.Lexer.Atributo;
+    import Compilador.Generador.Generador;
 %}
 
 %start programa
 
-%type <sval> constante
-%token <sval> CTEL CTEF INVALID
+%type <sval> constante tipo
+%token <sval> CTEL CTEF INVALID ID IDCOMP STRING LONG
 
 %%
 
@@ -42,6 +43,8 @@ programa
         { errManager.error("Falta identificador del programa", al.getLine()); }
 	| ID
 	    { errManager.error("Faltan delimitadores de programa de programa '{' '}'", al.getLine()); }
+	| error
+	    { errManager.error("Falta identificador del programa", al.getLine()); }
 	;
 
 sentencia
@@ -72,13 +75,23 @@ sentencia_ejecutable
 	;
 
 declaracion_funcion
-	: tipo ID parametros_formales_opt cuerpo_funcion_opt
-	    { errManager.debug("Declaracion de funcion detectada.", al.getLine()); }
-    | ID parametros_formales_opt cuerpo_funcion_opt
-         { errManager.error("Funcion sin tipo.", al.getLine()); }
-    | tipo parametros_formales_opt cuerpo_funcion_opt
+	: inicio_funcion cuerpo_funcion_opt
+	    {
+	        errManager.debug("Declaracion de funcion detectada.", al.getLine());
+	        generador.exitScope();
+	    }
+    ;
+
+inicio_funcion
+    : tipo ID parametros_formales_opt
+        {
+            generador.enterScope($2);
+        }
+    | ID parametros_formales_opt
+        { errManager.error("Funcion sin tipo.", al.getLine()); }
+    | tipo parametros_formales_opt
         { errManager.error("Funcion sin nombre.", al.getLine()); }
-    | tipo IDCOMP parametros_formales_opt cuerpo_funcion_opt
+    | tipo IDCOMP parametros_formales_opt
         { errManager.error("No se debe especificar la unidad en declaracion de funcion", al.getLine()); }
     ;
 
@@ -142,7 +155,13 @@ parametro_formal
 
 lista_identificadores
 	: tipo IDCOMP
-	    { errManager.debug("Declaracion de variable detectada.",  al.getLine()); }
+	    {
+	        errManager.debug("Declaracion de variable detectada.",  al.getLine());
+	        errManager.debug("Mangle Name: " + generador.mangleName($2), al.getLine());
+	        int tipo = Integer.parseInt($1);
+	        al.ts.insertar(generador.mangleName($2),new Atributo(tipo));
+
+	    }
 	| lista_identificadores ',' IDCOMP
 	    { errManager.debug("Declaracion de variable detectada.",  al.getLine()); }
 	| lista_identificadores IDCOMP
@@ -245,6 +264,8 @@ cuerpo_opt
         { errManager.error("Falta llave de apertura", al.getLine()); }
     | '{' '}'
         { errManager.error("Falta contenido en bloque", al.getLine()); }
+    | '{' error '}'
+        { errManager.error("Contenido del bloque invalido", al.getLine()); }
     ;
 
 
@@ -279,12 +300,17 @@ comparador
 
 tipo
 	: LONG
+	    { $$ = "0"; }
 	| STRING
+	    { $$ = "1"; }
 	;
 
 asignacion
 	: IDCOMP ASIGNAR expresion ';'
-	    { errManager.debug("Asignacion detectada", al.getLine()); }
+	    {
+	        errManager.debug("Asignacion detectada", al.getLine());
+
+	    }
 	| IDCOMP ASIGNAR expresion error
 	    { errManager.error(" Falta delimitador de sentencias ;.", al.getLine()); }
 	| ID ASIGNAR expresion ';'
@@ -447,11 +473,13 @@ constante
 private AnalizadorLexico al;
 private ErrorManager errManager;
 private static final ParserVal dummyParserVal = new ParserVal();
+private Generador generador;
 
 public Parser(ErrorManager.Nivel nivel){
     this.al = AnalizadorLexico.getInstance();
     this.errManager = ErrorManager.getInstance();
     errManager.setNivel(nivel);
+    this.generador = new Generador();
 }
 
 public int yylex(){

@@ -19,3 +19,5 @@ if %ERRORLEVEL%==0 (
 ) else (
     echo Error al ejecutar yacc.
 )
+
+pause

@@ -20,6 +20,10 @@ public class Atributo {
         this.numValue = numValue;
     }
 
+    public Atributo(int type){
+        this.type = type;
+    }
+
     @Override
     public String toString() {
         return "Atributo{" + "type=" + type + ", strValue=" + strValue + ", numValue=" + numValue + ", ref=" + ref + '}';
