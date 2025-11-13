@@ -18,13 +18,16 @@
 %%
 
 programa    
-	: ID '{' lista_sentencias '}'
-		{ errManager.debug("Declaracion de programa detectada", al.getLine()); }
-	| ID '{' error '}'
+	: inicio_programa lista_sentencias '}'
+		{
+		    errManager.debug("Declaracion de programa detectada", al.getLine());
+		    generador.exitScope();
+		}
+	| inicio_programa error '}'
 		{ errManager.error("Programa con error detectado", al.getLine()); }
-	| ID '{' error
+	| inicio_programa error
 	    { errManager.error("Programa con error detectado", al.getLine()); }
-    | ID '{' lista_sentencias '}' error
+    | inicio_programa lista_sentencias '}' error
         {
             errManager.debug("Declaracion de programa detectada", al.getLine());
             errManager.error("No se permiten sentencias luego del cierre de programa", al.getLine());
@@ -33,11 +36,11 @@ programa
         { errManager.error("Falta identificador del programa", al.getLine()); }
     | ID lista_sentencias '}'
         { errManager.error("Falta apertura del programa '{'", al.getLine()); }
-    | ID '{' lista_sentencias
+    | inicio_programa lista_sentencias
         { errManager.error("Falta cierre del programa '{'", al.getLine()); }
     | ID lista_sentencias
         { errManager.error("Faltan delimitadores de programa de programa '{' '}'", al.getLine()); }
-	| ID '{' '}'
+	| inicio_programa '}'
 	    { errManager.error("Programa vacio.", al.getLine()); }
 	| '{' '}'
         { errManager.error("Falta identificador del programa", al.getLine()); }
@@ -46,6 +49,13 @@ programa
 	| error
 	    { errManager.error("Falta identificador del programa", al.getLine()); }
 	;
+
+inicio_programa
+    : ID '{'
+        {
+            generador.enterScope($1);
+        }
+    ;
 
 sentencia
 	: sentencia_declarativa
