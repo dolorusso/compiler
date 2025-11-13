@@ -791,7 +791,7 @@ final static String yyrule[] = {
 "constante : '+' CTEF",
 };
 
-//#line 483 "parser.y"
+//#line 494 "parser.y"
 private AnalizadorLexico al;
 private ErrorManager errManager;
 private static final ParserVal dummyParserVal = new ParserVal();
@@ -1095,469 +1095,480 @@ case 29:
 //#line 97 "parser.y"
 {
             generador.enterScope(val_peek(1).sval);
+            generador.aplicarAmbito(al.ts);
+
         }
 break;
 case 30:
-//#line 101 "parser.y"
+//#line 103 "parser.y"
 { errManager.error("Funcion sin tipo.", al.getLine()); }
 break;
 case 31:
-//#line 103 "parser.y"
+//#line 105 "parser.y"
 { errManager.error("Funcion sin nombre.", al.getLine()); }
 break;
 case 32:
-//#line 105 "parser.y"
+//#line 107 "parser.y"
 { errManager.error("No se debe especificar la unidad en declaracion de funcion", al.getLine()); }
 break;
 case 34:
-//#line 110 "parser.y"
+//#line 112 "parser.y"
 { errManager.error("Parametros formales faltantes", al.getLine()); }
 break;
 case 36:
-//#line 115 "parser.y"
+//#line 117 "parser.y"
 { errManager.error("Faltan cuerpo de la funcion", al.getLine()); }
 break;
 case 37:
-//#line 116 "parser.y"
+//#line 118 "parser.y"
 { errManager.error("Faltan llaves de la funcion", al.getLine()); }
 break;
 case 40:
-//#line 124 "parser.y"
+//#line 126 "parser.y"
 { errManager.error("Sentencia invalida.", al.getLine()); }
 break;
 case 48:
-//#line 142 "parser.y"
+//#line 144 "parser.y"
 { errManager.error("Falta separador de parametros ','", al.getLine()); }
 break;
 case 49:
-//#line 147 "parser.y"
-{ errManager.debug("Parametro formal con semantica opia-resultado detectado.", al.getLine()); }
+//#line 149 "parser.y"
+{
+	        errManager.debug("Parametro formal con semantica opia-resultado detectado.", al.getLine());
+	        generador.agregarParametro(true,val_peek(1).sval,val_peek(0).sval);
+	    }
 break;
 case 50:
-//#line 149 "parser.y"
+//#line 154 "parser.y"
 { errManager.error("Se espera un tipo correspondiente al parametro formal", al.getLine()); }
 break;
 case 51:
-//#line 151 "parser.y"
+//#line 156 "parser.y"
 { errManager.error("Se espera un Identifier correspondiente al parametro formal", al.getLine()); }
 break;
 case 52:
-//#line 153 "parser.y"
-{ errManager.debug("Parametro formal con semantica por defecto detectado.", al.getLine()); }
+//#line 158 "parser.y"
+{
+	        errManager.debug("Parametro formal con semantica por defecto detectado.", al.getLine());
+	        generador.agregarParametro(false,val_peek(1).sval,val_peek(0).sval);
+	    }
 break;
 case 53:
-//#line 155 "parser.y"
+//#line 163 "parser.y"
 { errManager.error("Se espera un tipo correspondiente al parametro formal", al.getLine()); }
 break;
 case 54:
-//#line 157 "parser.y"
+//#line 165 "parser.y"
 { errManager.debug("Parametro formal lambda semantica copia-resultado detectado", al.getLine()); }
 break;
 case 55:
-//#line 159 "parser.y"
+//#line 167 "parser.y"
 { errManager.debug("Parametro formal lambda semantica copia-resultado detectado", al.getLine()); }
 break;
 case 56:
-//#line 161 "parser.y"
+//#line 169 "parser.y"
 { errManager.error("Se espera un tipo correspondiente al parametro formal", al.getLine()); }
 break;
 case 57:
-//#line 163 "parser.y"
+//#line 171 "parser.y"
 { errManager.error("Se espera un Identifier correspondiente al parametro formal", al.getLine()); }
 break;
 case 58:
-//#line 168 "parser.y"
+//#line 176 "parser.y"
 {
 	        errManager.debug("Declaracion de variable detectada.",  al.getLine());
-	        errManager.debug("Mangle Name: " + generador.mangleName(val_peek(0).sval), al.getLine());
 	        int tipo = Integer.parseInt(val_peek(1).sval);
-	        al.ts.insertar(generador.mangleName(val_peek(0).sval),new Atributo(tipo));
+	        if (generador.checkearAmbito(val_peek(0).sval)){
+                al.ts.insertar(val_peek(0).sval,new Atributo(tipo));
+	        } else {
+	            errManager.error("El ambito declarado es incorrecto.", al.getLine());
+	        }
 
 	    }
 break;
 case 59:
-//#line 176 "parser.y"
+//#line 187 "parser.y"
 { errManager.debug("Declaracion de variable detectada.",  al.getLine()); }
 break;
 case 60:
-//#line 178 "parser.y"
+//#line 189 "parser.y"
 { errManager.error("Falta separador de variable ','", al.getLine()); }
 break;
 case 61:
-//#line 180 "parser.y"
+//#line 191 "parser.y"
 { errManager.error("Falta prefijo obligatorio del ID", al.getLine()); }
 break;
 case 62:
-//#line 182 "parser.y"
+//#line 193 "parser.y"
 { errManager.error("Falta prefijo obligatorio del ID", al.getLine()); }
 break;
 case 63:
-//#line 184 "parser.y"
+//#line 195 "parser.y"
 { errManager.error("Falta prefijo obligatorio del ID", al.getLine()); }
 break;
 case 64:
-//#line 186 "parser.y"
+//#line 197 "parser.y"
 { errManager.error("Falta separador de variable ','", al.getLine()); }
 break;
 case 65:
-//#line 193 "parser.y"
+//#line 204 "parser.y"
 { errManager.debug("Parametro real detectado", al.getLine()); }
 break;
 case 70:
-//#line 209 "parser.y"
+//#line 220 "parser.y"
 { errManager.debug("IF detectado (sin ELSE)", al.getLine()); }
 break;
 case 71:
-//#line 211 "parser.y"
+//#line 222 "parser.y"
 { errManager.debug("IF detectado (sin ELSE)", al.getLine()); }
 break;
 case 72:
-//#line 213 "parser.y"
+//#line 224 "parser.y"
 { errManager.debug("IF-ELSE detectado", al.getLine()); }
 break;
 case 73:
-//#line 215 "parser.y"
+//#line 226 "parser.y"
 { errManager.debug("IF-ELSE detectado", al.getLine()); }
 break;
 case 74:
-//#line 217 "parser.y"
+//#line 228 "parser.y"
 { errManager.error(" Falta delimitador de sentencias ;.", al.getLine()); }
 break;
 case 75:
-//#line 219 "parser.y"
+//#line 230 "parser.y"
 { errManager.error(" Falta delimitador de sentencias ;.", al.getLine()); }
 break;
 case 76:
-//#line 221 "parser.y"
+//#line 232 "parser.y"
 { errManager.error("Falta cierre endif",  al.getLine()); }
 break;
 case 77:
-//#line 223 "parser.y"
+//#line 234 "parser.y"
 { errManager.error("Falta cierre endif",  al.getLine()); }
 break;
 case 78:
-//#line 225 "parser.y"
+//#line 236 "parser.y"
 { errManager.error("Falta llave de cierre", al.getLine()); }
 break;
 case 79:
-//#line 227 "parser.y"
+//#line 238 "parser.y"
 { errManager.error("Falta llave de cierre", al.getLine()); }
 break;
 case 80:
-//#line 229 "parser.y"
+//#line 240 "parser.y"
 { errManager.error("Falta llave de apertura", al.getLine()); }
 break;
 case 81:
-//#line 231 "parser.y"
+//#line 242 "parser.y"
 { errManager.error("Falta llave de apertura", al.getLine()); }
 break;
 case 82:
-//#line 233 "parser.y"
+//#line 244 "parser.y"
 { errManager.error("Falta cuerpo de la sentencia", al.getLine()); }
 break;
 case 83:
-//#line 235 "parser.y"
+//#line 246 "parser.y"
 { errManager.error("Falta cuerpo de la sentencia", al.getLine()); }
 break;
 case 86:
-//#line 242 "parser.y"
+//#line 253 "parser.y"
 { errManager.error(" Falta delimitador de sentencias ;.", al.getLine()); }
 break;
 case 87:
-//#line 244 "parser.y"
+//#line 255 "parser.y"
 { errManager.error(" Falta delimitador de sentencias ;.", al.getLine()); }
 break;
 case 88:
-//#line 246 "parser.y"
+//#line 257 "parser.y"
 { errManager.error("Falta cierre endif",  al.getLine()); }
 break;
 case 89:
-//#line 248 "parser.y"
+//#line 259 "parser.y"
 { errManager.error("Falta cierre endif",  al.getLine()); }
 break;
 case 90:
-//#line 250 "parser.y"
+//#line 261 "parser.y"
 { errManager.error("Falta cierre endif",  al.getLine()); }
 break;
 case 91:
-//#line 252 "parser.y"
+//#line 263 "parser.y"
 { errManager.error("Falta llave de cierre", al.getLine()); }
 break;
 case 92:
-//#line 254 "parser.y"
+//#line 265 "parser.y"
 { errManager.error("Falta llave de apertura", al.getLine()); }
 break;
 case 93:
-//#line 256 "parser.y"
+//#line 267 "parser.y"
 { errManager.error(" Falta cuerpo de la sentencia ;.", al.getLine()); }
 break;
 case 95:
-//#line 262 "parser.y"
+//#line 273 "parser.y"
 { errManager.error("Falta parentesis de apertura de la condicion", al.getLine()); }
 break;
 case 96:
-//#line 264 "parser.y"
+//#line 275 "parser.y"
 { errManager.error("Falta parentesis de cierre de la condicion", al.getLine()); }
 break;
 case 97:
-//#line 266 "parser.y"
+//#line 277 "parser.y"
 { errManager.error("Faltan parentesis de cierre y apertura de la condicion", al.getLine()); }
 break;
 case 99:
-//#line 272 "parser.y"
+//#line 283 "parser.y"
 { errManager.error("Falta llave de cierre", al.getLine()); }
 break;
 case 100:
-//#line 274 "parser.y"
+//#line 285 "parser.y"
 { errManager.error("Falta llave de apertura", al.getLine()); }
 break;
 case 101:
-//#line 276 "parser.y"
+//#line 287 "parser.y"
 { errManager.error("Falta contenido en bloque", al.getLine()); }
 break;
 case 102:
-//#line 278 "parser.y"
+//#line 289 "parser.y"
 { errManager.error("Contenido del bloque invalido", al.getLine()); }
 break;
 case 103:
-//#line 284 "parser.y"
+//#line 295 "parser.y"
 { errManager.debug("Condicion detectada. Linea: " + al.getLine()); }
 break;
 case 104:
-//#line 286 "parser.y"
+//#line 297 "parser.y"
 { errManager.error("Comparador de condicion invalido/faltante", al.getLine()); }
 break;
 case 105:
-//#line 291 "parser.y"
+//#line 302 "parser.y"
 { errManager.debug("DO-UNTIL detectado", al.getLine()); }
 break;
 case 106:
-//#line 293 "parser.y"
+//#line 304 "parser.y"
 { errManager.error(" Falta delimitador de sentencias ;.", al.getLine()); }
 break;
 case 107:
-//#line 295 "parser.y"
+//#line 306 "parser.y"
 { errManager.error("Falta cuerpo de DO", al.getLine()); }
 break;
 case 108:
-//#line 297 "parser.y"
+//#line 308 "parser.y"
 { errManager.error(" Falta delimitador de sentencias ;.", al.getLine()); }
 break;
 case 109:
-//#line 299 "parser.y"
+//#line 310 "parser.y"
 { errManager.error("Falta cierre de bloque UNTIL", al.getLine()); }
 break;
 case 116:
-//#line 313 "parser.y"
+//#line 324 "parser.y"
 { yyval.sval = "0"; }
 break;
 case 117:
-//#line 315 "parser.y"
-{ yyval.sval = "1"; }
+//#line 326 "parser.y"
+{ yyval.sval = "2"; }
 break;
 case 118:
-//#line 320 "parser.y"
+//#line 331 "parser.y"
 {
 	        errManager.debug("Asignacion detectada", al.getLine());
 
 	    }
 break;
 case 119:
-//#line 325 "parser.y"
+//#line 336 "parser.y"
 { errManager.error(" Falta delimitador de sentencias ;.", al.getLine()); }
 break;
 case 120:
-//#line 327 "parser.y"
+//#line 338 "parser.y"
 { errManager.error("Falta prefijo obligatorio del ID", al.getLine()); }
 break;
 case 121:
-//#line 329 "parser.y"
+//#line 340 "parser.y"
 { errManager.error("Falta prefijo obligatorio del ID", al.getLine()); }
 break;
 case 123:
-//#line 335 "parser.y"
+//#line 346 "parser.y"
 { errManager.error("Falta el segundo operando en la suma", al.getLine()); }
 break;
 case 124:
-//#line 337 "parser.y"
+//#line 348 "parser.y"
 { errManager.debug("Faltan los dos operandos", al.getLine()); }
 break;
 case 126:
-//#line 340 "parser.y"
+//#line 351 "parser.y"
 { errManager.error("Falta el segundo operando en la resta", al.getLine()); }
 break;
 case 127:
-//#line 342 "parser.y"
+//#line 353 "parser.y"
 { errManager.debug("Faltan los dos operandos", al.getLine()); }
 break;
 case 129:
-//#line 345 "parser.y"
+//#line 356 "parser.y"
 { errManager.debug("Trunc detectado", al.getLine()); }
 break;
 case 130:
-//#line 347 "parser.y"
+//#line 358 "parser.y"
 { errManager.error("Cuerpo del trunc invalido", al.getLine()); }
 break;
 case 132:
-//#line 353 "parser.y"
+//#line 364 "parser.y"
 { errManager.debug("Falta el primer operando en la multiplicacion", al.getLine()); }
 break;
 case 133:
-//#line 355 "parser.y"
+//#line 366 "parser.y"
 { errManager.error("Falta el segundo operando en la multiplicacion", al.getLine()); }
 break;
 case 134:
-//#line 357 "parser.y"
+//#line 368 "parser.y"
 { errManager.debug("Faltan los dos operandos en la multiplicacion", al.getLine()); }
 break;
 case 136:
-//#line 360 "parser.y"
+//#line 371 "parser.y"
 { errManager.debug("Falta el primer operando en la division", al.getLine()); }
 break;
 case 137:
-//#line 362 "parser.y"
+//#line 373 "parser.y"
 { errManager.error("Falta el segundo operando en la division", al.getLine()); }
 break;
 case 138:
-//#line 364 "parser.y"
+//#line 375 "parser.y"
 { errManager.debug("Faltan los dos operandos en la division", al.getLine()); }
 break;
 case 144:
-//#line 374 "parser.y"
+//#line 385 "parser.y"
 { errManager.error("Falta prefijo obligatorio del ID", al.getLine()); }
 break;
 case 146:
-//#line 377 "parser.y"
+//#line 388 "parser.y"
 { errManager.debug("Identificador con -", al.getLine()); }
 break;
 case 147:
-//#line 379 "parser.y"
+//#line 390 "parser.y"
 { errManager.error("Falta prefijo obligatorio del ID", al.getLine()); }
 break;
 case 148:
-//#line 381 "parser.y"
+//#line 392 "parser.y"
 { errManager.error("Operador '-' no permitido en este contexto", al.getLine()); }
 break;
 case 149:
-//#line 386 "parser.y"
+//#line 397 "parser.y"
 { errManager.debug("Llamado a funcion detectado", al.getLine()); }
 break;
 case 150:
-//#line 388 "parser.y"
+//#line 399 "parser.y"
 { errManager.error("Falta prefijo obligatorio del ID", al.getLine()); }
 break;
 case 151:
-//#line 390 "parser.y"
+//#line 401 "parser.y"
 { errManager.error("Llamado a funcion con parametros invalidos", al.getLine()); }
 break;
 case 152:
-//#line 392 "parser.y"
+//#line 403 "parser.y"
 { errManager.error("Llamado a funcion con parametros invalidos", al.getLine()); }
 break;
 case 153:
-//#line 397 "parser.y"
+//#line 408 "parser.y"
 { errManager.debug("Print detectado con expresion", al.getLine());}
 break;
 case 154:
-//#line 401 "parser.y"
+//#line 412 "parser.y"
 { errManager.debug("Definicion lambda detectada", al.getLine()); }
 break;
 case 155:
-//#line 403 "parser.y"
+//#line 414 "parser.y"
 { errManager.error("Falta llave de cierre en lambda", al.getLine()); }
 break;
 case 156:
-//#line 405 "parser.y"
+//#line 416 "parser.y"
 { errManager.error("Falta llave de apertura en lambda", al.getLine()); }
 break;
 case 157:
-//#line 407 "parser.y"
+//#line 418 "parser.y"
 { errManager.error("Faltan llaves en lambda", al.getLine()); }
 break;
 case 158:
-//#line 412 "parser.y"
+//#line 423 "parser.y"
 {errManager.debug("Retorno detectado. Linea: " + al.getLine());}
 break;
 case 160:
-//#line 418 "parser.y"
+//#line 429 "parser.y"
 {errManager.error("Falta parentesis de apertura", al.getLine());}
 break;
 case 161:
-//#line 420 "parser.y"
+//#line 431 "parser.y"
 {errManager.error("Falta parentesis de cierre", al.getLine());}
 break;
 case 162:
-//#line 422 "parser.y"
+//#line 433 "parser.y"
 {errManager.error("Faltan argumentos", al.getLine());}
 break;
 case 163:
-//#line 424 "parser.y"
+//#line 435 "parser.y"
 {errManager.error("Falta parentesis de cierre", al.getLine());}
 break;
 case 164:
-//#line 426 "parser.y"
+//#line 437 "parser.y"
 {errManager.error("Falta parentesis de apertura", al.getLine());}
 break;
 case 165:
-//#line 431 "parser.y"
+//#line 442 "parser.y"
 { errManager.debug("Asignacion multiple detectada. Linea: " + al.getLine()); }
 break;
 case 166:
-//#line 433 "parser.y"
+//#line 444 "parser.y"
 { errManager.error("Error en asignacion multiple, separador a utilizar: ','", al.getLine()); }
 break;
 case 167:
-//#line 435 "parser.y"
+//#line 446 "parser.y"
 { errManager.error("Error en asignacion multiple, separador a utilizar: ','", al.getLine()); }
 break;
 case 168:
-//#line 437 "parser.y"
+//#line 448 "parser.y"
 { errManager.error("Falta separador ';'", al.getLine()); }
 break;
 case 173:
-//#line 452 "parser.y"
+//#line 463 "parser.y"
 {
             checkearRango(val_peek(0).sval);
             yyval.sval = val_peek(0).sval;
         }
 break;
 case 174:
-//#line 457 "parser.y"
+//#line 468 "parser.y"
 {
             errManager.debug("CTEF detectada sin signo " + val_peek(0).sval ,al.getLine());
             yyval.sval = val_peek(0).sval;
         }
 break;
 case 175:
-//#line 462 "parser.y"
+//#line 473 "parser.y"
 {
 	        tratarNegativos(val_peek(0).sval);
 	        yyval.sval = "-" + val_peek(0).sval;
 	    }
 break;
 case 176:
-//#line 467 "parser.y"
+//#line 478 "parser.y"
 {
            tratarNegativos(val_peek(0).sval);
            yyval.sval = "-" + val_peek(0).sval;
         }
 break;
 case 177:
-//#line 472 "parser.y"
+//#line 483 "parser.y"
 { errManager.error("factor invalido", al.getLine()); }
 break;
 case 178:
-//#line 474 "parser.y"
+//#line 485 "parser.y"
 {
             checkearRango(val_peek(0).sval);
             yyval.sval = val_peek(0).sval;
         }
 break;
 case 179:
-//#line 479 "parser.y"
+//#line 490 "parser.y"
 { yyval.sval = val_peek(0).sval; }
 break;
-//#line 1483 "Parser.java"
+//#line 1494 "Parser.java"
 //########## END OF USER-SUPPLIED ACTIONS ##########
     }//switch
     //#### Now let's reduce... ####

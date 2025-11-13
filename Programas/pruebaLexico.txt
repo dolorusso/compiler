@@ -1,4 +1,6 @@
 A {
-    long A.Y;
-    A.Y := 3L;
+    long B (string Z){
+        long A.B.X;
+        string A.B.Y;
+    }
 }

@@ -96,6 +96,8 @@ inicio_funcion
     : tipo ID parametros_formales_opt
         {
             generador.enterScope($2);
+            generador.aplicarAmbito(al.ts);
+
         }
     | ID parametros_formales_opt
         { errManager.error("Funcion sin tipo.", al.getLine()); }
@@ -144,13 +146,19 @@ lista_parametros_reales
 
 parametro_formal
 	: CR tipo ID
-	    { errManager.debug("Parametro formal con semantica opia-resultado detectado.", al.getLine()); }
+	    {
+	        errManager.debug("Parametro formal con semantica opia-resultado detectado.", al.getLine());
+	        generador.agregarParametro(true,$2,$3);
+	    }
 	| CR ID
 	    { errManager.error("Se espera un tipo correspondiente al parametro formal", al.getLine()); }
 	| CR tipo error
 	    { errManager.error("Se espera un Identifier correspondiente al parametro formal", al.getLine()); }
 	| tipo ID
-	    { errManager.debug("Parametro formal con semantica por defecto detectado.", al.getLine()); }
+	    {
+	        errManager.debug("Parametro formal con semantica por defecto detectado.", al.getLine());
+	        generador.agregarParametro(false,$1,$2);
+	    }
 	| ID
 	    { errManager.error("Se espera un tipo correspondiente al parametro formal", al.getLine()); }
 	| LAMBDA ID
@@ -167,9 +175,12 @@ lista_identificadores
 	: tipo IDCOMP
 	    {
 	        errManager.debug("Declaracion de variable detectada.",  al.getLine());
-	        errManager.debug("Mangle Name: " + generador.mangleName($2), al.getLine());
 	        int tipo = Integer.parseInt($1);
-	        al.ts.insertar(generador.mangleName($2),new Atributo(tipo));
+	        if (generador.checkearAmbito($2)){
+                al.ts.insertar($2,new Atributo(tipo));
+	        } else {
+	            errManager.error("El ambito declarado es incorrecto.", al.getLine());
+	        }
 
 	    }
 	| lista_identificadores ',' IDCOMP
@@ -312,7 +323,7 @@ tipo
 	: LONG
 	    { $$ = "0"; }
 	| STRING
-	    { $$ = "1"; }
+	    { $$ = "2"; }
 	;
 
 asignacion
