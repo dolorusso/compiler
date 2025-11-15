@@ -7,6 +7,7 @@ public class Atributo {
     // Variable para determinar si un parametro de funcion es Copia Resultado. Caso contrario es Copia valor.
     public boolean esCR;
     public short ref = 1;
+    public boolean declarado = false;
 
     public static final int longType = 0;
     public static final int floatType = 1;
@@ -29,10 +30,21 @@ public class Atributo {
 
     public Atributo(int type){
         this.type = type;
+        //si a algo se le asigna un tipo, es por que esta declarado
+        this.declarado = true;
     }
 
     @Override
     public String toString() {
-        return "Atributo{" + "type=" + type + ", strValue=" + strValue + ", numValue=" + numValue + ", ref=" + ref + '}';
+        return
+            "Atributo{" +
+                "type=" + type +
+                ", strValue=" + strValue +
+                ", numValue=" + numValue +
+                ", ref=" + ref +
+                ", declarado=" + declarado  +
+                ", esCR=" + esCR +
+                ", declarado=" + declarado +
+            '}';
     }
 }

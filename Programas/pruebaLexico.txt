@@ -1,6 +1,7 @@
 A {
     long B (string Z){
-        long A.B.X;
-        string A.B.Y;
+        long A.B.X,A.B.L;
+        string A.B.X2,A.B.L2;
+
     }
 }

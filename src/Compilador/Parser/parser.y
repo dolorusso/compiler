@@ -177,17 +177,13 @@ parametro_formal
 lista_identificadores
 	: tipo IDCOMP
 	    {
-	        errManager.debug("Declaracion de variable detectada.",  al.getLine());
-	        int tipo = $1;
-	        if (generador.checkearAmbito($2)){
-                al.ts.reemplazar($2,new Atributo(tipo));
-	        } else {
-	            errManager.error("El ambito declarado es incorrecto.", al.getLine());
-	        }
+	        declararVariable($2,$1);
             $$ = $1;
 	    }
 	| lista_identificadores ',' IDCOMP
-	    { errManager.debug("Declaracion de variable detectada.",  al.getLine()); }
+	    {
+	        declararVariable($3,$1);
+	    }
 	| lista_identificadores IDCOMP
 	    { errManager.error("Falta separador de variable ','", al.getLine()); }
 	| ID
@@ -545,7 +541,21 @@ public void checkearRango(String lexemaActual){
             atributoActual.numValue -= 1;
         }
     }
+}
 
+public void declararVariable(String IDCOMP, int tipo){
+    errManager.debug("Declaracion de variable detectada.",  al.getLine());
+    if (generador.checkearAmbito(IDCOMP)){
+        if (generador.estaDeclarada(IDCOMP,al.ts)){
+            errManager.error("Redeclaracion de variable no permitida.", al.getLine());
+        } else {
+            Atributo info = new Atributo(tipo);
+            info.declarado = true;
+            al.ts.reemplazar(IDCOMP, info);
+        }
+    } else {
+        errManager.error("El ambito declarado es incorrecto.", al.getLine());
+    }
 }
 
 public void run()

@@ -42,6 +42,7 @@ public class Generador {
 
     public void agregarParametro(boolean esCR, int tipo, String ID){
         Atributo atributo = new Atributo(tipo,esCR);
+        atributo.declarado = true;
         pasajeParametrosAux.put(ID, atributo);
     }
 
@@ -62,6 +63,11 @@ public class Generador {
         return sinUltimo.equals(getCurrentScope());
     }
 
-
+    public boolean estaDeclarada(String IDCOMP, TablaSimbolos ts){
+        Atributo atributo = ts.obtener(IDCOMP);
+        if  (atributo == null)
+            return false;
+        return atributo.declarado;
+    }
 }
 
