@@ -254,12 +254,12 @@ state 2
 	'{'  shift 15
 	$end  reduce 11
 
-	tipo  goto 16
-	lista_sentencias  goto 17
-	sentencia  goto 18
-	sentencia_declarativa  goto 19
-	sentencia_ejecutable  goto 20
-	lista_identificadores  goto 21
+	lista_identificadores  goto 16
+	tipo  goto 17
+	lista_sentencias  goto 18
+	sentencia  goto 19
+	sentencia_declarativa  goto 20
+	sentencia_ejecutable  goto 21
 	declaracion_funcion  goto 22
 	asignacion  goto 23
 	control  goto 24
@@ -289,12 +289,12 @@ state 3
 	'}'  shift 33
 	.  error
 
-	tipo  goto 16
+	lista_identificadores  goto 16
+	tipo  goto 17
 	lista_sentencias  goto 34
-	sentencia  goto 18
-	sentencia_declarativa  goto 19
-	sentencia_ejecutable  goto 20
-	lista_identificadores  goto 21
+	sentencia  goto 19
+	sentencia_declarativa  goto 20
+	sentencia_ejecutable  goto 21
 	declaracion_funcion  goto 22
 	asignacion  goto 23
 	control  goto 24
@@ -334,12 +334,12 @@ state 5
 	'}'  shift 36
 	.  error
 
-	tipo  goto 16
+	lista_identificadores  goto 16
+	tipo  goto 17
 	lista_sentencias  goto 37
-	sentencia  goto 18
-	sentencia_declarativa  goto 19
-	sentencia_ejecutable  goto 20
-	lista_identificadores  goto 21
+	sentencia  goto 19
+	sentencia_declarativa  goto 20
+	sentencia_ejecutable  goto 21
 	declaracion_funcion  goto 22
 	asignacion  goto 23
 	control  goto 24
@@ -534,21 +534,37 @@ state 15
 
 
 state 16
+	sentencia_declarativa : lista_identificadores . ';'  (16)
+	sentencia_declarativa : lista_identificadores . error  (17)
+	lista_identificadores : lista_identificadores . ',' IDCOMP  (59)
+	lista_identificadores : lista_identificadores . IDCOMP  (60)
+	lista_identificadores : lista_identificadores . ',' ID  (63)
+	lista_identificadores : lista_identificadores . ID  (64)
+
+	error  shift 74
+	ID  shift 75
+	IDCOMP  shift 76
+	';'  shift 77
+	','  shift 78
+	.  error
+
+
+state 17
 	inicio_funcion : tipo . ID parametros_formales_opt  (29)
 	inicio_funcion : tipo . parametros_formales_opt  (31)
 	inicio_funcion : tipo . IDCOMP parametros_formales_opt  (32)
 	lista_identificadores : tipo . IDCOMP  (58)
 	lista_identificadores : tipo . ID  (62)
 
-	ID  shift 74
-	IDCOMP  shift 75
-	'('  shift 76
+	ID  shift 79
+	IDCOMP  shift 80
+	'('  shift 81
 	.  error
 
-	parametros_formales_opt  goto 77
+	parametros_formales_opt  goto 82
 
 
-state 17
+state 18
 	programa : ID lista_sentencias . '}'  (6)
 	programa : ID lista_sentencias .  (8)
 	lista_sentencias : lista_sentencias . sentencia  (39)
@@ -561,14 +577,14 @@ state 17
 	DO  shift 12
 	STRING  shift 13
 	IDCOMP  shift 14
-	'}'  shift 78
+	'}'  shift 83
 	$end  reduce 8
 
-	tipo  goto 16
-	sentencia  goto 79
-	sentencia_declarativa  goto 19
-	sentencia_ejecutable  goto 20
-	lista_identificadores  goto 21
+	lista_identificadores  goto 16
+	tipo  goto 17
+	sentencia  goto 84
+	sentencia_declarativa  goto 20
+	sentencia_ejecutable  goto 21
 	declaracion_funcion  goto 22
 	asignacion  goto 23
 	control  goto 24
@@ -582,38 +598,22 @@ state 17
 	ids  goto 32
 
 
-state 18
+state 19
 	lista_sentencias : sentencia .  (38)
 
 	.  reduce 38
 
 
-state 19
+state 20
 	sentencia : sentencia_declarativa .  (14)
 
 	.  reduce 14
 
 
-state 20
+state 21
 	sentencia : sentencia_ejecutable .  (15)
 
 	.  reduce 15
-
-
-state 21
-	sentencia_declarativa : lista_identificadores . ';'  (16)
-	sentencia_declarativa : lista_identificadores . error  (17)
-	lista_identificadores : lista_identificadores . ',' IDCOMP  (59)
-	lista_identificadores : lista_identificadores . IDCOMP  (60)
-	lista_identificadores : lista_identificadores . ',' ID  (63)
-	lista_identificadores : lista_identificadores . ID  (64)
-
-	error  shift 80
-	ID  shift 81
-	IDCOMP  shift 82
-	';'  shift 83
-	','  shift 84
-	.  error
 
 
 state 22
@@ -732,11 +732,11 @@ state 34
 	'}'  shift 96
 	.  error
 
-	tipo  goto 16
-	sentencia  goto 79
-	sentencia_declarativa  goto 19
-	sentencia_ejecutable  goto 20
-	lista_identificadores  goto 21
+	lista_identificadores  goto 16
+	tipo  goto 17
+	sentencia  goto 84
+	sentencia_declarativa  goto 20
+	sentencia_ejecutable  goto 21
 	declaracion_funcion  goto 22
 	asignacion  goto 23
 	control  goto 24
@@ -783,11 +783,11 @@ state 37
 	'}'  shift 98
 	$end  reduce 7
 
-	tipo  goto 16
-	sentencia  goto 79
-	sentencia_declarativa  goto 19
-	sentencia_ejecutable  goto 20
-	lista_identificadores  goto 21
+	lista_identificadores  goto 16
+	tipo  goto 17
+	sentencia  goto 84
+	sentencia_declarativa  goto 20
+	sentencia_ejecutable  goto 21
 	declaracion_funcion  goto 22
 	asignacion  goto 23
 	control  goto 24
@@ -1485,38 +1485,71 @@ state 73
 
 
 state 74
+	sentencia_declarativa : lista_identificadores error .  (17)
+
+	.  reduce 17
+
+
+state 75
+	lista_identificadores : lista_identificadores ID .  (64)
+
+	.  reduce 64
+
+
+state 76
+	lista_identificadores : lista_identificadores IDCOMP .  (60)
+
+	.  reduce 60
+
+
+state 77
+	sentencia_declarativa : lista_identificadores ';' .  (16)
+
+	.  reduce 16
+
+
+state 78
+	lista_identificadores : lista_identificadores ',' . IDCOMP  (59)
+	lista_identificadores : lista_identificadores ',' . ID  (63)
+
+	ID  shift 168
+	IDCOMP  shift 169
+	.  error
+
+
+state 79
 	inicio_funcion : tipo ID . parametros_formales_opt  (29)
 	lista_identificadores : tipo ID .  (62)
 
-	'('  shift 76
+	'('  shift 81
 	error  reduce 62
 	ID  reduce 62
 	IDCOMP  reduce 62
 	';'  reduce 62
 	','  reduce 62
 
-	parametros_formales_opt  goto 168
+	parametros_formales_opt  goto 170
 
 
-state 75
+state 80
 	inicio_funcion : tipo IDCOMP . parametros_formales_opt  (32)
 	lista_identificadores : tipo IDCOMP .  (58)
 
-	'('  shift 76
+	'('  shift 81
 	error  reduce 58
 	ID  reduce 58
 	IDCOMP  reduce 58
 	';'  reduce 58
 	','  reduce 58
 
-	parametros_formales_opt  goto 169
+	parametros_formales_opt  goto 171
 
 
-state 76
+state 81
 	parametros_formales_opt : '(' . lista_parametros_formales ')'  (33)
 	parametros_formales_opt : '(' . ')'  (34)
 
-	ID  shift 170
+	ID  shift 172
 	LAMBDA  shift 102
 	LONG  shift 11
 	CR  shift 103
@@ -1529,55 +1562,22 @@ state 76
 	parametro_formal  goto 108
 
 
-state 77
+state 82
 	inicio_funcion : tipo parametros_formales_opt .  (31)
 
 	.  reduce 31
 
 
-state 78
+state 83
 	programa : ID lista_sentencias '}' .  (6)
 
 	.  reduce 6
 
 
-state 79
+state 84
 	lista_sentencias : lista_sentencias sentencia .  (39)
 
 	.  reduce 39
-
-
-state 80
-	sentencia_declarativa : lista_identificadores error .  (17)
-
-	.  reduce 17
-
-
-state 81
-	lista_identificadores : lista_identificadores ID .  (64)
-
-	.  reduce 64
-
-
-state 82
-	lista_identificadores : lista_identificadores IDCOMP .  (60)
-
-	.  reduce 60
-
-
-state 83
-	sentencia_declarativa : lista_identificadores ';' .  (16)
-
-	.  reduce 16
-
-
-state 84
-	lista_identificadores : lista_identificadores ',' . IDCOMP  (59)
-	lista_identificadores : lista_identificadores ',' . ID  (63)
-
-	ID  shift 171
-	IDCOMP  shift 172
-	.  error
 
 
 state 85
@@ -1632,12 +1632,12 @@ state 91
 	'}'  shift 173
 	.  error
 
-	tipo  goto 16
+	lista_identificadores  goto 16
+	tipo  goto 17
 	lista_sentencias  goto 174
-	sentencia  goto 18
-	sentencia_declarativa  goto 19
-	sentencia_ejecutable  goto 20
-	lista_identificadores  goto 21
+	sentencia  goto 19
+	sentencia_declarativa  goto 20
+	sentencia_ejecutable  goto 21
 	declaracion_funcion  goto 22
 	asignacion  goto 23
 	control  goto 24
@@ -1808,7 +1808,7 @@ state 107
 	lista_parametros_formales : lista_parametros_formales . ',' parametro_formal  (44)
 	lista_parametros_formales : lista_parametros_formales . parametro_formal  (45)
 
-	ID  shift 170
+	ID  shift 172
 	LAMBDA  shift 102
 	LONG  shift 11
 	CR  shift 103
@@ -2568,33 +2568,33 @@ state 167
 
 
 state 168
-	inicio_funcion : tipo ID parametros_formales_opt .  (29)
-
-	.  reduce 29
-
-
-state 169
-	inicio_funcion : tipo IDCOMP parametros_formales_opt .  (32)
-
-	.  reduce 32
-
-
-state 170
-	parametro_formal : ID .  (53)
-
-	.  reduce 53
-
-
-state 171
 	lista_identificadores : lista_identificadores ',' ID .  (63)
 
 	.  reduce 63
 
 
-state 172
+state 169
 	lista_identificadores : lista_identificadores ',' IDCOMP .  (59)
 
 	.  reduce 59
+
+
+state 170
+	inicio_funcion : tipo ID parametros_formales_opt .  (29)
+
+	.  reduce 29
+
+
+state 171
+	inicio_funcion : tipo IDCOMP parametros_formales_opt .  (32)
+
+	.  reduce 32
+
+
+state 172
+	parametro_formal : ID .  (53)
+
+	.  reduce 53
 
 
 state 173
@@ -2618,11 +2618,11 @@ state 174
 	'}'  shift 242
 	.  error
 
-	tipo  goto 16
-	sentencia  goto 79
-	sentencia_declarativa  goto 19
-	sentencia_ejecutable  goto 20
-	lista_identificadores  goto 21
+	lista_identificadores  goto 16
+	tipo  goto 17
+	sentencia  goto 84
+	sentencia_declarativa  goto 20
+	sentencia_ejecutable  goto 21
 	declaracion_funcion  goto 22
 	asignacion  goto 23
 	control  goto 24
@@ -2777,7 +2777,7 @@ state 193
 state 194
 	lista_parametros_formales : lista_parametros_formales ',' . parametro_formal  (44)
 
-	ID  shift 170
+	ID  shift 172
 	LAMBDA  shift 102
 	LONG  shift 11
 	CR  shift 103

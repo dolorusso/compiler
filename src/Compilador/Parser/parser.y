@@ -12,8 +12,11 @@
 
 %start programa
 
-%type <sval> constante tipo
-%token <sval> CTEL CTEF INVALID ID IDCOMP STRING LONG
+%type <sval> constante
+%token <sval> CTEL CTEF INVALID ID IDCOMP
+
+%type <ival> lista_identificadores tipo
+%token <ival> STRING LONG
 
 %%
 
@@ -175,13 +178,13 @@ lista_identificadores
 	: tipo IDCOMP
 	    {
 	        errManager.debug("Declaracion de variable detectada.",  al.getLine());
-	        int tipo = Integer.parseInt($1);
+	        int tipo = $1;
 	        if (generador.checkearAmbito($2)){
-                al.ts.insertar($2,new Atributo(tipo));
+                al.ts.reemplazar($2,new Atributo(tipo));
 	        } else {
 	            errManager.error("El ambito declarado es incorrecto.", al.getLine());
 	        }
-
+            $$ = $1;
 	    }
 	| lista_identificadores ',' IDCOMP
 	    { errManager.debug("Declaracion de variable detectada.",  al.getLine()); }
@@ -321,9 +324,9 @@ comparador
 
 tipo
 	: LONG
-	    { $$ = "0"; }
+	    { $$ = 0; }
 	| STRING
-	    { $$ = "2"; }
+	    { $$ = 2; }
 	;
 
 asignacion

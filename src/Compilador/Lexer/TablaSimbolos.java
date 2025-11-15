@@ -30,6 +30,10 @@ public class TablaSimbolos {
         insertar(lexemaNuevo, atributo);
     }
 
+    public void reemplazar(String lexema, Atributo atributo){
+        tabla.put(lexema, atributo);
+    }
+
     @Override
     public String toString() {
         return tabla.toString().replace("}, ", "}\n");

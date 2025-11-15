@@ -37,12 +37,11 @@ public class Generador {
     }
 
     public String mangleName(String id) {
-        return id + ":" + getCurrentScope();
+        return getCurrentScope() + "." + id;
     }
 
-    public void agregarParametro(boolean esCR, String tipo, String ID){
-        //checkear esto, deberiamos poner timpo como numvalue en lugar de string
-        Atributo atributo = new Atributo(Integer.parseInt(tipo),esCR);
+    public void agregarParametro(boolean esCR, int tipo, String ID){
+        Atributo atributo = new Atributo(tipo,esCR);
         pasajeParametrosAux.put(ID, atributo);
     }
 
