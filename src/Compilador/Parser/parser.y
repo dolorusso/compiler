@@ -560,8 +560,8 @@ public void declararVariable(String IDCOMP, int tipo){
 
 public void run()
 {
-  yyparse();
-  errManager.debug("Tabla de simbolos resultante" + '\n' +  al.ts.toString());
+    yyparse();
+    errManager.debug("Tabla de simbolos resultante" + '\n' +  al.ts.toString());
 }
 
 public void yyerror(String s) {
