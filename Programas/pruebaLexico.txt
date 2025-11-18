@@ -1,6 +1,7 @@
 A {
     long B (cr string X){
         long A.B.B2;
+        return (3L);
         long C (cr string X){
             A.B.B2 := 5;
         }

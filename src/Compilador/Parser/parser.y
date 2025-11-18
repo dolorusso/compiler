@@ -78,6 +78,16 @@ sentencia_ejecutable
 	| llamada_funcion ';'
 	| print ';'
 	| retorno ';'
+	    {
+	        String scope = generador.getCurrentScope();
+	        Atributo func = al.ts.obtener(scope);
+	        if (func != null && func.uso == Atributo.USO_FUNCION) {
+	            func.tieneReturn = true;
+	        } else {
+	            errManager.error("Return en lugar invalido.", al.getLine());
+	        }
+
+	    }
 	| asignacion_multiple
     | llamada_funcion error
         { errManager.error("Falta delimitador de sentencias ;.", al.getLine()); }
@@ -90,7 +100,13 @@ sentencia_ejecutable
 declaracion_funcion
 	: inicio_funcion cuerpo_funcion_opt
 	    {
-	        errManager.debug("Declaracion de funcion detectada.", al.getLine());
+	        String scope = generador.getCurrentScope();
+            Atributo func = al.ts.obtener(scope);
+            if (func.tieneReturn){
+                errManager.debug("Declaracion de funcion detectada.", al.getLine());
+	        } else {
+	            errManager.error("Falta sentencia return.", al.getLine());
+	        }
 	        generador.exitScope();
 	    }
     ;
@@ -173,7 +189,7 @@ parametro_formal
 	| LAMBDA ID
 	    { errManager.debug("Parametro formal lambda semantica copia-resultado detectado", al.getLine()); }
 	| CR LAMBDA ID
-	    { errManager.debug("Parametro formal lambda semantica copia-resultado detectado", al.getLine()); }
+	    { errManager.error("Semantica Copia Resultado invalida en el contexto", al.getLine()); }
 	| CR error
 	    { errManager.error("Se espera un tipo correspondiente al parametro formal", al.getLine()); }
 	| tipo error
@@ -386,6 +402,9 @@ termino
 
 factor
 	: IDCOMP
+	    {
+            puedoLeer($1);
+        }
 	| constante
 	| CADENASTR
 	| llamada_funcion
@@ -393,7 +412,10 @@ factor
 	    { errManager.error("Falta prefijo obligatorio del ID", al.getLine()); }
     | '-' llamada_funcion
     | '-' IDCOMP
-        { errManager.debug("Identificador con -", al.getLine()); }
+        {
+            errManager.debug("Identificador con -", al.getLine());
+            puedoLeer($1);
+        }
     | '-' ID
         { errManager.error("Falta prefijo obligatorio del ID", al.getLine()); }
     | '-' CADENASTR
@@ -404,7 +426,7 @@ llamada_funcion
 	: IDCOMP '(' lista_parametros_reales ')'
 	    {
 	        errManager.debug("Llamado a funcion detectado", al.getLine());
-
+	        generador.checkearLlamado();
 	    }
 	| ID '(' lista_parametros_reales ')'
 	    { errManager.error("Falta prefijo obligatorio del ID", al.getLine()); }
@@ -562,6 +584,16 @@ public void declararVariable(String IDCOMP, int tipo){
         }
     } else {
         errManager.error("El ambito declarado es incorrecto.", al.getLine());
+    }
+}
+
+// Verifica si una variable se puede leer dependiendo de su semantica
+public void puedoLeer(String IDCOMP){
+    Atributo id = al.ts.obtener(IDCOMP);
+    if (id.uso == Atributo.USO_PARAMETRO){
+        if (id.esCR){
+            errManager.error("La variable no puede ser usada para leer.", al.getLine());
+        }
     }
 }
 

@@ -13,6 +13,7 @@ public class Atributo {
     public String uso;
     //Para las funciones, una lista de parametros. Cada campo es la entrada a la tabla del parametro.
     public List<String> parametros = null;
+    public boolean tieneReturn = false;
 
     public static final int longType = 0;
     public static final int floatType = 1;
