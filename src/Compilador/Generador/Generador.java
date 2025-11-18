@@ -3,18 +3,23 @@ package Compilador.Generador;
 import Compilador.Lexer.Atributo;
 import Compilador.Lexer.TablaSimbolos;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Stack;
+import java.util.*;
 
 public class Generador {
+    public final List<Terceto> tercetos;
     private final Stack<String> scopeStack;
     private final Map<String, Atributo> pasajeParametrosAux;
 
     public Generador() {
         scopeStack = new Stack<>();
         pasajeParametrosAux = new HashMap<>();
+        tercetos = new ArrayList<>();
+    }
+
+    public int agregarTerceto(String o1, String o2, String operador){
+        Terceto tercet = new Terceto(operador, o1, o2);
+        tercetos.add(tercet);
+        return tercetos.size()-1;
     }
 
     public String getCurrentScope(){

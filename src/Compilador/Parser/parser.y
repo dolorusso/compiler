@@ -12,7 +12,7 @@
 
 %start programa
 
-%type <sval> constante
+%type <sval> constante factor termino expresion
 %token <sval> CTEL CTEF INVALID ID IDCOMP
 
 %type <ival> lista_identificadores tipo
@@ -366,11 +366,19 @@ asignacion
 
 expresion
 	: expresion '+' termino
+	    {
+            int aux = generador.agregarTerceto($1, $3, "+");
+            $$ = aux + "";
+        }
 	| expresion '+' error 
 		{ errManager.error("Falta el segundo operando en la suma", al.getLine()); }
 	| '+'
 		{ errManager.debug("Faltan los dos operandos", al.getLine()); }
 	| expresion '-' termino
+	    {
+            int aux = generador.agregarTerceto($1, $3, "-");
+            $$ = aux + "";
+        }
 	| expresion '-' error
 		{ errManager.error("Falta el segundo operando en la resta", al.getLine()); }
 	| '-' error
@@ -384,6 +392,10 @@ expresion
 
 termino
 	: termino '*' factor
+	    {
+	        int aux = generador.agregarTerceto($1, $3, "*");
+	        $$ = aux + "";
+	    }
 	| '*' factor
 		{ errManager.debug("Falta el primer operando en la multiplicacion", al.getLine()); }
 	| termino '*' error
@@ -391,6 +403,10 @@ termino
 	| '*' error
 		{ errManager.debug("Faltan los dos operandos en la multiplicacion", al.getLine()); }
 	| termino '/' factor
+	    {
+	        int aux = generador.agregarTerceto($1, $3, "/");
+            $$ = aux + "";
+        }
 	| '/' factor
 		{ errManager.debug("Falta el primer operando en la division", al.getLine()); }
 	| termino '/' error
@@ -403,10 +419,13 @@ termino
 factor
 	: IDCOMP
 	    {
-            puedoLeer($1);
+            if (puedoLeer($1)){
+                //pongo en factor el valor necesario para el terceto
+                $$ = $1;
+            }
         }
 	| constante
-	| CADENASTR
+	    { $$ = $1; }
 	| llamada_funcion
 	| ID
 	    { errManager.error("Falta prefijo obligatorio del ID", al.getLine()); }
@@ -414,19 +433,20 @@ factor
     | '-' IDCOMP
         {
             errManager.debug("Identificador con -", al.getLine());
-            puedoLeer($1);
+            if (puedoLeer($2)){
+                //pongo en factor el valor necesario para el terceto
+               $$ = $2;
+            }
         }
     | '-' ID
         { errManager.error("Falta prefijo obligatorio del ID", al.getLine()); }
-    | '-' CADENASTR
-        { errManager.error("Operador '-' no permitido en este contexto", al.getLine()); }
 	;
 
 llamada_funcion
 	: IDCOMP '(' lista_parametros_reales ')'
 	    {
 	        errManager.debug("Llamado a funcion detectado", al.getLine());
-	        generador.checkearLlamado();
+	        //generador.checkearLlamado();
 	    }
 	| ID '(' lista_parametros_reales ')'
 	    { errManager.error("Falta prefijo obligatorio del ID", al.getLine()); }
@@ -588,19 +608,22 @@ public void declararVariable(String IDCOMP, int tipo){
 }
 
 // Verifica si una variable se puede leer dependiendo de su semantica
-public void puedoLeer(String IDCOMP){
+public boolean puedoLeer(String IDCOMP){
     Atributo id = al.ts.obtener(IDCOMP);
     if (id.uso == Atributo.USO_PARAMETRO){
         if (id.esCR){
             errManager.error("La variable no puede ser usada para leer.", al.getLine());
+            return false;
         }
     }
+    return true;
 }
 
 public void run()
 {
     yyparse();
     errManager.debug("Tabla de simbolos resultante" + '\n' +  al.ts.toString());
+    errManager.debug("Tercetos resultante" + '\n' +  generador.tercetos.toString());
 }
 
 public void yyerror(String s) {

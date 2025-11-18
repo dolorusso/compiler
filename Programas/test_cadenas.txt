@@ -1,0 +1,8 @@
+P{
+    @cadena bien escrita
+    A.A := & blablabla &;
+
+    @cadena mal escrita
+    A.A := & blablabla ;
+} 
+    
