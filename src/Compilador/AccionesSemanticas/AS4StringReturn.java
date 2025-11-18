@@ -14,7 +14,7 @@ public class AS4StringReturn implements AccionSemantica{
         al.addToBuffer(ch); //Agrego el ultimo &
         String strLexVal = al.getBufferString();
 
-        al.ts.insertar(strLexVal, new Atributo(strVal));
+        al.ts.insertar(strLexVal, new Atributo(strVal, Atributo.USO_CONSTANTE));
 
         al.setYylval(strLexVal);
 

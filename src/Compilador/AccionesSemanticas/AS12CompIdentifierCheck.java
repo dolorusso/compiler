@@ -29,7 +29,7 @@ public class AS12CompIdentifierCheck implements AccionSemantica{
         VAL.deleteCharAt(VAL.length()-1);
 
 
-        al.ts.insertar(ID, new Atributo(VAL.toString()));
+        al.ts.insertar(ID, new Atributo(VAL.toString(), Atributo.USO_IDLEX));
         al.setYylval(ID);
         return TokenType.IDCOMP;
     }

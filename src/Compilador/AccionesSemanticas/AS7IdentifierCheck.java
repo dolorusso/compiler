@@ -22,7 +22,7 @@ public class AS7IdentifierCheck implements AccionSemantica{
             ErrorManager.getInstance().warning("Identificador muy largo. Truncando a " + MAX_LENGTH + " characters", al.getLine());
         }
 
-        al.ts.insertar(ID, new Atributo(VAL));
+        al.ts.insertar(ID, new Atributo(VAL, Atributo.USO_IDLEX));
         al.setYylval(ID);
         return TokenType.ID;
     }

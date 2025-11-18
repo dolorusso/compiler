@@ -25,24 +25,24 @@ public class AS10Float implements AccionSemantica {
         } catch (NumberFormatException e) {
             // No deberia pasar por aca, ya que manejamos con los estados.
             ErrorManager.getInstance().error("Constante float invalida. Insertando 0", al.getLine());
-            al.ts.insertar(str, new Atributo(Atributo.floatType,0.0));
+            al.ts.insertar(str, new Atributo(Atributo.floatType,0.0,Atributo.USO_CONSTANTE));
             return TokenType.CTEF;
         }
 
         if (val > FLOAT_POSITIVE_MAX) {
             ErrorManager.getInstance().warning("Constante fuera de rango, truncado a " + FLOAT_POSITIVE_MAX, al.getLine());
-            al.ts.insertar(str, new Atributo(Atributo.floatType, FLOAT_POSITIVE_MAX));
+            al.ts.insertar(str, new Atributo(Atributo.floatType, FLOAT_POSITIVE_MAX, Atributo.USO_CONSTANTE));
         } else if (val < FLOAT_POSITIVE_MIN && val > 0.0) {
             ErrorManager.getInstance().warning("Constante fuera de rango,  truncado a 0", al.getLine());
-            al.ts.insertar(str, new Atributo(Atributo.floatType, 0.0));
+            al.ts.insertar(str, new Atributo(Atributo.floatType, 0.0, Atributo.USO_CONSTANTE));
         } else if (val < 0.0 && val > FLOAT_NEGATIVE_MAX) {
             ErrorManager.getInstance().warning("Constante fuera de rango, truncado a 0", al.getLine());
-            al.ts.insertar(str, new Atributo(Atributo.floatType, 0.0));
+            al.ts.insertar(str, new Atributo(Atributo.floatType, 0.0, Atributo.USO_CONSTANTE));
         } else if (val < FLOAT_NEGATIVE_MIN) {
             ErrorManager.getInstance().warning("Constante fuera de rango, truncado a " + FLOAT_NEGATIVE_MIN, al.getLine());
-            al.ts.insertar(str, new Atributo(Atributo.floatType, FLOAT_NEGATIVE_MIN));
+            al.ts.insertar(str, new Atributo(Atributo.floatType, FLOAT_NEGATIVE_MIN, Atributo.USO_CONSTANTE));
         } else {
-            al.ts.insertar(str, new Atributo(Atributo.floatType, val));
+            al.ts.insertar(str, new Atributo(Atributo.floatType, val, Atributo.USO_CONSTANTE));
         }
 
 

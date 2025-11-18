@@ -1,7 +1,9 @@
 A {
-    long B (string Z){
-        long A.B.X,A.B.L;
-        string A.B.X2,A.B.L2;
-
+    long B (cr string X){
+        long A.B.B2;
+        long C (cr string X){
+            A.B.B2 := 5;
+        }
     }
+
 }

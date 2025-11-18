@@ -9,8 +9,7 @@ public class TablaSimbolos {
 
     public void insertar(String lexema, Atributo atributo) {
         if (tabla.containsKey(lexema)) {
-            ErrorManager.getInstance().debug("El lexema ya existe " + lexema + " en la tabla");
-            tabla.get(lexema).ref++;
+            ErrorManager.getInstance().debug("El lexema " + lexema + " ya existe  en la tabla");
             return;
         }
         tabla.put(lexema, atributo);

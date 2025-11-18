@@ -98,9 +98,15 @@ declaracion_funcion
 inicio_funcion
     : tipo ID parametros_formales_opt
         {
+            // Entramos al scope de la funcion.
             generador.enterScope($2);
-            generador.aplicarAmbito(al.ts);
-
+            // Checkeamos si esta declarada usando el scope, ya que este sera el mangle name de la funcion.
+            if (generador.estaDeclarada(generador.getCurrentScope(), al.ts)){
+                errManager.error("Redeclaracion de funcion no permitida.", al.getLine());
+            } else {
+                // Generamos las entradas solo si es correcta.
+                generador.aplicarAmbito(al.ts,$1);
+            }
         }
     | ID parametros_formales_opt
         { errManager.error("Funcion sin tipo.", al.getLine()); }
@@ -150,7 +156,7 @@ lista_parametros_reales
 parametro_formal
 	: CR tipo ID
 	    {
-	        errManager.debug("Parametro formal con semantica opia-resultado detectado.", al.getLine());
+	        errManager.debug("Parametro formal con semantica copia-resultado detectado.", al.getLine());
 	        generador.agregarParametro(true,$2,$3);
 	    }
 	| CR ID
@@ -328,11 +334,14 @@ tipo
 asignacion
 	: IDCOMP ASIGNAR expresion ';'
 	    {
-	        errManager.debug("Asignacion detectada", al.getLine());
-
+            if (generador.checkearAlcance($1, al.ts)){
+                errManager.debug("Asignacion valida detectada", al.getLine());
+            } else {
+                errManager.error("Variable invalida para asignacion (no encontrada/no declarada)", al.getLine());
+            }
 	    }
 	| IDCOMP ASIGNAR expresion error
-	    { errManager.error(" Falta delimitador de sentencias ;.", al.getLine()); }
+	    { errManager.error("Falta delimitador de sentencias ;.", al.getLine()); }
 	| ID ASIGNAR expresion ';'
 	    { errManager.error("Falta prefijo obligatorio del ID", al.getLine()); }
 	| ID ASIGNAR expresion error
@@ -393,7 +402,10 @@ factor
 
 llamada_funcion
 	: IDCOMP '(' lista_parametros_reales ')'
-	    { errManager.debug("Llamado a funcion detectado", al.getLine()); }
+	    {
+	        errManager.debug("Llamado a funcion detectado", al.getLine());
+
+	    }
 	| ID '(' lista_parametros_reales ')'
 	    { errManager.error("Falta prefijo obligatorio del ID", al.getLine()); }
     | IDCOMP '(' error ')'
@@ -522,34 +534,29 @@ public void tratarNegativos(String lexemaAnterior){
     errManager.debug("Tratando numero negativo " + lexemaAnterior,al.getLine());
     Atributo atributoAnterior = al.ts.obtener(lexemaAnterior);
     String nuevoLexema = "-" + lexemaAnterior;
-    if(atributoAnterior.ref > 1){
-        Atributo atributoNuevo = new Atributo(Atributo.longType,-1 * atributoAnterior.numValue);
-        al.ts.insertar(nuevoLexema, atributoNuevo);
-        atributoAnterior.ref -= 1;
-    } else {
-        atributoAnterior.numValue = -1 * atributoAnterior.numValue;
-        al.ts.modificar(lexemaAnterior, nuevoLexema, atributoAnterior);
-    }
+    Atributo atributoNuevo = new Atributo(Atributo.longType,-1 * atributoAnterior.numValue, Atributo.USO_CONSTANTE);
+    al.ts.insertar(nuevoLexema, atributoNuevo);
 }
 
 public void checkearRango(String lexemaActual){
     errManager.debug("Checkeando rango de constante " + lexemaActual,al.getLine());
     Atributo atributoActual = al.ts.obtener(lexemaActual);
-    if (atributoActual.ref == 1){
-        if (atributoActual.numValue == (2147483648L)) {
-            errManager.warning("Constante long fuera de rango, truncando.");
-            atributoActual.numValue -= 1;
-        }
+    if (atributoActual.numValue == (2147483648L)) {
+        errManager.warning("Constante long fuera de rango, truncando.");
+        atributoActual.numValue -= 1;
     }
 }
 
 public void declararVariable(String IDCOMP, int tipo){
     errManager.debug("Declaracion de variable detectada.",  al.getLine());
+    // Verificar que el prefijo coincida con el ambito.
     if (generador.checkearAmbito(IDCOMP)){
+        // Verificar si ya se encuentra declarada.
         if (generador.estaDeclarada(IDCOMP,al.ts)){
             errManager.error("Redeclaracion de variable no permitida.", al.getLine());
         } else {
-            Atributo info = new Atributo(tipo);
+            // Insertar entrada en Tabla de Simbolos de la variable. Esta reemplaza la del lexico.
+            Atributo info = new Atributo(tipo, Atributo.USO_VARIABLE);
             info.declarado = true;
             al.ts.reemplazar(IDCOMP, info);
         }

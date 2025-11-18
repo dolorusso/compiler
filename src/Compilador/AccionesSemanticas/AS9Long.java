@@ -31,7 +31,7 @@ public class AS9Long implements AccionSemantica{
         //La clave va a ser el numero completo, sin truncar y con el sufijo
         String clave = al.getBufferString();
 
-        Atributo atributo = new Atributo(Atributo.longType, num);
+        Atributo atributo = new Atributo(Atributo.longType, num, Atributo.USO_CONSTANTE);
 
         al.ts.insertar(clave,atributo);
         al.setYylval(clave);

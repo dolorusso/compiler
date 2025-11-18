@@ -3,6 +3,7 @@ package Compilador.Generador;
 import Compilador.Lexer.Atributo;
 import Compilador.Lexer.TablaSimbolos;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Stack;
@@ -41,24 +42,39 @@ public class Generador {
     }
 
     public void agregarParametro(boolean esCR, int tipo, String ID){
-        Atributo atributo = new Atributo(tipo,esCR);
+        Atributo atributo = new Atributo(tipo,esCR,Atributo.USO_PARAMETRO);
         atributo.declarado = true;
         pasajeParametrosAux.put(ID, atributo);
     }
 
-    public void aplicarAmbito(TablaSimbolos ts){
+    public void aplicarAmbito(TablaSimbolos ts, int tipoFuncion){
+        Atributo funcion = new Atributo(tipoFuncion, Atributo.USO_FUNCION);
+        ArrayList<String> parametros = new ArrayList<>();
         for (Map.Entry<String, Atributo> entry : pasajeParametrosAux.entrySet()) {
             String clave = entry.getKey();
             Atributo valor = entry.getValue();
-
-            ts.insertar(mangleName(clave), valor);
+            // Al parametro no se le agrega el mangle name por que no nos interesa el ambito,
+            // es para verificar en llamados a funciones que el parametro existe.
+            parametros.add(clave);
+            // Guardamos el mangled para poder buscarlo en la tabla de simbolos de manera univoca.
+            String mangledName = mangleName(clave);
+            ts.insertar(mangledName, valor);
         }
+        funcion.parametros = parametros;
+        ts.insertar(getCurrentScope(), funcion);
+
         pasajeParametrosAux.clear();
     }
 
-    public boolean checkearAmbito(String IDCOMP){
+    // Funcion auxiliar para sacar el ultimo valor de un id compuesto y retornal el resto.
+    private String quitarUltimo(String IDCOMP){
         int pos = IDCOMP.lastIndexOf('.');
-        String sinUltimo = (pos == -1) ? IDCOMP : IDCOMP.substring(0, pos);
+        return (pos == -1) ? IDCOMP : IDCOMP.substring(0, pos);
+    }
+
+    public boolean checkearAmbito(String IDCOMP){
+        // Sacamos el ultimo valor para poder comparar ambitos, sin la ultima ID.
+        String sinUltimo = quitarUltimo(IDCOMP);
 
         return sinUltimo.equals(getCurrentScope());
     }
@@ -69,5 +85,25 @@ public class Generador {
             return false;
         return atributo.declarado;
     }
+
+    public boolean checkearAlcance(String IDCOMP, TablaSimbolos ts){
+        String sinUltimo = quitarUltimo(IDCOMP);
+        String ambitoActual = getCurrentScope();
+
+        // Viendo si es un subset, verificamos que el ambito sea posible.
+        boolean alcanceValido = sinUltimo.equals(ambitoActual) || ambitoActual.startsWith(sinUltimo + ".");
+
+        // Verificamos que exista y este declarado.
+        if (alcanceValido) {
+            Atributo aux = ts.obtener(IDCOMP);
+            if (aux == null)
+                return false;
+            return aux.declarado;
+        } else {
+            return false;
+        }
+    }
+
+
 }
 
