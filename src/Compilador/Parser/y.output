@@ -854,13 +854,13 @@ state 40
 	factor  goto 54
 	termino  goto 55
 	expresion  goto 105
-	tipo  goto 106
+	parametro_real  goto 106
+	tipo  goto 107
 	llamada_funcion  goto 57
-	lista_parametros_formales  goto 107
-	parametro_formal  goto 108
-	lista_parametros_reales  goto 109
-	parametro_real_compuesto  goto 110
-	parametro_real  goto 111
+	lista_parametros_formales  goto 108
+	parametro_formal  goto 109
+	lista_parametros_reales  goto 110
+	parametro_real_compuesto  goto 111
 	lambda  goto 112
 
 
@@ -1453,10 +1453,10 @@ state 72
 	factor  goto 54
 	termino  goto 55
 	expresion  goto 105
+	parametro_real  goto 106
 	llamada_funcion  goto 57
 	lista_parametros_reales  goto 165
-	parametro_real_compuesto  goto 110
-	parametro_real  goto 111
+	parametro_real_compuesto  goto 111
 	lambda  goto 112
 
 
@@ -1533,9 +1533,9 @@ state 80
 	')'  shift 104
 	.  error
 
-	tipo  goto 106
-	lista_parametros_formales  goto 107
-	parametro_formal  goto 108
+	tipo  goto 107
+	lista_parametros_formales  goto 108
+	parametro_formal  goto 109
 
 
 state 81
@@ -1783,15 +1783,22 @@ state 105
 
 
 state 106
-	parametro_formal : tipo . ID  (52)
-	parametro_formal : tipo . error  (57)
+	parametro_real_compuesto : parametro_real . FLECHA ID  (65)
 
-	error  shift 189
-	ID  shift 190
+	FLECHA  shift 189
 	.  error
 
 
 state 107
+	parametro_formal : tipo . ID  (52)
+	parametro_formal : tipo . error  (57)
+
+	error  shift 190
+	ID  shift 191
+	.  error
+
+
+state 108
 	parametros_formales_opt : '(' lista_parametros_formales . ')'  (33)
 	lista_parametros_formales : lista_parametros_formales . ',' parametro_formal  (44)
 	lista_parametros_formales : lista_parametros_formales . parametro_formal  (45)
@@ -1801,21 +1808,21 @@ state 107
 	LONG  shift 11
 	CR  shift 102
 	STRING  shift 13
-	')'  shift 191
-	','  shift 192
+	')'  shift 192
+	','  shift 193
 	.  error
 
-	tipo  goto 106
-	parametro_formal  goto 193
+	tipo  goto 107
+	parametro_formal  goto 194
 
 
-state 108
+state 109
 	lista_parametros_formales : parametro_formal .  (43)
 
 	.  reduce 43
 
 
-state 109
+state 110
 	lista_parametros_reales : lista_parametros_reales . ',' parametro_real_compuesto  (47)
 	lista_parametros_reales : lista_parametros_reales . parametro_real_compuesto  (48)
 	llamada_funcion : ID '(' lista_parametros_reales . ')'  (148)
@@ -1827,8 +1834,8 @@ state 109
 	CTEF  shift 46
 	INVALID  shift 47
 	'('  shift 103
-	')'  shift 194
-	','  shift 195
+	')'  shift 195
+	','  shift 196
 	'+'  shift 49
 	'-'  shift 50
 	'*'  shift 51
@@ -1839,23 +1846,16 @@ state 109
 	factor  goto 54
 	termino  goto 55
 	expresion  goto 105
+	parametro_real  goto 106
 	llamada_funcion  goto 57
-	parametro_real_compuesto  goto 196
-	parametro_real  goto 111
+	parametro_real_compuesto  goto 197
 	lambda  goto 112
 
 
-state 110
+state 111
 	lista_parametros_reales : parametro_real_compuesto .  (46)
 
 	.  reduce 46
-
-
-state 111
-	parametro_real_compuesto : parametro_real . FLECHA ID  (65)
-
-	FLECHA  shift 197
-	.  error
 
 
 state 112
@@ -1886,10 +1886,10 @@ state 113
 	factor  goto 54
 	termino  goto 55
 	expresion  goto 105
+	parametro_real  goto 106
 	llamada_funcion  goto 57
-	lista_parametros_reales  goto 109
-	parametro_real_compuesto  goto 110
-	parametro_real  goto 111
+	lista_parametros_reales  goto 110
+	parametro_real_compuesto  goto 111
 	lambda  goto 112
 
 
@@ -2509,7 +2509,7 @@ state 165
 	INVALID  shift 47
 	'('  shift 103
 	')'  shift 239
-	','  shift 195
+	','  shift 196
 	'+'  shift 49
 	'-'  shift 50
 	'*'  shift 51
@@ -2520,9 +2520,9 @@ state 165
 	factor  goto 54
 	termino  goto 55
 	expresion  goto 105
+	parametro_real  goto 106
 	llamada_funcion  goto 57
-	parametro_real_compuesto  goto 196
-	parametro_real  goto 111
+	parametro_real_compuesto  goto 197
 	lambda  goto 112
 
 
@@ -2716,24 +2716,31 @@ state 188
 
 
 state 189
+	parametro_real_compuesto : parametro_real FLECHA . ID  (65)
+
+	ID  shift 249
+	.  error
+
+
+state 190
 	parametro_formal : tipo error .  (57)
 
 	.  reduce 57
 
 
-state 190
+state 191
 	parametro_formal : tipo ID .  (52)
 
 	.  reduce 52
 
 
-state 191
+state 192
 	parametros_formales_opt : '(' lista_parametros_formales ')' .  (33)
 
 	.  reduce 33
 
 
-state 192
+state 193
 	lista_parametros_formales : lista_parametros_formales ',' . parametro_formal  (44)
 
 	ID  shift 170
@@ -2743,23 +2750,23 @@ state 192
 	STRING  shift 13
 	.  error
 
-	tipo  goto 106
-	parametro_formal  goto 249
+	tipo  goto 107
+	parametro_formal  goto 250
 
 
-state 193
+state 194
 	lista_parametros_formales : lista_parametros_formales parametro_formal .  (45)
 
 	.  reduce 45
 
 
-state 194
+state 195
 	llamada_funcion : ID '(' lista_parametros_reales ')' .  (148)
 
 	.  reduce 148
 
 
-state 195
+state 196
 	lista_parametros_reales : lista_parametros_reales ',' . parametro_real_compuesto  (47)
 
 	ID  shift 42
@@ -2779,23 +2786,16 @@ state 195
 	factor  goto 54
 	termino  goto 55
 	expresion  goto 105
+	parametro_real  goto 106
 	llamada_funcion  goto 57
-	parametro_real_compuesto  goto 250
-	parametro_real  goto 111
+	parametro_real_compuesto  goto 251
 	lambda  goto 112
 
 
-state 196
+state 197
 	lista_parametros_reales : lista_parametros_reales parametro_real_compuesto .  (48)
 
 	.  reduce 48
-
-
-state 197
-	parametro_real_compuesto : parametro_real FLECHA . ID  (65)
-
-	ID  shift 251
-	.  error
 
 
 state 198
@@ -3243,21 +3243,21 @@ state 248
 
 
 state 249
+	parametro_real_compuesto : parametro_real FLECHA ID .  (65)
+
+	.  reduce 65
+
+
+state 250
 	lista_parametros_formales : lista_parametros_formales ',' parametro_formal .  (44)
 
 	.  reduce 44
 
 
-state 250
+state 251
 	lista_parametros_reales : lista_parametros_reales ',' parametro_real_compuesto .  (47)
 
 	.  reduce 47
-
-
-state 251
-	parametro_real_compuesto : parametro_real FLECHA ID .  (65)
-
-	.  reduce 65
 
 
 state 252

@@ -9,7 +9,7 @@ public class Generador {
     public final List<Terceto> tercetos;
     private final Stack<String> scopeStack;
     private final Map<String, Atributo> pasajeParametrosAux;
-
+    private final List<ParametroReal> llamadaFuncionAux;
 
     // Clase interna para abstraer la operacion de tercetos y entradas de la tabla de simbolos.
     private static class OperandoInfo {
@@ -22,6 +22,7 @@ public class Generador {
         scopeStack = new Stack<>();
         pasajeParametrosAux = new HashMap<>();
         tercetos = new ArrayList<>();
+        llamadaFuncionAux = new ArrayList<>();
     }
 
     public String getCurrentScope(){
@@ -104,12 +105,12 @@ public class Generador {
         if (alcanceValido) {
             Atributo aux = ts.obtener(IDCOMP);
             if (aux == null)
-                return "Variable no encontrada";
+                return "Identificador no encontrado";
             if (!aux.declarado)
-                return "Variable no declarada";
+                return "Identificador no declarado";
             return null;
         } else {
-            return "Variable fuera de alcance";
+            return "Identificador fuera de alcance";
         }
     }
 
@@ -214,6 +215,38 @@ public class Generador {
             return null;
         }
         return "La variable no puede ser usada para escribir.";
+    }
+
+    public String puedoLlamar(String IDCOMP, TablaSimbolos ts){
+        Atributo id = ts.obtener(IDCOMP);
+        if (id.uso == Atributo.USO_FUNCION){
+            return null;
+        }
+        return "La variable no puede ser usada para llamada.";
+    }
+
+    // Funcion para agregar a la estructura auxiliar llamadaFuncionAux
+    // En las llamadas a funciones guardamos el par parametroReal -> parametroFormal
+    // para luego vincularlo en reglas de orden superior.
+    public void agregarParametroReal(String parametroReal, String parametroFormal){
+        ParametroReal pr = new ParametroReal(parametroReal, parametroFormal);
+        llamadaFuncionAux.add(pr);
+    }
+
+    // Funcion para vincularle el ambito correspondiente a los parametros reales, ya que en los llamados
+    // no tienen el ambito pero en la tabla de simbolos los guardamos con este.
+    public String vincularIDS(String idFuncion, TablaSimbolos ts){
+        return
+    }
+
+    public String checkearParametrosLlamada(String idFuncion, TablaSimbolos ts){
+        Map<String, Atributo> parametrosFormales = new HashMap<>();
+        for (String parametroFormal : ts.obtener(idFuncion).parametros) {
+            Atributo atributoPF = ts.obtener(vincularIDS(parametroFormal,ts));
+            parametrosFormales.put(parametroFormal, null);
+        }
+
+
     }
 
 }

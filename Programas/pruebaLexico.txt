@@ -1,4 +1,8 @@
 A {
-    long A.X;
-    A.X := 3L + 4L + 5L;
+    long A.Z;
+    long F(long X){
+        A.Z := 3L;
+        A.F.X := -A.Z;
+        return (A.Z);
+    }
 }

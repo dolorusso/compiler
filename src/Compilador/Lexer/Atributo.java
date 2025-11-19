@@ -55,15 +55,23 @@ public class Atributo {
 
     @Override
     public String toString() {
+        if (parametros == null)
+            return
+                "Atributo{" +
+                    "type=" + type +
+                    ", strValue=" + strValue +
+                    ", numValue=" + numValue +
+                    ", declarado=" + declarado  +
+                    ", esCR=" + esCR +
+                    ", uso=" + uso  +
+                '}';
         return
-            "Atributo{" +
+                "Atributo{" +
                 "type=" + type +
-                ", strValue=" + strValue +
-                ", numValue=" + numValue +
                 ", declarado=" + declarado  +
-                ", esCR=" + esCR +
                 ", uso=" + uso  +
-            '}';
+                ", parametros=" + parametros +
+                '}';
     }
 
 

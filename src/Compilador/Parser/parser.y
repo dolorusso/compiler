@@ -12,7 +12,7 @@
 
 %start programa
 
-%type <sval> constante factor termino expresion
+%type <sval> constante factor termino expresion parametro_real
 %token <sval> CTEL CTEF INVALID ID IDCOMP
 
 %type <ival> lista_identificadores tipo
@@ -222,7 +222,10 @@ lista_identificadores
 
 parametro_real_compuesto
 	: parametro_real FLECHA ID
-	    { errManager.debug("Parametro real detectado", al.getLine()); }
+	    {
+	        errManager.debug("Parametro real detectado", al.getLine());
+            generador.agregarParametroReal($1, $3);
+	    }
 	;
 
 parametro_real
@@ -482,7 +485,8 @@ factor
 	    { $$ = $1; }
 	| llamada_funcion
 	    {
-	    
+	        // a
+
 	    }
 	| ID
 	    { errManager.error("Falta prefijo obligatorio del ID", al.getLine()); }
@@ -523,7 +527,26 @@ llamada_funcion
 	: IDCOMP '(' lista_parametros_reales ')'
 	    {
 	        errManager.debug("Llamado a funcion detectado", al.getLine());
-	        //generador.checkearLlamado();
+	        String mensaje = generador.puedoLlamar($1, al.ts);
+	        if (mensaje != null){
+	            errManager.error(mensaje, al.getLine());
+	            break ;
+	        }
+
+	        mensaje = generador.checkearAlcance($1, al.ts);
+	        if (mensaje != null){
+                errManager.error(mensaje, al.getLine());
+                break ;
+            }
+
+            mensaje = generador.checkearParametrosLlamada($1, al.ts);
+            if (mensaje != null){
+                errManager.error(mensaje, al.getLine());
+                break ;
+            }
+
+            mensaje = generador.generarTercetosLlamado() ....
+
 	    }
 	| ID '(' lista_parametros_reales ')'
 	    { errManager.error("Falta prefijo obligatorio del ID", al.getLine()); }
