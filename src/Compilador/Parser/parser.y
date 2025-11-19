@@ -350,11 +350,27 @@ tipo
 asignacion
 	: IDCOMP ASIGNAR expresion ';'
 	    {
-            if (generador.checkearAlcance($1, al.ts)){
-                errManager.debug("Asignacion valida detectada", al.getLine());
-            } else {
-                errManager.error("Variable invalida para asignacion (no encontrada/no declarada)", al.getLine());
+            String mensaje = generador.puedoEscribir($1,al.ts);
+            if (mensaje != null){
+                errManager.error(mensaje,al.getLine());
+                break ;
             }
+
+            mensaje = generador.checkearAlcance($1, al.ts);
+            if (mensaje != null){
+                errManager.error(mensaje, al.getLine());
+                break ;
+            }
+
+            mensaje = generador.generarTercetoValido(":=", $1, $3, al.ts);
+            if (mensaje != null){
+                errManager.error(mensaje,al.getLine());
+                break ;
+            }
+
+            errManager.debug("Asignacion valida detectada", al.getLine());
+            int indiceTerceto = generador.getUltimoTerceto();
+
 	    }
 	| IDCOMP ASIGNAR expresion error
 	    { errManager.error("Falta delimitador de sentencias ;.", al.getLine()); }
@@ -367,8 +383,14 @@ asignacion
 expresion
 	: expresion '+' termino
 	    {
-            int aux = generador.agregarTerceto($1, $3, "+");
-            $$ = aux + "";
+            String mensaje = generador.generarTercetoValido("+", $1, $3, al.ts);
+            if (mensaje != null){
+                errManager.error(mensaje,al.getLine());
+            } else {
+                errManager.debug("Suma valida detectada", al.getLine());
+                int indiceTerceto = generador.getUltimoTerceto();
+                $$ = indiceTerceto + "";
+            }
         }
 	| expresion '+' error 
 		{ errManager.error("Falta el segundo operando en la suma", al.getLine()); }
@@ -376,14 +398,21 @@ expresion
 		{ errManager.debug("Faltan los dos operandos", al.getLine()); }
 	| expresion '-' termino
 	    {
-            int aux = generador.agregarTerceto($1, $3, "-");
-            $$ = aux + "";
+            String mensaje = generador.generarTercetoValido("-", $1, $3, al.ts);
+            if (mensaje != null){
+                errManager.error(mensaje,al.getLine());
+            } else {
+                errManager.debug("Resta valida detectada", al.getLine());
+                int indiceTerceto = generador.getUltimoTerceto();
+                $$ = indiceTerceto + "";
+            }
         }
 	| expresion '-' error
 		{ errManager.error("Falta el segundo operando en la resta", al.getLine()); }
 	| '-' error
 		{ errManager.debug("Faltan los dos operandos", al.getLine()); }
 	| termino
+	    { $$ = $1; }
 	| TRUNC cuerpo_expresion
 	    { errManager.debug("Trunc detectado", al.getLine()); }
 	| TRUNC error
@@ -393,8 +422,14 @@ expresion
 termino
 	: termino '*' factor
 	    {
-	        int aux = generador.agregarTerceto($1, $3, "*");
-	        $$ = aux + "";
+            String mensaje = generador.generarTercetoValido("*", $1, $3, al.ts);
+            if (mensaje != null){
+                errManager.error(mensaje,al.getLine());
+            } else {
+                errManager.debug("Multiplicacion valida detectada", al.getLine());
+                int indiceTerceto = generador.getUltimoTerceto();
+                $$ = indiceTerceto + "";
+            }
 	    }
 	| '*' factor
 		{ errManager.debug("Falta el primer operando en la multiplicacion", al.getLine()); }
@@ -404,8 +439,14 @@ termino
 		{ errManager.debug("Faltan los dos operandos en la multiplicacion", al.getLine()); }
 	| termino '/' factor
 	    {
-	        int aux = generador.agregarTerceto($1, $3, "/");
-            $$ = aux + "";
+	        String mensaje = generador.generarTercetoValido("/", $1, $3, al.ts);
+	        if (mensaje != null){
+                errManager.error(mensaje,al.getLine());
+            } else {
+                errManager.debug("Division valida detectada", al.getLine());
+                int indiceTerceto = generador.getUltimoTerceto();
+                $$ = indiceTerceto + "";
+            }
         }
 	| '/' factor
 		{ errManager.debug("Falta el primer operando en la division", al.getLine()); }
@@ -414,29 +455,65 @@ termino
 	| '/' error
 		{ errManager.debug("Faltan los dos operandos en la division", al.getLine()); }
 	| factor
+	    { $$ = $1; }
 	;
 
 factor
 	: IDCOMP
 	    {
-            if (puedoLeer($1)){
-                //pongo en factor el valor necesario para el terceto
-                $$ = $1;
+            // Verificamos que se pueda leer el IDCOMP.
+            String mensaje = generador.puedoLeer($1, al.ts);
+            if (mensaje != null){
+                errManager.error(mensaje,al.getLine());
+                break;
             }
+
+            // Verificamos que se encuetre al alcance.
+            mensaje = generador.checkearAlcance($1, al.ts);
+            if (mensaje != null){
+                errManager.error(mensaje, al.getLine());
+                break;
+            }
+
+            //pongo en factor el valor necesario para el terceto
+            $$ = $1;
         }
 	| constante
 	    { $$ = $1; }
 	| llamada_funcion
+	    {
+	    
+	    }
 	| ID
 	    { errManager.error("Falta prefijo obligatorio del ID", al.getLine()); }
-    | '-' llamada_funcion
+    | '-' llamada_funcion // TODO !!!!. Es tipo long igualmente.
     | '-' IDCOMP
         {
             errManager.debug("Identificador con -", al.getLine());
-            if (puedoLeer($2)){
-                //pongo en factor el valor necesario para el terceto
-               $$ = $2;
+
+            // Verificamos que se pueda leer el IDCOMP.
+            String mensaje = generador.puedoLeer($2, al.ts);
+            if (mensaje != null){
+                errManager.error(mensaje, al.getLine());
+                break;
             }
+
+            // Verificamos que se encuetre al alcance.
+            mensaje = generador.checkearAlcance($2, al.ts);
+            if (mensaje != null){
+                errManager.error(mensaje, al.getLine());
+                break;
+            }
+
+            // Generamos el terceto correspondiente. Utilizamos un "-1L" previamente creado como auxiliar.
+            mensaje = generador.generarTercetoValido("*", "-1L", $2, al.ts);
+            if (mensaje != null){
+                errManager.error(mensaje,al.getLine());
+                break ;
+            }
+
+            int indiceTerceto = generador.getUltimoTerceto();
+            $$ = indiceTerceto + "";
         }
     | '-' ID
         { errManager.error("Falta prefijo obligatorio del ID", al.getLine()); }
@@ -479,15 +556,15 @@ retorno
 cuerpo_expresion
     : '(' expresion ')'
     | expresion ')'
-        {errManager.error("Falta parentesis de apertura", al.getLine());}
+        { errManager.error("Falta parentesis de apertura", al.getLine()); }
     | '(' expresion error
-        {errManager.error("Falta parentesis de cierre", al.getLine());}
+        { errManager.error("Falta parentesis de cierre", al.getLine()); }
     | '(' ')'
-        {errManager.error("Faltan argumentos", al.getLine());}
+        { errManager.error("Faltan argumentos", al.getLine()); }
     | '(' error
-        {errManager.error("Falta parentesis de cierre", al.getLine());}
+        { errManager.error("Falta parentesis de cierre", al.getLine()); }
     | ')'
-        {errManager.error("Falta parentesis de apertura", al.getLine());}
+        { errManager.error("Falta parentesis de apertura", al.getLine()); }
     ;
 
 asignacion_multiple
@@ -554,6 +631,7 @@ public Parser(ErrorManager.Nivel nivel){
     this.errManager = ErrorManager.getInstance();
     errManager.setNivel(nivel);
     this.generador = new Generador();
+    al.ts.insertar("-1L", new Atributo(0,-1,"auxiliar"));
 }
 
 public int yylex(){
@@ -605,18 +683,6 @@ public void declararVariable(String IDCOMP, int tipo){
     } else {
         errManager.error("El ambito declarado es incorrecto.", al.getLine());
     }
-}
-
-// Verifica si una variable se puede leer dependiendo de su semantica
-public boolean puedoLeer(String IDCOMP){
-    Atributo id = al.ts.obtener(IDCOMP);
-    if (id.uso == Atributo.USO_PARAMETRO){
-        if (id.esCR){
-            errManager.error("La variable no puede ser usada para leer.", al.getLine());
-            return false;
-        }
-    }
-    return true;
 }
 
 public void run()

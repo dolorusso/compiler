@@ -782,7 +782,7 @@ final static String yyrule[] = {
 "constante : '+' CTEF",
 };
 
-//#line 547 "parser.y"
+//#line 621 "parser.y"
 private AnalizadorLexico al;
 private ErrorManager errManager;
 private static final ParserVal dummyParserVal = new ParserVal();
@@ -793,6 +793,7 @@ public Parser(ErrorManager.Nivel nivel){
     this.errManager = ErrorManager.getInstance();
     errManager.setNivel(nivel);
     this.generador = new Generador();
+    al.ts.insertar("-1L", new Atributo(0,-1,"auxiliar"));
 }
 
 public int yylex(){
@@ -846,18 +847,6 @@ public void declararVariable(String IDCOMP, int tipo){
     }
 }
 
-// Verifica si una variable se puede leer dependiendo de su semantica
-public boolean puedoLeer(String IDCOMP){
-    Atributo id = al.ts.obtener(IDCOMP);
-    if (id.uso == Atributo.USO_PARAMETRO){
-        if (id.esCR){
-            errManager.error("La variable no puede ser usada para leer.", al.getLine());
-            return false;
-        }
-    }
-    return true;
-}
-
 public void run()
 {
     yyparse();
@@ -867,7 +856,7 @@ public void run()
 
 public void yyerror(String s) {
 }
-//#line 798 "Parser.java"
+//#line 787 "Parser.java"
 //###############################################################
 // method: yylexdebug : check lexer state
 //###############################################################
@@ -1403,255 +1392,335 @@ break;
 case 118:
 //#line 352 "parser.y"
 {
-            if (generador.checkearAlcance(val_peek(3).sval, al.ts)){
-                errManager.debug("Asignacion valida detectada", al.getLine());
-            } else {
-                errManager.error("Variable invalida para asignacion (no encontrada/no declarada)", al.getLine());
+            String mensaje = generador.puedoEscribir(val_peek(3).sval,al.ts);
+            if (mensaje != null){
+                errManager.error(mensaje,al.getLine());
+                break ;
             }
+
+            mensaje = generador.checkearAlcance(val_peek(3).sval, al.ts);
+            if (mensaje != null){
+                errManager.error(mensaje, al.getLine());
+                break ;
+            }
+
+            mensaje = generador.generarTercetoValido(":=", val_peek(3).sval, val_peek(1).sval, al.ts);
+            if (mensaje != null){
+                errManager.error(mensaje,al.getLine());
+                break ;
+            }
+
+            errManager.debug("Asignacion valida detectada", al.getLine());
+            int indiceTerceto = generador.getUltimoTerceto();
+
 	    }
 break;
 case 119:
-//#line 360 "parser.y"
+//#line 376 "parser.y"
 { errManager.error("Falta delimitador de sentencias ;.", al.getLine()); }
 break;
 case 120:
-//#line 362 "parser.y"
+//#line 378 "parser.y"
 { errManager.error("Falta prefijo obligatorio del ID", al.getLine()); }
 break;
 case 121:
-//#line 364 "parser.y"
+//#line 380 "parser.y"
 { errManager.error("Falta prefijo obligatorio del ID", al.getLine()); }
 break;
 case 122:
-//#line 369 "parser.y"
+//#line 385 "parser.y"
 {
-            int aux = generador.agregarTerceto(val_peek(2).sval, val_peek(0).sval, "+");
-            yyval.sval = aux + "";
+            String mensaje = generador.generarTercetoValido("+", val_peek(2).sval, val_peek(0).sval, al.ts);
+            if (mensaje != null){
+                errManager.error(mensaje,al.getLine());
+            } else {
+                errManager.debug("Suma valida detectada", al.getLine());
+                int indiceTerceto = generador.getUltimoTerceto();
+                yyval.sval = indiceTerceto + "";
+            }
         }
 break;
 case 123:
-//#line 374 "parser.y"
+//#line 396 "parser.y"
 { errManager.error("Falta el segundo operando en la suma", al.getLine()); }
 break;
 case 124:
-//#line 376 "parser.y"
+//#line 398 "parser.y"
 { errManager.debug("Faltan los dos operandos", al.getLine()); }
 break;
 case 125:
-//#line 378 "parser.y"
+//#line 400 "parser.y"
 {
-            int aux = generador.agregarTerceto(val_peek(2).sval, val_peek(0).sval, "-");
-            yyval.sval = aux + "";
+            String mensaje = generador.generarTercetoValido("-", val_peek(2).sval, val_peek(0).sval, al.ts);
+            if (mensaje != null){
+                errManager.error(mensaje,al.getLine());
+            } else {
+                errManager.debug("Resta valida detectada", al.getLine());
+                int indiceTerceto = generador.getUltimoTerceto();
+                yyval.sval = indiceTerceto + "";
+            }
         }
 break;
 case 126:
-//#line 383 "parser.y"
+//#line 411 "parser.y"
 { errManager.error("Falta el segundo operando en la resta", al.getLine()); }
 break;
 case 127:
-//#line 385 "parser.y"
+//#line 413 "parser.y"
 { errManager.debug("Faltan los dos operandos", al.getLine()); }
 break;
+case 128:
+//#line 415 "parser.y"
+{ yyval.sval = val_peek(0).sval; }
+break;
 case 129:
-//#line 388 "parser.y"
+//#line 417 "parser.y"
 { errManager.debug("Trunc detectado", al.getLine()); }
 break;
 case 130:
-//#line 390 "parser.y"
+//#line 419 "parser.y"
 { errManager.error("Cuerpo del trunc invalido", al.getLine()); }
 break;
 case 131:
-//#line 395 "parser.y"
+//#line 424 "parser.y"
 {
-	        int aux = generador.agregarTerceto(val_peek(2).sval, val_peek(0).sval, "*");
-	        yyval.sval = aux + "";
+            String mensaje = generador.generarTercetoValido("*", val_peek(2).sval, val_peek(0).sval, al.ts);
+            if (mensaje != null){
+                errManager.error(mensaje,al.getLine());
+            } else {
+                errManager.debug("Multiplicacion valida detectada", al.getLine());
+                int indiceTerceto = generador.getUltimoTerceto();
+                yyval.sval = indiceTerceto + "";
+            }
 	    }
 break;
 case 132:
-//#line 400 "parser.y"
+//#line 435 "parser.y"
 { errManager.debug("Falta el primer operando en la multiplicacion", al.getLine()); }
 break;
 case 133:
-//#line 402 "parser.y"
+//#line 437 "parser.y"
 { errManager.error("Falta el segundo operando en la multiplicacion", al.getLine()); }
 break;
 case 134:
-//#line 404 "parser.y"
+//#line 439 "parser.y"
 { errManager.debug("Faltan los dos operandos en la multiplicacion", al.getLine()); }
 break;
 case 135:
-//#line 406 "parser.y"
+//#line 441 "parser.y"
 {
-	        int aux = generador.agregarTerceto(val_peek(2).sval, val_peek(0).sval, "/");
-            yyval.sval = aux + "";
+	        String mensaje = generador.generarTercetoValido("/", val_peek(2).sval, val_peek(0).sval, al.ts);
+	        if (mensaje != null){
+                errManager.error(mensaje,al.getLine());
+            } else {
+                errManager.debug("Division valida detectada", al.getLine());
+                int indiceTerceto = generador.getUltimoTerceto();
+                yyval.sval = indiceTerceto + "";
+            }
         }
 break;
 case 136:
-//#line 411 "parser.y"
+//#line 452 "parser.y"
 { errManager.debug("Falta el primer operando en la division", al.getLine()); }
 break;
 case 137:
-//#line 413 "parser.y"
+//#line 454 "parser.y"
 { errManager.error("Falta el segundo operando en la division", al.getLine()); }
 break;
 case 138:
-//#line 415 "parser.y"
+//#line 456 "parser.y"
 { errManager.debug("Faltan los dos operandos en la division", al.getLine()); }
 break;
+case 139:
+//#line 458 "parser.y"
+{ yyval.sval = val_peek(0).sval; }
+break;
 case 140:
-//#line 421 "parser.y"
+//#line 463 "parser.y"
 {
-            if (puedoLeer(val_peek(0).sval)){
-                /*pongo en factor el valor necesario para el terceto*/
-                yyval.sval = val_peek(0).sval;
+            /* Verificamos que se pueda leer el IDCOMP.*/
+            String mensaje = generador.puedoLeer(val_peek(0).sval, al.ts);
+            if (mensaje != null){
+                errManager.error(mensaje,al.getLine());
+                break;
             }
+
+            /* Verificamos que se encuetre al alcance.*/
+            mensaje = generador.checkearAlcance(val_peek(0).sval, al.ts);
+            if (mensaje != null){
+                errManager.error(mensaje, al.getLine());
+                break;
+            }
+
+            /*pongo en factor el valor necesario para el terceto*/
+            yyval.sval = val_peek(0).sval;
         }
 break;
 case 141:
-//#line 428 "parser.y"
+//#line 482 "parser.y"
 { yyval.sval = val_peek(0).sval; }
 break;
 case 143:
-//#line 431 "parser.y"
+//#line 485 "parser.y"
 { errManager.error("Falta prefijo obligatorio del ID", al.getLine()); }
 break;
 case 145:
-//#line 434 "parser.y"
+//#line 488 "parser.y"
 {
             errManager.debug("Identificador con -", al.getLine());
-            if (puedoLeer(val_peek(0).sval)){
-                /*pongo en factor el valor necesario para el terceto*/
-               yyval.sval = val_peek(0).sval;
+
+            /* Verificamos que se pueda leer el IDCOMP.*/
+            String mensaje = generador.puedoLeer(val_peek(0).sval, al.ts);
+            if (mensaje != null){
+                errManager.error(mensaje, al.getLine());
+                break;
             }
+
+            /* Verificamos que se encuetre al alcance.*/
+            mensaje = generador.checkearAlcance(val_peek(0).sval, al.ts);
+            if (mensaje != null){
+                errManager.error(mensaje, al.getLine());
+                break;
+            }
+
+            /* Generamos el terceto correspondiente. Utilizamos un "-1L" previamente creado como auxiliar.*/
+            mensaje = generador.generarTercetoValido("*", "-1L", val_peek(0).sval, al.ts);
+            if (mensaje != null){
+                errManager.error(mensaje,al.getLine());
+                break ;
+            }
+
+            int indiceTerceto = generador.getUltimoTerceto();
+            yyval.sval = indiceTerceto + "";
         }
 break;
 case 146:
-//#line 442 "parser.y"
+//#line 516 "parser.y"
 { errManager.error("Falta prefijo obligatorio del ID", al.getLine()); }
 break;
 case 147:
-//#line 447 "parser.y"
+//#line 521 "parser.y"
 {
 	        errManager.debug("Llamado a funcion detectado", al.getLine());
 	        /*generador.checkearLlamado();*/
 	    }
 break;
 case 148:
-//#line 452 "parser.y"
+//#line 526 "parser.y"
 { errManager.error("Falta prefijo obligatorio del ID", al.getLine()); }
 break;
 case 149:
-//#line 454 "parser.y"
+//#line 528 "parser.y"
 { errManager.error("Llamado a funcion con parametros invalidos", al.getLine()); }
 break;
 case 150:
-//#line 456 "parser.y"
+//#line 530 "parser.y"
 { errManager.error("Llamado a funcion con parametros invalidos", al.getLine()); }
 break;
 case 151:
-//#line 461 "parser.y"
+//#line 535 "parser.y"
 { errManager.debug("Print detectado con expresion", al.getLine());}
 break;
 case 152:
-//#line 465 "parser.y"
+//#line 539 "parser.y"
 { errManager.debug("Definicion lambda detectada", al.getLine()); }
 break;
 case 153:
-//#line 467 "parser.y"
+//#line 541 "parser.y"
 { errManager.error("Falta llave de cierre en lambda", al.getLine()); }
 break;
 case 154:
-//#line 469 "parser.y"
+//#line 543 "parser.y"
 { errManager.error("Falta llave de apertura en lambda", al.getLine()); }
 break;
 case 155:
-//#line 471 "parser.y"
+//#line 545 "parser.y"
 { errManager.error("Faltan llaves en lambda", al.getLine()); }
 break;
 case 156:
-//#line 476 "parser.y"
+//#line 550 "parser.y"
 {errManager.debug("Retorno detectado. Linea: " + al.getLine());}
 break;
 case 158:
-//#line 482 "parser.y"
-{errManager.error("Falta parentesis de apertura", al.getLine());}
+//#line 556 "parser.y"
+{ errManager.error("Falta parentesis de apertura", al.getLine()); }
 break;
 case 159:
-//#line 484 "parser.y"
-{errManager.error("Falta parentesis de cierre", al.getLine());}
+//#line 558 "parser.y"
+{ errManager.error("Falta parentesis de cierre", al.getLine()); }
 break;
 case 160:
-//#line 486 "parser.y"
-{errManager.error("Faltan argumentos", al.getLine());}
+//#line 560 "parser.y"
+{ errManager.error("Faltan argumentos", al.getLine()); }
 break;
 case 161:
-//#line 488 "parser.y"
-{errManager.error("Falta parentesis de cierre", al.getLine());}
+//#line 562 "parser.y"
+{ errManager.error("Falta parentesis de cierre", al.getLine()); }
 break;
 case 162:
-//#line 490 "parser.y"
-{errManager.error("Falta parentesis de apertura", al.getLine());}
+//#line 564 "parser.y"
+{ errManager.error("Falta parentesis de apertura", al.getLine()); }
 break;
 case 163:
-//#line 495 "parser.y"
+//#line 569 "parser.y"
 { errManager.debug("Asignacion multiple detectada. Linea: " + al.getLine()); }
 break;
 case 164:
-//#line 497 "parser.y"
+//#line 571 "parser.y"
 { errManager.error("Error en asignacion multiple, separador a utilizar: ','", al.getLine()); }
 break;
 case 165:
-//#line 499 "parser.y"
+//#line 573 "parser.y"
 { errManager.error("Error en asignacion multiple, separador a utilizar: ','", al.getLine()); }
 break;
 case 166:
-//#line 501 "parser.y"
+//#line 575 "parser.y"
 { errManager.error("Falta separador ';'", al.getLine()); }
 break;
 case 171:
-//#line 516 "parser.y"
+//#line 590 "parser.y"
 {
             checkearRango(val_peek(0).sval);
             yyval.sval = val_peek(0).sval;
         }
 break;
 case 172:
-//#line 521 "parser.y"
+//#line 595 "parser.y"
 {
             errManager.debug("CTEF detectada sin signo " + val_peek(0).sval ,al.getLine());
             yyval.sval = val_peek(0).sval;
         }
 break;
 case 173:
-//#line 526 "parser.y"
+//#line 600 "parser.y"
 {
 	        tratarNegativos(val_peek(0).sval);
 	        yyval.sval = "-" + val_peek(0).sval;
 	    }
 break;
 case 174:
-//#line 531 "parser.y"
+//#line 605 "parser.y"
 {
            tratarNegativos(val_peek(0).sval);
            yyval.sval = "-" + val_peek(0).sval;
         }
 break;
 case 175:
-//#line 536 "parser.y"
+//#line 610 "parser.y"
 { errManager.error("factor invalido", al.getLine()); }
 break;
 case 176:
-//#line 538 "parser.y"
+//#line 612 "parser.y"
 {
             checkearRango(val_peek(0).sval);
             yyval.sval = val_peek(0).sval;
         }
 break;
 case 177:
-//#line 543 "parser.y"
+//#line 617 "parser.y"
 { yyval.sval = val_peek(0).sval; }
 break;
-//#line 1577 "Parser.java"
+//#line 1646 "Parser.java"
 //########## END OF USER-SUPPLIED ACTIONS ##########
     }//switch
     //#### Now let's reduce... ####

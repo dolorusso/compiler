@@ -10,16 +10,18 @@ public class Generador {
     private final Stack<String> scopeStack;
     private final Map<String, Atributo> pasajeParametrosAux;
 
+
+    // Clase interna para abstraer la operacion de tercetos y entradas de la tabla de simbolos.
+    private static class OperandoInfo {
+        boolean esTerceto;
+        int tipo;
+        String representacion;
+    }
+
     public Generador() {
         scopeStack = new Stack<>();
         pasajeParametrosAux = new HashMap<>();
         tercetos = new ArrayList<>();
-    }
-
-    public int agregarTerceto(String o1, String o2, String operador){
-        Terceto tercet = new Terceto(operador, o1, o2);
-        tercetos.add(tercet);
-        return tercetos.size()-1;
     }
 
     public String getCurrentScope(){
@@ -91,7 +93,7 @@ public class Generador {
         return atributo.declarado;
     }
 
-    public boolean checkearAlcance(String IDCOMP, TablaSimbolos ts){
+    public String checkearAlcance(String IDCOMP, TablaSimbolos ts){
         String sinUltimo = quitarUltimo(IDCOMP);
         String ambitoActual = getCurrentScope();
 
@@ -102,13 +104,117 @@ public class Generador {
         if (alcanceValido) {
             Atributo aux = ts.obtener(IDCOMP);
             if (aux == null)
-                return false;
-            return aux.declarado;
+                return "Variable no encontrada";
+            if (!aux.declarado)
+                return "Variable no declarada";
+            return null;
         } else {
-            return false;
+            return "Variable fuera de alcance";
         }
     }
 
+    // Agregar terceto sin tipo, por default se utiliza tipo = -1.
+    public int agregarTerceto(String operador, String o1, String o2){
+        Terceto tercet = new Terceto(operador, o1, o2);
+        tercetos.add(tercet);
+        return tercetos.size()-1;
+    }
+
+    // Agregar terceto con tipo.
+    public int agregarTerceto(String operador, String o1, String o2, int tipo){
+        Terceto tercet = new Terceto(operador, o1, o2, tipo);
+        tercetos.add(tercet);
+        return tercetos.size()-1;
+    }
+
+
+    private OperandoInfo resolverOperando(String valor, TablaSimbolos ts) {
+        // Intentamos parsear como terceto. el valor es el indice de el array de tercetos
+        try {
+            int indice = Integer.parseInt(valor);
+            Terceto t = tercetos.get(indice);
+            OperandoInfo info = new OperandoInfo();
+            info.esTerceto = true;
+            info.tipo = t.tipo;
+            info.representacion = valor;
+            return info;
+        } catch (Exception ignored) { }
+
+        // Si no es un terceto, lo buscamos en la TS, pq el valor es el lexema
+        Atributo atr = ts.obtener(valor);
+        if (atr == null || !atr.declarado)
+            return null; // no declarado
+
+        OperandoInfo info = new OperandoInfo();
+        info.esTerceto = false;
+        info.tipo = atr.type;
+        info.representacion = valor;
+        return info;
+    }
+
+    // Genera tercetos para ambos multiplicaciones y divisiones.
+    public String generarTercetoValido(String operador, String izquierda, String derecha, TablaSimbolos ts) {
+
+        // Resolvemos ambos operandos.
+        OperandoInfo izq = resolverOperando(izquierda, ts);
+        if (izq == null)
+            return "Lado izquierdo no declarado.";
+
+        OperandoInfo der = resolverOperando(derecha, ts);
+        if (der == null)
+            return "Lado derecho no declarado.";
+
+        // Chequeo tipos.
+        int tipoResultante = checkearCompatibilidad(operador, izq.tipo, der.tipo);
+        if (tipoResultante == Atributo.invalidType)
+            return "Tipos incompatibles.";
+
+        // Crear terceto con tipo resultante.
+        agregarTerceto(operador, izquierda, derecha, tipoResultante);
+
+        return null;
+    }
+
+    public int getUltimoTerceto(){
+        return tercetos.size()-1;
+    }
+
+    int checkearCompatibilidad(String op, int tipo1, int tip2){
+        //if (op.equals(":=")){
+            if (tipo1 == Atributo.longType && tip2 == Atributo.longType)
+                return Atributo.longType;
+        //}
+
+        return Atributo.invalidType;
+    }
+
+    // Verifica si una variable se puede leer dependiendo de su semantica
+    public String puedoLeer(String IDCOMP, TablaSimbolos ts){
+        Atributo id = ts.obtener(IDCOMP);
+        // Checkeo dependiendo de la semantica del parametro.
+        if (id.uso == Atributo.USO_PARAMETRO){
+            if (id.esCR){
+                return "La variable no puede ser usada para leer.";
+            }
+            return null;
+        }
+
+        // Si es una variable, se puede leer.
+        if (id.uso == Atributo.USO_VARIABLE){
+            return null;
+        }
+
+        // Lo demas no se puede leer.
+        return "La variable no puede ser usada para leer.";
+    }
+
+    public String puedoEscribir(String IDCOMP, TablaSimbolos ts){
+        Atributo id = ts.obtener(IDCOMP);
+        if (id.uso == Atributo.USO_VARIABLE || id.uso == Atributo.USO_PARAMETRO){
+            return null;
+        }
+        return "La variable no puede ser usada para escribir.";
+    }
 
 }
 

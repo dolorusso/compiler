@@ -15,6 +15,7 @@ public class Atributo {
     public List<String> parametros = null;
     public boolean tieneReturn = false;
 
+    public static final int invalidType = -1;
     public static final int longType = 0;
     public static final int floatType = 1;
     public static final int stringType = 2;
@@ -36,6 +37,7 @@ public class Atributo {
         this.type = type;
         this.numValue = numValue;
         this.uso = uso;
+        this.declarado = true;
     }
 
     public Atributo(int type, boolean esCR, String uso){
@@ -60,7 +62,6 @@ public class Atributo {
                 ", numValue=" + numValue +
                 ", declarado=" + declarado  +
                 ", esCR=" + esCR +
-                ", declarado=" + declarado +
                 ", uso=" + uso  +
             '}';
     }
