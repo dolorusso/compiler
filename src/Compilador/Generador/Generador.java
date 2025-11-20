@@ -9,7 +9,7 @@ public class Generador {
     public final List<Terceto> tercetos;
     private final Stack<String> scopeStack;
     private final Map<String, Atributo> pasajeParametrosAux;
-    private final List<ParametroReal> llamadaFuncionAux;
+    private final List<ParametroLlamada> llamadaFuncionAux;
 
     // Clase interna para abstraer la operacion de tercetos y entradas de la tabla de simbolos.
     private static class OperandoInfo {
@@ -229,21 +229,102 @@ public class Generador {
     // En las llamadas a funciones guardamos el par parametroReal -> parametroFormal
     // para luego vincularlo en reglas de orden superior.
     public void agregarParametroReal(String parametroReal, String parametroFormal){
-        ParametroReal pr = new ParametroReal(parametroReal, parametroFormal);
+        ParametroLlamada pr = new ParametroLlamada(parametroReal, parametroFormal);
         llamadaFuncionAux.add(pr);
     }
 
-    // Funcion para vincularle el ambito correspondiente a los parametros reales, ya que en los llamados
-    // no tienen el ambito pero en la tabla de simbolos los guardamos con este.
-    public String vincularIDS(String idFuncion, TablaSimbolos ts){
-        return
-    }
+
 
     public String checkearParametrosLlamada(String idFuncion, TablaSimbolos ts){
-        Map<String, Atributo> parametrosFormales = new HashMap<>();
-        for (String parametroFormal : ts.obtener(idFuncion).parametros) {
-            Atributo atributoPF = ts.obtener(vincularIDS(parametroFormal,ts));
-            parametrosFormales.put(parametroFormal, null);
+        Atributo func = ts.obtener(idFuncion);
+        if (func == null || func.uso != Atributo.USO_FUNCION)
+            return "Funcion no declarada.";
+
+        // Lista de parametros formales sin ambito.
+        List<String> parametrosFormales = func.parametros;
+
+        // Verificar que todos los parametros reales tengan un formal.
+        for (ParametroLlamada pr : llamadaFuncionAux){
+            if (!parametrosFormales.contains(pr.formal)){
+                return "Parametro formal no declarado.";
+            }
+        }
+
+        // Verificar que se utilicen todos los parametros formales.
+        for (String f : parametrosFormales){
+            boolean encontrado = false;
+            for (ParametroLlamada pr : llamadaFuncionAux){
+                if (pr.formal.equals(f)){
+                    encontrado = true;
+                    break;
+                }
+            }
+            if (!encontrado){
+                return "Parametro formal no utilizado.";
+            }
+        }
+
+        // Checkear tipos y CR
+        for (ParametroLlamada pr : llamadaFuncionAux){
+            String formalKey = idFuncion + "." + pr.formal;
+            Atributo formalAtr = ts.obtener(formalKey);
+            if (formalAtr == null)
+                return "Parametro formal no declarado.";
+
+            int tipoParametroReal;
+            try {
+                int i = Integer.parseInt(pr.real);
+
+                // Un terceto no puede ser pasado como parametro CR.
+                if (formalAtr.esCR) {
+                    return "Parametro CR, se espera asignable.";
+                }
+
+                tipoParametroReal = i;
+            } catch (Exception e) {
+                Atributo realAtr = ts.obtener(pr.real);
+                if (realAtr == null || !realAtr.declarado)
+                    return "Parametro real no declarado.";
+                // todo aca se deberia checkear si es una variable, funcion, etc.
+
+                // Si es copia resultado, solo se le debe pasar un asignable. Las variables son asignables,
+                // Pero tambien en llamados a funciones desde funciones los parametros.
+                if (formalAtr.esCR){
+                    if (!(realAtr.uso == Atributo.USO_VARIABLE || realAtr.uso == Atributo.USO_PARAMETRO ))
+                        return "Parametro CR, se espera asignable.";
+                }
+
+                tipoParametroReal = realAtr.type;
+            }
+
+            // Checkeamos compatibilidad. Utilizamos asignacion ya que es lo que sucedera en los parametros.
+            if (checkearCompatibilidad(":=", tipoParametroReal, formalAtr.type) == Atributo.invalidType){
+                return "Tipo de parametros incompatible.";
+            }
+
+        }
+        return null;
+    }
+
+
+    // Funcion para generar tercetos. Supone previo llamado a checkearParametrosLlamada, por lo que
+    // no se realizaran checkeos de tipo, existencia, declaracion.
+    public String generarTercetosLlamado(String idFuncion, TablaSimbolos ts){
+        // Obtenemos la funcion sin verificar que sea correcta ya que esto se deberia cumplir por prerequisitos.
+        Atributo func = ts.obtener(idFuncion);
+
+        // Guardamos los atributos y utilizamos el campo StringValue
+        List<Atributo> parametrosCR = new ArrayList<>();
+
+        for (ParametroLlamada pr : llamadaFuncionAux){
+            String formalKey = idFuncion + "." + pr.formal;
+            Atributo formalAtr = ts.obtener(formalKey);
+
+            // Tratamiento especial para parametros CR, ya que estos requieren el copiado en salida.
+            if (formalAtr.esCR){
+                // Guardamos los atributos,
+                parametrosCR.add(formalAtr);
+            }
         }
 
 
