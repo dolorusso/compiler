@@ -2,7 +2,10 @@ A {
     long A.Z;
     long F(long X){
         A.Z := 3L;
-        A.F.X := -A.Z;
-        return (A.Z);
+        A.F.X := 1 - -4;
+        return (A.F.X);
+
     }
+
+    A.Z := A.F(3L -> X);
 }

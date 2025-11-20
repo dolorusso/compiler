@@ -23,11 +23,19 @@ public class Terceto {
 
     @Override
     public String toString() {
+        if (tipo == -1)
+            return
+                "{" +
+                    "operador='" + operador + '\'' +
+                    ", operando1='" + operando1 + '\'' +
+                    ", operando2='" + operando2 + '\'' +
+                "} \n";
         return
             "{" +
                 "operador='" + operador + '\'' +
                 ", operando1='" + operando1 + '\'' +
                 ", operando2='" + operando2 + '\'' +
-                "} \n";
+                ", tipo=" + tipo +
+            "} \n";
     }
 }

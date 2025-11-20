@@ -12,7 +12,7 @@
 
 %start programa
 
-%type <sval> constante factor termino expresion parametro_real
+%type <sval> constante factor termino expresion parametro_real cuerpo_expresion llamada_funcion
 %token <sval> CTEL CTEF INVALID ID IDCOMP
 
 %type <ival> lista_identificadores tipo
@@ -104,9 +104,11 @@ declaracion_funcion
             Atributo func = al.ts.obtener(scope);
             if (func.tieneReturn){
                 errManager.debug("Declaracion de funcion detectada.", al.getLine());
+                generador.agregarTerceto("fin_funcion", scope, "-");
 	        } else {
 	            errManager.error("Falta sentencia return.", al.getLine());
 	        }
+
 	        generador.exitScope();
 	    }
     ;
@@ -117,11 +119,15 @@ inicio_funcion
             // Entramos al scope de la funcion.
             generador.enterScope($2);
             // Checkeamos si esta declarada usando el scope, ya que este sera el mangle name de la funcion.
-            if (generador.estaDeclarada(generador.getCurrentScope(), al.ts)){
+            String ambitoFuncion = generador.getCurrentScope();
+            if (generador.estaDeclarada(ambitoFuncion, al.ts)){
                 errManager.error("Redeclaracion de funcion no permitida.", al.getLine());
             } else {
                 // Generamos las entradas solo si es correcta.
                 generador.aplicarAmbito(al.ts,$1);
+
+                //Generamos el terceto correspondiente al inicio de la a funcion.
+                generador.agregarTerceto("inicio_funcion", ambitoFuncion, "-", $1);
             }
         }
     | ID parametros_formales_opt
@@ -187,7 +193,7 @@ parametro_formal
 	| ID
 	    { errManager.error("Se espera un tipo correspondiente al parametro formal", al.getLine()); }
 	| LAMBDA ID
-	    { errManager.debug("Parametro formal lambda semantica copia-resultado detectado", al.getLine()); }
+	    { errManager.debug("Parametro formal lambda semantica detectado", al.getLine()); }
 	| CR LAMBDA ID
 	    { errManager.error("Semantica Copia Resultado invalida en el contexto", al.getLine()); }
 	| CR error
@@ -347,7 +353,7 @@ tipo
 	: LONG
 	    { $$ = 0; }
 	| STRING
-	    { $$ = 2; }
+	    { errManager.error("Tipo string no permitido.",al.getLine()); }
 	;
 
 asignacion
@@ -484,13 +490,20 @@ factor
 	| constante
 	    { $$ = $1; }
 	| llamada_funcion
-	    {
-	        // a
-
-	    }
+	    { $$ = $1; }
 	| ID
 	    { errManager.error("Falta prefijo obligatorio del ID", al.getLine()); }
-    | '-' llamada_funcion // TODO !!!!. Es tipo long igualmente.
+    | '-' llamada_funcion
+        {
+            String mensaje = generador.generarTercetoValido("*", "-1L", $2, al.ts);
+            if (mensaje != null){
+                errManager.error(mensaje,al.getLine());
+                break ;
+            }
+
+            int indiceTerceto = generador.getUltimoTerceto();
+            $$ = indiceTerceto + "";
+        }
     | '-' IDCOMP
         {
             errManager.debug("Identificador con -", al.getLine());
@@ -545,7 +558,13 @@ llamada_funcion
                 break ;
             }
 
-            mensaje = generador.generarTercetosLlamado() ....
+            mensaje = generador.generarTercetosLlamado($1, al.ts);
+            try{
+                int indiceTerceto = Integer.parseInt(mensaje);
+                $$ = indiceTerceto + "";
+            } catch (Exception e){
+                errManager.error(mensaje, al.getLine());
+            }
 
 	    }
 	| ID '(' lista_parametros_reales ')'
@@ -562,22 +581,31 @@ print
 
 lambda
 	: '(' tipo ID')' '{' lista_sentencias_ejecutables '}'
-	    { errManager.debug("Definicion lambda detectada", al.getLine()); }
+	    {
+	        errManager.debug("Definicion lambda detectada", al.getLine());
+            String mensaje = generador.
+	    }
 	| '(' tipo ID ')' '{' lista_sentencias_ejecutables
 	    { errManager.error("Falta llave de cierre en lambda", al.getLine()); }
 	| '(' tipo ID ')' lista_sentencias_ejecutables '}'
 	    { errManager.error("Falta llave de apertura en lambda", al.getLine()); }
     | '(' tipo ID ')'
         { errManager.error("Faltan llaves en lambda", al.getLine()); }
+    | '(' CR tipo ID ')' '{' lista_sentencias_ejecutables '}'
+        { errManager.error("Semantica invalida en funciones lambda.", al.getLine()); }
 	;
 
 retorno
 	: RETURN cuerpo_expresion
-	    {errManager.debug("Retorno detectado. Linea: " + al.getLine());}
+	    {
+	        errManager.debug("Retorno detectado. Linea: " + al.getLine());
+	        generador.agregarTerceto("return", $2, "-");
+	    }
 	;
 
 cuerpo_expresion
     : '(' expresion ')'
+        { $$ = $2; }
     | expresion ')'
         { errManager.error("Falta parentesis de apertura", al.getLine()); }
     | '(' expresion error
@@ -712,7 +740,7 @@ public void run()
 {
     yyparse();
     errManager.debug("Tabla de simbolos resultante" + '\n' +  al.ts.toString());
-    errManager.debug("Tercetos resultante" + '\n' +  generador.tercetos.toString());
+    errManager.debug("Tercetos resultante" + '\n' +  generador.imprimirTercetos());
 }
 
 public void yyerror(String s) {
