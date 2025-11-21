@@ -436,7 +436,7 @@ inicio_do
     : DO
         {
             // Guardamos la direccion de inicio del DO.
-            $$ = generador.getUltimoTerceto();;
+            $$ = generador.getUltimoTerceto();
         }
 
 comparador
@@ -766,6 +766,8 @@ asignacion_multiple
                 errManager.error(mensaje, al.getLine());
                 break ;
             }
+
+            generador.limpiarAsignacionMultiple();
 
         }
     | ids error '=' lista_constantes ';'

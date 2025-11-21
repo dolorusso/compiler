@@ -49,7 +49,6 @@ public class Atributo {
 
     public Atributo(int type, String uso){
         this.type = type;
-        //si a algo se le asigna un tipo, es por que esta declarado
         this.declarado = true;
         this.uso = uso;
     }

@@ -36,11 +36,13 @@ public class Generador {
     //----------------------------------------------------------------------------------------------------------------//
     //-------------------------------------------------FUNCIONES DE SCOPE/AMBITO--------------------------------------//
     //----------------------------------------------------------------------------------------------------------------//
+
+    // Funcion para devolver el ambito actual.
     public String getCurrentScope(){
-        //ver si le ponemos global o error, por que en realidad desde el sintactico no te va a dejar
-        return scopeStack.isEmpty() ? "global" : scopeStack.peek();
+        return scopeStack.peek();
     }
 
+    // Funcion para agregar a la pila de ambitos un nuevo ambito.
     public void enterScope(String name) {
         String full;
         if (scopeStack.isEmpty())
@@ -50,12 +52,15 @@ public class Generador {
         scopeStack.push(full);
     }
 
+    // Funcion para desapilar un ambito de la pila.
     public void exitScope() {
         if (!scopeStack.isEmpty()) {
-            String left = scopeStack.pop();
+            scopeStack.pop();
         }
     }
 
+    // Funcion para construir el mangleName a partir del id de la variable.
+    // El mangle name sera igual a los IDCOMP.
     public String mangleName(String id) {
         return getCurrentScope() + "." + id;
     }
@@ -66,6 +71,7 @@ public class Generador {
         return (pos == -1) ? IDCOMP : IDCOMP.substring(0, pos);
     }
 
+    // Funcion para verificar si que se declaren variables solo en el ambito correspondiente.
     public boolean checkearAmbito(String IDCOMP){
         // Sacamos el ultimo valor para poder comparar ambitos, sin la ultima ID.
         String sinUltimo = quitarUltimo(IDCOMP);
@@ -77,6 +83,7 @@ public class Generador {
     //-------------------------------------------------FUNCIONES DE PARAMETROS Y FUNCIONES----------------------------//
     //----------------------------------------------------------------------------------------------------------------//
 
+    // Funcion para agregar a la estructura auxiliar pasajeParametrosAux un nuevo parametro.
     public void agregarParametro(boolean esCR, int tipo, String ID){
         Atributo atributo = new Atributo(tipo,esCR,Atributo.USO_PARAMETRO);
         atributo.declarado = true;
@@ -156,7 +163,7 @@ public class Generador {
                     return "Parametro CR, se espera asignable.";
                 }
 
-                tipoParametroReal = i;
+                tipoParametroReal = tercetos.get(i).tipo;
             } catch (Exception e) {
                 Atributo realAtr = ts.obtener(pr.real);
                 if (realAtr == null || !realAtr.declarado)
@@ -169,9 +176,6 @@ public class Generador {
                     if (!(realAtr.uso == Atributo.USO_VARIABLE || realAtr.uso == Atributo.USO_PARAMETRO ))
                         return "Parametro CR, se espera asignable.";
                 }
-
-                if (formalAtr.uso == Atributo.USO_FUNCION && realAtr.uso != Atributo.USO_FUNCION)
-                    return "Parametro real no es una funcion.";
 
                 tipoParametroReal = realAtr.type;
             }
@@ -487,11 +491,16 @@ public class Generador {
         while (i < asignacionMultipleIDAux.size()){
             String idVariable = asignacionMultipleIDAux.get(i);
             agregarTerceto(":=", idVariable, "0L");
-
+            ErrorManager.getInstance().warning("Asignando 0L a la variable " + idVariable + " en asignacion multiple.");
             i = i + 1;
         }
 
         return null;
+    }
+
+    public void limpiarAsignacionMultiple(){
+        asignacionMultipleCTEAux.clear();
+        asignacionMultipleIDAux.clear();
     }
 }
 
