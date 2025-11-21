@@ -1,10 +1,10 @@
 A {
-    long A.X;
-    A.X := 5L;
-    if ( A.X >= 3L ){
-        A.X := 1L;
-    } else {
-        A.X := 10L;
-    } endif;
-    long A.Z;
+    long A.Y;
+    long F( long X , lambda Y){
+        A.F.X := 3L;
+        print(&dpajsodiasiod&);
+        return (3L);
+    }
+
+    A.F( 5L -> X, (long W){ A.Y := 4L; } -> Y);
 }

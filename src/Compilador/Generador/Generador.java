@@ -11,6 +11,8 @@ public class Generador {
     private final Stack<String> scopeStack;
     private final Map<String, Atributo> pasajeParametrosAux;
     private final List<ParametroLlamada> llamadaFuncionAux;
+    private final List<String> asignacionMultipleCTEAux;
+    private final List<String> asignacionMultipleIDAux;
     public int lambdaCounter;
 
 
@@ -26,12 +28,14 @@ public class Generador {
         pasajeParametrosAux = new HashMap<>();
         tercetos = new ArrayList<>();
         llamadaFuncionAux = new ArrayList<>();
+        asignacionMultipleCTEAux = new ArrayList<>();
+        asignacionMultipleIDAux = new ArrayList<>();
         lambdaCounter = 0;
     }
 
-    //-------------------------------------------------------------------------------------------------------------------------------------//
-    //-----------------------------------------------------------FUNCIONES DE SCOPE/AMBITO--------------------------------------------------//
-    //-------------------------------------------------------------------------------------------------------------------------------------//
+    //----------------------------------------------------------------------------------------------------------------//
+    //-------------------------------------------------FUNCIONES DE SCOPE/AMBITO--------------------------------------//
+    //----------------------------------------------------------------------------------------------------------------//
     public String getCurrentScope(){
         //ver si le ponemos global o error, por que en realidad desde el sintactico no te va a dejar
         return scopeStack.isEmpty() ? "global" : scopeStack.peek();
@@ -69,9 +73,9 @@ public class Generador {
         return sinUltimo.equals(getCurrentScope());
     }
 
-    //-------------------------------------------------------------------------------------------------------------------------------------//
-    //-------------------------------------------------FUNCIONES DE PARAMETROS Y FUNCIONES-------------------------------------------------//
-    //-------------------------------------------------------------------------------------------------------------------------------------//
+    //----------------------------------------------------------------------------------------------------------------//
+    //-------------------------------------------------FUNCIONES DE PARAMETROS Y FUNCIONES----------------------------//
+    //----------------------------------------------------------------------------------------------------------------//
 
     public void agregarParametro(boolean esCR, int tipo, String ID){
         Atributo atributo = new Atributo(tipo,esCR,Atributo.USO_PARAMETRO);
@@ -186,9 +190,9 @@ public class Generador {
         return "lambda#" + lambdaCounter;
     }
 
-    //-------------------------------------------------------------------------------------------------------------------------------------//
-    //-----------------------------------------------------------FUNCIONES DE VARIABLES-----------------------------------------------------//
-    //-------------------------------------------------------------------------------------------------------------------------------------//
+    //----------------------------------------------------------------------------------------------------------------//
+    //-----------------------------------------------------------FUNCIONES DE VARIABLES-------------------------------//
+    //----------------------------------------------------------------------------------------------------------------//
 
     public boolean estaDeclarada(String IDCOMP, TablaSimbolos ts){
         Atributo atributo = ts.obtener(IDCOMP);
@@ -223,7 +227,7 @@ public class Generador {
         // Checkeo dependiendo de la semantica del parametro.
         if (id.uso == Atributo.USO_PARAMETRO){
             if (id.esCR){
-                return "La variable no puede ser usada para leer.";
+                return "La variable "+ IDCOMP + " no puede ser usada para leer.";
             }
             return null;
         }
@@ -234,7 +238,7 @@ public class Generador {
         }
 
         // Lo demas no se puede leer.
-        return "La variable no puede ser usada para leer.";
+        return "La variable "+ IDCOMP + " no puede ser usada para leer.";
     }
 
     public String puedoEscribir(String IDCOMP, TablaSimbolos ts){
@@ -242,7 +246,7 @@ public class Generador {
         if (id.uso == Atributo.USO_VARIABLE || id.uso == Atributo.USO_PARAMETRO){
             return null;
         }
-        return "La variable no puede ser usada para escribir.";
+        return "La variable "+ IDCOMP +" no puede ser usada para escribir.";
     }
 
     public String puedoLlamar(String IDCOMP, TablaSimbolos ts){
@@ -250,12 +254,26 @@ public class Generador {
         if (id.uso == Atributo.USO_FUNCION){
             return null;
         }
-        return "La variable no puede ser usada para llamada.";
+        return "La variable "+ IDCOMP +" no puede ser usada para llamada.";
     }
 
-    //-------------------------------------------------------------------------------------------------------------------------------------//
-    //-----------------------------------------------------------FUNCIONES DE TERCETOS-----------------------------------------------------//
-    //-------------------------------------------------------------------------------------------------------------------------------------//
+    // Funcion para abstraer codigo de checkeos de IDs.
+    public String validarLecturaYAlcance(String id, TablaSimbolos ts) {
+        String mensaje = puedoLeer(id, ts);
+        if (mensaje != null)
+            return mensaje;
+
+        mensaje = checkearAlcance(id, ts);
+        if (mensaje != null)
+            return mensaje;
+
+        return null; // Sin errores
+    }
+
+
+    //----------------------------------------------------------------------------------------------------------------//
+    //-----------------------------------------------------------FUNCIONES DE TERCETOS--------------------------------//
+    //----------------------------------------------------------------------------------------------------------------//
 
     // Agregar terceto sin tipo, por default se utiliza tipo = -1.
     public int agregarTerceto(String operador, String o1, String o2){
@@ -325,11 +343,17 @@ public class Generador {
         return tercetos.size()-1;
     }
 
-    int checkearCompatibilidad(String op, int tipo1, int tip2){
+    int checkearCompatibilidad(String op, int tipo1, int tipo2){
         //if (op.equals(":=")){
-            if (tipo1 == Atributo.longType && tip2 == Atributo.longType)
+            if (tipo1 == Atributo.longType && tipo2 == Atributo.longType)
                 return Atributo.longType;
         //}
+
+        if (tipo1 == Atributo.floatType && tipo2 == Atributo.floatType)
+            return Atributo.floatType;
+
+        if (tipo1 == Atributo.lambdaType && tipo2 == Atributo.lambdaType)
+            return Atributo.lambdaType;
 
         return Atributo.invalidType;
     }
@@ -357,6 +381,7 @@ public class Generador {
             }
         }
 
+        // Generamos los tercetos para asignar a las variables de salida por semantica CR.
         int callIdx = agregarTerceto("call", idFuncion, "-", func.type);
         for (ParametroLlamada pr : parametrosCR){
             agregarTerceto(":=", pr.real, pr.formal);
@@ -385,22 +410,22 @@ public class Generador {
         return result.toString();
     }
 
-    //-------------------------------------------------------------------------------------------------------------------------------------//
-    //-----------------------------------------------------------FUNCIONES DE IF-----------------------------------------------------//
-    //-------------------------------------------------------------------------------------------------------------------------------------//
-    // --- Nuevo: crear BF (branch if false) con destino desconocido ---
+    //----------------------------------------------------------------------------------------------------------------//
+    //-----------------------------------------------------------FUNCIONES DE IF--------------------------------------//
+    //----------------------------------------------------------------------------------------------------------------//
+    // crear BF (branch if false) con destino desconocido.
     public int generarBF(int condicion) {
         // BF condicion -> destino (inicialmente "-")
         return agregarTerceto("BF", condicion + "", "-");
     }
 
-    // --- Nuevo: crear BI (salto incondicional) con destino desconocido ---
+    // crear BI (salto incondicional) con destino desconocido.
     public int generarBI() {
         // BI - -> destino (inicialmente "-")
         return agregarTerceto("BI", "-", "-");
     }
 
-    // --- Nuevo: backpatch - rellena el operando 2 del terceto indicado ---
+    // Backpatch, rellena el operando 2 del terceto indicado.
     public void rellenarOperando(int indiceTerceto, int nuevoOp, int indiceModificable) {
 
         Terceto viejo = tercetos.get(indiceTerceto);
@@ -420,6 +445,52 @@ public class Generador {
         ErrorManager.getInstance().debug("Backpatch: terceto[" + indiceTerceto + "] ahora -> " + nuevoTer.toString());
     }
 
+    //----------------------------------------------------------------------------------------------------------------//
+    //-------------------------------------------FUNCIONES DE ASIGNACION MULTIPLE-------------------------------------//
+    //----------------------------------------------------------------------------------------------------------------//
 
+    public String agregarConstanteMultiple(String idConstante, TablaSimbolos ts){
+        // No checkeamos que este declarada o exista ya que tenerla en el ejecutable implica que existe en la TS.
+        asignacionMultipleCTEAux.add(idConstante);
+        return null;
+    }
+
+    public String agregarIDMultiple(String IDCOMP, TablaSimbolos ts){
+        asignacionMultipleIDAux.add(IDCOMP);
+        return null;
+    }
+
+    // Funcion que recorre las listas auxiliares verificando la compatibilidad de los pares.
+    // (Aunque ahora no sea tan necesario por que solo se pueden declarar LONGS, seria la practica correcta).
+    // Se realiza todo en una funcion ya que simplifica bastante la logica.
+    public String generarAsignacionMultiple(TablaSimbolos ts){
+        if (asignacionMultipleCTEAux.size() > asignacionMultipleIDAux.size())
+            return "Debe haber mayor o igual cantidad de IDs que Constantes en asignacion multiple.";
+
+        int i = 0;
+        while (i < asignacionMultipleIDAux.size() && i < asignacionMultipleCTEAux.size()){
+            String idConstante = asignacionMultipleCTEAux.get(i);
+            String idVariable = asignacionMultipleIDAux.get(i);
+
+            int tipoResultante = checkearCompatibilidad(":=", ts.obtener(idVariable).type, ts.obtener(idConstante).type);
+            if (tipoResultante == Atributo.invalidType){
+                return "Tipos incompatibles en asignacion multiple. Tipo constante: "
+                        + ts.obtener(idConstante).type + ", tipo variable: " + ts.obtener(idVariable).type;
+            }
+
+            agregarTerceto(":=", idVariable, idConstante);
+
+            i = i + 1;
+        }
+
+        while (i < asignacionMultipleIDAux.size()){
+            String idVariable = asignacionMultipleIDAux.get(i);
+            agregarTerceto(":=", idVariable, "0L");
+
+            i = i + 1;
+        }
+
+        return null;
+    }
 }
 

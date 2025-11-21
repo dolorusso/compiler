@@ -19,6 +19,7 @@ public class Atributo {
     public static final int longType = 0;
     public static final int floatType = 1;
     public static final int stringType = 2;
+    public static final int lambdaType = 3;
 
     public static final String USO_CONSTANTE = "constante";
     public static final String USO_VARIABLE = "variable";

@@ -13,7 +13,7 @@
 %start programa
 
 %type <sval> constante factor termino expresion parametro_real cuerpo_expresion llamada_funcion inicio_lambda comparador
-%type <sval>  lambda cuerpo_print
+%type <sval>  lambda cuerpo_print ids
 %token <sval> CTEL CTEF INVALID ID IDCOMP CADENASTR MENORIGUAL MAYORIGUAL IGUALIGUAL DISTINTO '>' '<'
 
 %type <ival> lista_identificadores tipo inicio_if else_opt inicio_else condicional_opt condicion
@@ -194,7 +194,10 @@ parametro_formal
 	| ID
 	    { errManager.error("Se espera un tipo correspondiente al parametro formal", al.getLine()); }
 	| LAMBDA ID
-	    { errManager.debug("Parametro formal lambda semantica detectado", al.getLine()); }
+	    {
+	        errManager.debug("Parametro formal lambda semantica detectado", al.getLine());
+	        generador.agregarParametro(false,Atributo.lambdaType,$2);
+	    }
 	| CR LAMBDA ID
 	    { errManager.error("Semantica Copia Resultado invalida en el contexto", al.getLine()); }
 	| CR error
@@ -233,6 +236,10 @@ parametro_real_compuesto
 	        errManager.debug("Parametro real detectado", al.getLine());
             generador.agregarParametroReal($1, $3);
 	    }
+	| parametro_real error
+	    {
+            errManager.error("Parametro real debe ser vinculado a formal (->)", al.getLine());
+        }
 	;
 
 parametro_real
@@ -561,17 +568,10 @@ termino
 factor
 	: IDCOMP
 	    {
-            // Verificamos que se pueda leer el IDCOMP.
-            String mensaje = generador.puedoLeer($1, al.ts);
+            // Verificamos que el IDCOMP sea valido.
+            String mensaje = generador.validarLecturaYAlcance($1, al.ts);
             if (mensaje != null){
                 errManager.error(mensaje,al.getLine());
-                break;
-            }
-
-            // Verificamos que se encuetre al alcance.
-            mensaje = generador.checkearAlcance($1, al.ts);
-            if (mensaje != null){
-                errManager.error(mensaje, al.getLine());
                 break;
             }
 
@@ -599,19 +599,13 @@ factor
         {
             errManager.debug("Identificador con -", al.getLine());
 
-            // Verificamos que se pueda leer el IDCOMP.
-            String mensaje = generador.puedoLeer($2, al.ts);
+            // Verificamos que el IDCOMP sea valido.
+            String mensaje = generador.validarLecturaYAlcance($2, al.ts);
             if (mensaje != null){
                 errManager.error(mensaje, al.getLine());
                 break;
             }
 
-            // Verificamos que se encuetre al alcance.
-            mensaje = generador.checkearAlcance($2, al.ts);
-            if (mensaje != null){
-                errManager.error(mensaje, al.getLine());
-                break;
-            }
 
             // Generamos el terceto correspondiente. Utilizamos un "-1L" previamente creado como auxiliar.
             mensaje = generador.generarTercetoValido("*", "-1L", $2, al.ts);
@@ -709,7 +703,7 @@ inicio_lambda
             // Agregamos el parametro, esto para reutilizar los metodos de funcion.
             generador.agregarParametro(false, $2, $3);
             // Aplica ambito a los parametros y crea el terceto de funcion.
-            generador.aplicarAmbito(al.ts, Atributo.invalidType, lamScope);
+            generador.aplicarAmbito(al.ts, Atributo.lambdaType, lamScope);
 
             //Generamos el terceto correspondiente al inicio de la a funcion.
             generador.agregarTerceto("inicio_funcion", lamScope, "-");
@@ -745,23 +739,57 @@ cuerpo_expresion
 
 asignacion_multiple
     : ids '=' lista_constantes ';'
-        { errManager.debug("Asignacion multiple detectada. Linea: " + al.getLine()); }
+        {
+            errManager.debug("Asignacion multiple detectada. Linea: " + al.getLine());
+            // Se checkeo alcance y lectura de las ID, por lo que solo resta verificar los tipos y
+            // realizar las asignaciones (generar tercetos).
+
+            String mensaje = generador.generarAsignacionMultiple(al.ts);
+            if (mensaje != null){
+                errManager.error(mensaje, al.getLine());
+                break ;
+            }
+
+
+        }
     | ids error '=' lista_constantes ';'
-        { errManager.error("Error en asignacion multiple, separador a utilizar: ','", al.getLine()); }
+        { errManager.error("Falta de separador: ','", al.getLine()); }
     | ids '=' error
-        { errManager.error("Error en asignacion multiple, separador a utilizar: ','", al.getLine()); }
+        { errManager.error("Falta de separador: ','", al.getLine()); }
     | ids '=' lista_constantes error
         { errManager.error("Falta separador ';'", al.getLine()); }
     ;
 
 ids
     : IDCOMP
+        {
+            // Verificamos que el IDCOMP sea valido.
+            String mensaje = generador.validarLecturaYAlcance($1, al.ts);
+            if (mensaje != null){
+                errManager.error(mensaje, al.getLine());
+                break;
+            }
+
+            generador.agregarIDMultiple($1, al.ts);
+        }
     | ids ',' IDCOMP
+        {
+            // Verificamos que el IDCOMP sea valido.
+            String mensaje = generador.validarLecturaYAlcance($3, al.ts);
+            if (mensaje != null){
+                errManager.error(mensaje, al.getLine());
+                break;
+            }
+
+            generador.agregarIDMultiple($3, al.ts);
+        }
     ;
 
 lista_constantes
     : lista_constantes ',' constante
+        { generador.agregarConstanteMultiple($3, al.ts); }
     | constante
+        { generador.agregarConstanteMultiple($1, al.ts); }
     ;
 
 constante
@@ -808,6 +836,7 @@ public Parser(ErrorManager.Nivel nivel){
     errManager.setNivel(nivel);
     this.generador = new Generador();
     al.ts.insertar("-1L", new Atributo(0,-1,"auxiliar"));
+    al.ts.insertar("0L", new Atributo(0,0,"auxiliar"));
 }
 
 public int yylex(){
