@@ -1,11 +1,10 @@
 A {
+    long A.X;
+    A.X := 5L;
+    if ( A.X >= 3L ){
+        A.X := 1L;
+    } else {
+        A.X := 10L;
+    } endif;
     long A.Z;
-    long F(long X){
-        A.Z := 3L;
-        A.F.X := 1 - -4;
-        return (A.F.X);
-
-    }
-
-    A.Z := A.F(3L -> X);
 }

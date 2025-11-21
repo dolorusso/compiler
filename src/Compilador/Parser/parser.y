@@ -12,10 +12,11 @@
 
 %start programa
 
-%type <sval> constante factor termino expresion parametro_real cuerpo_expresion llamada_funcion
-%token <sval> CTEL CTEF INVALID ID IDCOMP
+%type <sval> constante factor termino expresion parametro_real cuerpo_expresion llamada_funcion inicio_lambda comparador
+%type <sval>  lambda cuerpo_print
+%token <sval> CTEL CTEF INVALID ID IDCOMP CADENASTR MENORIGUAL MAYORIGUAL IGUALIGUAL DISTINTO '>' '<'
 
-%type <ival> lista_identificadores tipo
+%type <ival> lista_identificadores tipo inicio_if else_opt inicio_else condicional_opt condicion
 %token <ival> STRING LONG
 
 %%
@@ -124,7 +125,7 @@ inicio_funcion
                 errManager.error("Redeclaracion de funcion no permitida.", al.getLine());
             } else {
                 // Generamos las entradas solo si es correcta.
-                generador.aplicarAmbito(al.ts,$1);
+                generador.aplicarAmbito(al.ts,$1, ambitoFuncion);
 
                 //Generamos el terceto correspondiente al inicio de la a funcion.
                 generador.agregarTerceto("inicio_funcion", ambitoFuncion, "-", $1);
@@ -246,59 +247,124 @@ control
 
 
 sentencia_IF
-	: IF condicional_opt cuerpo_opt ENDIF ';'
-	    { errManager.debug("IF detectado (sin ELSE)", al.getLine()); }
-	| IF condicional_opt sentencia_ejecutable ENDIF ';'
-    	{ errManager.debug("IF detectado (sin ELSE)", al.getLine()); }
-	| IF condicional_opt cuerpo_opt else_opt
-	    { errManager.debug("IF-ELSE detectado", al.getLine()); }
-    | IF condicional_opt sentencia_ejecutable else_opt
-        { errManager.debug("IF-ELSE detectado", al.getLine()); }
-	| IF condicional_opt cuerpo_opt ENDIF error
+	: inicio_if cuerpo_opt ENDIF ';'
+	    {
+	        errManager.debug("IF detectado (sin ELSE)", al.getLine());
+
+            // Calculamos el indice del terceto siguiente a la ultima instruccion del bloque then.
+            int afterThen = generador.getUltimoTerceto() + 1;
+
+            // Backpatch BF para saltar a afterThen (no hay else).
+            generador.rellenarOperando($1, afterThen, 2);
+	    }
+	| inicio_if sentencia_ejecutable ENDIF ';'
+    	{
+    	    errManager.debug("IF detectado (sin ELSE)", al.getLine());
+
+            // Calculamos el indice del terceto siguiente a la ultima instruccion del bloque then.
+            int afterThen = generador.getUltimoTerceto() + 1;
+
+            // Backpatch BF para saltar a afterThen (no hay else).
+            generador.rellenarOperando($1, afterThen, 2);
+    	}
+	| inicio_if cuerpo_opt else_opt
+	    {
+	        errManager.debug("IF-ELSE detectado", al.getLine());
+
+            // rellenamos Backpatch BF para saltar al inicio del else
+            generador.rellenarOperando($1, $3, 2);
+	    }
+    | inicio_if sentencia_ejecutable else_opt
+        {
+            errManager.debug("IF-ELSE detectado", al.getLine());
+
+            // rellenamos Backpatch BF para saltar al inicio del else
+            generador.rellenarOperando($1, $3, 2);
+        }
+	| inicio_if cuerpo_opt ENDIF error
         { errManager.error(" Falta delimitador de sentencias ;.", al.getLine()); }
-    | IF condicional_opt sentencia_ejecutable ENDIF error
+    | inicio_if sentencia_ejecutable ENDIF error
         { errManager.error(" Falta delimitador de sentencias ;.", al.getLine()); }
-	| IF condicional_opt cuerpo_opt ';'
+	| inicio_if cuerpo_opt ';'
 	    { errManager.error("Falta cierre endif",  al.getLine()); }
-	| IF condicional_opt sentencia_ejecutable ';'
+	| inicio_if sentencia_ejecutable ';'
         { errManager.error("Falta cierre endif",  al.getLine()); }
-    | IF condicional_opt '{' ENDIF ';'
+    | inicio_if '{' ENDIF ';'
         { errManager.error("Falta llave de cierre", al.getLine()); }
-    | IF condicional_opt '{' else_opt
+    | inicio_if '{' else_opt
         { errManager.error("Falta llave de cierre", al.getLine()); }
-    | IF condicional_opt '}' ENDIF ';'
+    | inicio_if '}' ENDIF ';'
         { errManager.error("Falta llave de apertura", al.getLine()); }
-    | IF condicional_opt '}' else_opt
+    | inicio_if '}' else_opt
         { errManager.error("Falta llave de apertura", al.getLine()); }
-    | IF condicional_opt ENDIF ';'
+    | inicio_if ENDIF ';'
         { errManager.error("Falta cuerpo de la sentencia", al.getLine()); }
-    | IF condicional_opt else_opt ';'
+    | inicio_if else_opt ';'
         { errManager.error("Falta cuerpo de la sentencia", al.getLine()); }
 	;
 
+inicio_if
+    : IF condicional_opt
+        {
+            // $2 = indice de terceto condicion.
+            // Generar BF con destino desconocido.
+            int idxBF = generador.generarBF($2);
+            $$ = idxBF;
+        }
+
 else_opt
-    : ELSE cuerpo_opt ENDIF ';'
-    | ELSE sentencia_ejecutable ENDIF ';'
-    | ELSE cuerpo_opt ENDIF error
-        { errManager.error(" Falta delimitador de sentencias ;.", al.getLine()); }
-    | ELSE sentencia_ejecutable ENDIF error
-        { errManager.error(" Falta delimitador de sentencias ;.", al.getLine()); }
-    | ELSE cuerpo_opt ';'
+    : inicio_else cuerpo_opt ENDIF ';'
+        {
+            // Backpatch BF para saltar al Else.
+            //Lo pasamos para arriba asi se rellena el BF
+            $$ = $1 + 1;
+
+            // Calculamos el indice del terceto siguiente a la ultima instruccion del bloque then.
+            int afterElse = generador.getUltimoTerceto() + 1;
+
+            // Backpatch BI para saltar a afterElse.
+            generador.rellenarOperando($1, afterElse, 1);
+        }
+    | inicio_else sentencia_ejecutable ENDIF ';'
+        {
+            $$ = $1 + 1;
+
+            // Calculamos el indice del terceto siguiente a la ultima instruccion del bloque then.
+            int afterElse = generador.getUltimoTerceto() + 1;
+
+            // Backpatch BI para saltar a afterElse.
+            generador.rellenarOperando($1, afterElse, 1);
+        }
+    | inicio_else cuerpo_opt ENDIF error
+        { errManager.error("Falta delimitador de sentencias ;.", al.getLine()); }
+    | inicio_else sentencia_ejecutable ENDIF error
+        { errManager.error("Falta delimitador de sentencias ;.", al.getLine()); }
+    | inicio_else cuerpo_opt ';'
         { errManager.error("Falta cierre endif",  al.getLine()); }
-    | ELSE sentencia_ejecutable ';'
+    | inicio_else sentencia_ejecutable ';'
         { errManager.error("Falta cierre endif",  al.getLine()); }
-    | ELSE ';'
+    | inicio_else ';'
         { errManager.error("Falta cierre endif",  al.getLine()); }
-    | ELSE '{' ENDIF ';'
+    | inicio_else '{' ENDIF ';'
         { errManager.error("Falta llave de cierre", al.getLine()); }
-    | ELSE '}' ENDIF ';'
+    | inicio_else '}' ENDIF ';'
         { errManager.error("Falta llave de apertura", al.getLine()); }
-    | ELSE ENDIF
-        { errManager.error(" Falta cuerpo de la sentencia ;.", al.getLine()); }
+    | inicio_else ENDIF
+        { errManager.error("Falta cuerpo de la sentencia ;.", al.getLine()); }
+    ;
+
+inicio_else
+    : ELSE
+        {
+          int idxBI = generador.generarBI();
+          //devolvemos la instruccion donde se genero el BI
+          $$ = idxBI;
+        }
     ;
 
 condicional_opt
     : '(' condicion ')'
+        { $$ = $2; }
     | condicion ')'
         { errManager.error("Falta parentesis de apertura de la condicion", al.getLine()); }
     | '(' condicion error
@@ -322,7 +388,18 @@ cuerpo_opt
 
 condicion
 	: expresion comparador expresion
-	    { errManager.debug("Condicion detectada. Linea: " + al.getLine()); }
+	    {
+	        errManager.debug("Condicion detectada. Linea: " + al.getLine());
+
+            String opLexema = $2; // adaptar si $2 no es string
+            String mensaje = generador.generarTercetoValido(opLexema, $1, $3, al.ts);
+            if (mensaje != null) {
+                errManager.error(mensaje, al.getLine());
+                break;
+            } else {
+                $$ = generador.getUltimoTerceto(); // indice del terceto de la condición
+            }
+	     }
 	| expresion error
 	    { errManager.error("Comparador de condicion invalido/faltante", al.getLine()); }
 	;
@@ -342,9 +419,13 @@ do_until
 
 comparador
 	: MENORIGUAL
+	    { $$ = "<="; }
 	| MAYORIGUAL
+	    { $$ = ">="; }
 	| IGUALIGUAL
+	    { $$ = "=="; }
 	| DISTINTO
+	    { $$ = "!="; }
 	| '>'
 	| '<'
 	;
@@ -423,7 +504,17 @@ expresion
 	| termino
 	    { $$ = $1; }
 	| TRUNC cuerpo_expresion
-	    { errManager.debug("Trunc detectado", al.getLine()); }
+	    {
+	        errManager.debug("Trunc detectado", al.getLine());
+	        String mensaje = generador.validarExpresionTrunc($2, al.ts);
+	        if (mensaje != null){
+	            errManager.error(mensaje, al.getLine());
+	            break ;
+	        }
+	        // Generamos el terceto de salida. Al ser trunc devuelve un long .
+	        int indiceTerceto = generador.agregarTerceto("trunc", $2, "-", Atributo.longType);
+	        $$ = indiceTerceto + "";
+        }
 	| TRUNC error
 	    { errManager.error("Cuerpo del trunc invalido", al.getLine()); }
 	;
@@ -576,24 +667,58 @@ llamada_funcion
 	;
 
 print
-	: PRINT cuerpo_expresion
-	    { errManager.debug("Print detectado con expresion", al.getLine());}	;
+	: PRINT cuerpo_print
+	    {
+	        errManager.debug("Print detectado", al.getLine());
+	        generador.agregarTerceto("print", $2, "-");
+	    }
+
+cuerpo_print
+    : cuerpo_expresion
+        { $$ = $1; }
+    | '(' CADENASTR ')'
+        { $$ = $2; }
 
 lambda
-	: '(' tipo ID')' '{' lista_sentencias_ejecutables '}'
+	: inicio_lambda '{' lista_sentencias_ejecutables '}'
 	    {
 	        errManager.debug("Definicion lambda detectada", al.getLine());
-            String mensaje = generador.
+
+	        generador.agregarTerceto("fin_funcion", $1, "-");
+	        generador.exitScope();
+
+	        $$ = $1;
 	    }
-	| '(' tipo ID ')' '{' lista_sentencias_ejecutables
+	| inicio_lambda '{' lista_sentencias_ejecutables
 	    { errManager.error("Falta llave de cierre en lambda", al.getLine()); }
-	| '(' tipo ID ')' lista_sentencias_ejecutables '}'
+	| inicio_lambda lista_sentencias_ejecutables '}'
 	    { errManager.error("Falta llave de apertura en lambda", al.getLine()); }
-    | '(' tipo ID ')'
+    | inicio_lambda
         { errManager.error("Faltan llaves en lambda", al.getLine()); }
-    | '(' CR tipo ID ')' '{' lista_sentencias_ejecutables '}'
-        { errManager.error("Semantica invalida en funciones lambda.", al.getLine()); }
 	;
+
+inicio_lambda
+    : '(' tipo ID ')'
+        {
+            // Obtenemos un nombre para la funcion lambda.
+            String lamName = generador.getLambdaName();
+            // Entramos al scope de la funcion.
+            generador.enterScope(lamName);
+            String lamScope = generador.getCurrentScope();
+
+            // Agregamos el parametro, esto para reutilizar los metodos de funcion.
+            generador.agregarParametro(false, $2, $3);
+            // Aplica ambito a los parametros y crea el terceto de funcion.
+            generador.aplicarAmbito(al.ts, Atributo.invalidType, lamScope);
+
+            //Generamos el terceto correspondiente al inicio de la a funcion.
+            generador.agregarTerceto("inicio_funcion", lamScope, "-");
+            $$ = lamScope;
+        }
+    | '(' CR tipo ID ')'
+        { errManager.error("Semantica invalida en funciones lambda.", al.getLine()); }
+    ;
+
 
 retorno
 	: RETURN cuerpo_expresion

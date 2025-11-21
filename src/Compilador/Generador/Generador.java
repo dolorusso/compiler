@@ -13,6 +13,7 @@ public class Generador {
     private final List<ParametroLlamada> llamadaFuncionAux;
     public int lambdaCounter;
 
+
     // Clase interna para abstraer la operacion de tercetos y entradas de la tabla de simbolos.
     private static class OperandoInfo {
         boolean esTerceto;
@@ -78,7 +79,7 @@ public class Generador {
         pasajeParametrosAux.put(ID, atributo);
     }
 
-    public void aplicarAmbito(TablaSimbolos ts, int tipoFuncion){
+    public void aplicarAmbito(TablaSimbolos ts, int tipoFuncion, String funcName){
         Atributo funcion = new Atributo(tipoFuncion, Atributo.USO_FUNCION);
         ArrayList<String> parametros = new ArrayList<>();
         for (Map.Entry<String, Atributo> entry : pasajeParametrosAux.entrySet()) {
@@ -92,7 +93,8 @@ public class Generador {
             ts.insertar(mangledName, valor);
         }
         funcion.parametros = parametros;
-        ts.insertar(getCurrentScope(), funcion);
+        ts.insertar(funcName, funcion);
+
 
         pasajeParametrosAux.clear();
     }
@@ -164,6 +166,9 @@ public class Generador {
                         return "Parametro CR, se espera asignable.";
                 }
 
+                if (formalAtr.uso == Atributo.USO_FUNCION && realAtr.uso != Atributo.USO_FUNCION)
+                    return "Parametro real no es una funcion.";
+
                 tipoParametroReal = realAtr.type;
             }
 
@@ -174,6 +179,11 @@ public class Generador {
 
         }
         return null;
+    }
+
+    public String getLambdaName() {
+        lambdaCounter += 1;
+        return "lambda#" + lambdaCounter;
     }
 
     //-------------------------------------------------------------------------------------------------------------------------------------//
@@ -332,7 +342,7 @@ public class Generador {
         Atributo func = ts.obtener(idFuncion);
 
         // Guardamos los atributos y utilizamos el campo StringValue
-        List<Atributo> parametrosCR = new ArrayList<>();
+        List<ParametroLlamada> parametrosCR = new ArrayList<>();
 
         for (ParametroLlamada pr : llamadaFuncionAux){
             String formalKey = idFuncion + "." + pr.formal;
@@ -340,17 +350,31 @@ public class Generador {
 
             // Tratamiento especial para parametros CR, ya que estos requieren el copiado en salida.
             if (formalAtr.esCR){
-                // Guardamos los atributos,
-                parametrosCR.add(formalAtr); //todo TERMINAR ESTO.
+                // Guardamos los atributos que sean CR
+                parametrosCR.add(new ParametroLlamada(pr.real, formalKey));
             } else {
                 agregarTerceto(":=", formalKey, pr.real); // TODO Esto no permite recursion
             }
         }
 
         int callIdx = agregarTerceto("call", idFuncion, "-", func.type);
+        for (ParametroLlamada pr : parametrosCR){
+            agregarTerceto(":=", pr.real, pr.formal);
+        }
+
 
         llamadaFuncionAux.clear();
         return callIdx + "";
+    }
+
+    // Funcion para verificar que el argumento del trunc sea un float.
+    public String validarExpresionTrunc(String expresion, TablaSimbolos ts){
+        OperandoInfo op = resolverOperando(expresion, ts);
+        if (op == null)
+            return "Argumento no declarado.";
+        if (op.tipo != Atributo.floatType)
+            return "Argumento no es un float.";
+        return null;
     }
 
     public String imprimirTercetos() {
@@ -360,5 +384,42 @@ public class Generador {
         }
         return result.toString();
     }
+
+    //-------------------------------------------------------------------------------------------------------------------------------------//
+    //-----------------------------------------------------------FUNCIONES DE IF-----------------------------------------------------//
+    //-------------------------------------------------------------------------------------------------------------------------------------//
+    // --- Nuevo: crear BF (branch if false) con destino desconocido ---
+    public int generarBF(int condicion) {
+        // BF condicion -> destino (inicialmente "-")
+        return agregarTerceto("BF", condicion + "", "-");
+    }
+
+    // --- Nuevo: crear BI (salto incondicional) con destino desconocido ---
+    public int generarBI() {
+        // BI - -> destino (inicialmente "-")
+        return agregarTerceto("BI", "-", "-");
+    }
+
+    // --- Nuevo: backpatch - rellena el operando 2 del terceto indicado ---
+    public void rellenarOperando(int indiceTerceto, int nuevoOp, int indiceModificable) {
+
+        Terceto viejo = tercetos.get(indiceTerceto);
+
+
+        Terceto nuevoTer;
+        if (indiceModificable == 1){
+            nuevoTer = new Terceto(viejo.operador, nuevoOp + "", viejo.operando2, viejo.tipo);
+        }
+        else{
+            nuevoTer = new Terceto(viejo.operador, viejo.operando1, nuevoOp + "", viejo.tipo);
+        }
+
+        //reemplazo el terceto viejo con el nuevo operando (a donde tiene que saltar)
+        tercetos.set(indiceTerceto, nuevoTer);
+
+        ErrorManager.getInstance().debug("Backpatch: terceto[" + indiceTerceto + "] ahora -> " + nuevoTer.toString());
+    }
+
+
 }
 

@@ -13,7 +13,6 @@ public class Main {
             path = args[0];
         }
 
-
         AnalizadorLexico al = AnalizadorLexico.getInstance(path);
         Parser p = new Parser(ErrorManager.Nivel.DEBUG);
         p.run();
