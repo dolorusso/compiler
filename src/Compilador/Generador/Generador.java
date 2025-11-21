@@ -136,7 +136,7 @@ public class Generador {
                 }
             }
             if (!encontrado){
-                return "Parametro formal no utilizado.";
+                return "Parametro formal " + f + " no utilizado.";
             }
         }
 
@@ -376,6 +376,7 @@ public class Generador {
             if (formalAtr.esCR){
                 // Guardamos los atributos que sean CR
                 parametrosCR.add(new ParametroLlamada(pr.real, formalKey));
+                // No necesitamos generarle un terceto, ya que no tiene sentido darle el valor actual del real al formal.
             } else {
                 agregarTerceto(":=", formalKey, pr.real); // TODO Esto no permite recursion
             }

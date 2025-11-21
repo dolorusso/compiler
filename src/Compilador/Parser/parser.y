@@ -16,7 +16,7 @@
 %type <sval>  lambda cuerpo_print ids
 %token <sval> CTEL CTEF INVALID ID IDCOMP CADENASTR MENORIGUAL MAYORIGUAL IGUALIGUAL DISTINTO '>' '<'
 
-%type <ival> lista_identificadores tipo inicio_if else_opt inicio_else condicional_opt condicion
+%type <ival> lista_identificadores tipo inicio_if else_opt inicio_else condicional_opt condicion inicio_do
 %token <ival> STRING LONG
 
 %%
@@ -412,17 +412,32 @@ condicion
 	;
 
 do_until
-	: DO cuerpo_opt UNTIL condicional_opt ';'
-	    { errManager.debug("DO-UNTIL detectado", al.getLine()); }
-	| DO cuerpo_opt UNTIL condicional_opt error
+	: inicio_do cuerpo_opt UNTIL condicional_opt ';'
+	    {
+	        errManager.debug("DO-UNTIL detectado", al.getLine());
+            int indiceInicio = $1;   // primer terceto del cuerpo
+            int indiceCondicion  = $4;   // indice del terceto que representa la condicion
+
+            // Generamos BF y luego rellenamos su destino al inicio del cuerpo.
+            int indiceBF = generador.generarBF(indiceCondicion);
+            generador.rellenarOperando(indiceBF, indiceInicio, 2);
+	    }
+	| inicio_do cuerpo_opt UNTIL condicional_opt error
         { errManager.error(" Falta delimitador de sentencias ;.", al.getLine()); }
-	| DO UNTIL condicional_opt ';'
+	| inicio_do UNTIL condicional_opt ';'
 	    { errManager.error("Falta cuerpo de DO", al.getLine()); }
-	| DO UNTIL condicional_opt error
+	| inicio_do UNTIL condicional_opt error
         { errManager.error(" Falta delimitador de sentencias ;.", al.getLine()); }
-	| DO cuerpo_opt condicional_opt ';'
+	| inicio_do cuerpo_opt condicional_opt ';'
 	    { errManager.error("Falta cierre de bloque UNTIL", al.getLine()); }
 	;
+
+inicio_do
+    : DO
+        {
+            // Guardamos la direccion de inicio del DO.
+            $$ = generador.getUltimoTerceto();;
+        }
 
 comparador
 	: MENORIGUAL
@@ -434,7 +449,9 @@ comparador
 	| DISTINTO
 	    { $$ = "!="; }
 	| '>'
+	    { $$ = ">"; }
 	| '<'
+	    { $$ = "<"; }
 	;
 
 tipo
@@ -749,7 +766,6 @@ asignacion_multiple
                 errManager.error(mensaje, al.getLine());
                 break ;
             }
-
 
         }
     | ids error '=' lista_constantes ';'
