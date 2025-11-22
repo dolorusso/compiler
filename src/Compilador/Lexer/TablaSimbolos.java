@@ -33,6 +33,10 @@ public class TablaSimbolos {
         tabla.put(lexema, atributo);
     }
 
+    public Map<String, Atributo> getTabla() {
+        return tabla;
+    }
+
     @Override
     public String toString() {
         return tabla.toString().replace("}, ", "}\n");

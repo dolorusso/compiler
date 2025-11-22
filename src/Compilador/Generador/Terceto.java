@@ -5,6 +5,7 @@ public class Terceto {
     public String operando1;
     public String operando2;
     public int tipo;
+    public String aux;
 
     public Terceto(String operador, String operando1, String operando2) {
         this.operador = operador;

@@ -8,12 +8,13 @@
     import Compilador.ErrorHandler.ErrorManager;
     import Compilador.Lexer.Atributo;
     import Compilador.Generador.Generador;
+    import Compilador.Assembler.Traductor;
 %}
 
 %start programa
 
 %type <sval> constante factor termino expresion parametro_real cuerpo_expresion llamada_funcion inicio_lambda comparador
-%type <sval>  lambda cuerpo_print ids
+%type <sval>  lambda cuerpo_print ids inicio_programa
 %token <sval> CTEL CTEF INVALID ID IDCOMP CADENASTR MENORIGUAL MAYORIGUAL IGUALIGUAL DISTINTO '>' '<'
 
 %type <ival> lista_identificadores tipo inicio_if else_opt inicio_else condicional_opt condicion inicio_do
@@ -26,6 +27,7 @@ programa
 		{
 		    errManager.debug("Declaracion de programa detectada", al.getLine());
 		    generador.exitScope();
+		    generador.agregarTerceto("fin_main", $1, "-");
 		}
 	| inicio_programa error '}'
 		{ errManager.error("Programa con error detectado", al.getLine()); }
@@ -58,6 +60,8 @@ inicio_programa
     : ID '{'
         {
             generador.enterScope($1);
+            generador.agregarTerceto("inicio_main", $1, "-");
+            $$ = $1;
         }
     ;
 
@@ -847,6 +851,7 @@ private AnalizadorLexico al;
 private ErrorManager errManager;
 private static final ParserVal dummyParserVal = new ParserVal();
 private Generador generador;
+private Traductor traductor;
 
 public Parser(ErrorManager.Nivel nivel){
     this.al = AnalizadorLexico.getInstance();
@@ -855,6 +860,7 @@ public Parser(ErrorManager.Nivel nivel){
     this.generador = new Generador();
     al.ts.insertar("-1L", new Atributo(0,-1,"auxiliar"));
     al.ts.insertar("0L", new Atributo(0,0,"auxiliar"));
+    this.traductor = new Traductor(al.ts);
 }
 
 public int yylex(){
@@ -913,6 +919,7 @@ public void run()
     yyparse();
     errManager.debug("Tabla de simbolos resultante" + '\n' +  al.ts.toString());
     errManager.debug("Tercetos resultante" + '\n' +  generador.imprimirTercetos());
+    traductor.traducir(generador.getTercetos());
 }
 
 public void yyerror(String s) {

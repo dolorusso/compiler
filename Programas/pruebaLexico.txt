@@ -1,9 +1,16 @@
-A {
+A
+{
+    long A.X;
     long A.Y;
-    A.Y := 0L;
-    do {
-        A.Y := A.Y + 1;
-    } until (A.Y > 10);
-
-    print(&FIN&);
+    long A.Z;
+    if (A.X > 30L){
+        if (A.X > 30L){
+            A.X := 2L;
+        } else {
+                  A.X := 5L;
+              }endif;
+        A.X := 3L;
+    }else {
+        A.X := 1L;
+    }endif;
 }
