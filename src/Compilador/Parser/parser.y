@@ -81,6 +81,7 @@ sentencia_ejecutable
 	: asignacion
 	| control
 	| llamada_funcion ';'
+	    { generador.agregarTerceto("drop", "-", "-"); }
 	| print ';'
 	| retorno ';'
 	    {

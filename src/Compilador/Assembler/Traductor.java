@@ -89,7 +89,9 @@ public class Traductor {
             case "inicio_main":
                 mainName = terceto.operando1;
                 break;
-
+            case "drop":
+                agregarCodigo("drop");
+                break;
         }
     }
 
