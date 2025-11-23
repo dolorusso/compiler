@@ -15,6 +15,20 @@ public class Traductor {
     private int tabs;
     private String mainName;
     private final ErrorManager errManager;
+    private final Map<String, OpWasm> tablaOps = new HashMap<>();
+
+    static class OpWasm {
+        boolean usaAmbosOperandos;
+        String instrI32;
+        String instrF32;
+
+        OpWasm(boolean usa, String i32, String f32) {
+            this.usaAmbosOperandos = usa;
+            this.instrI32 = i32;
+            this.instrF32 = f32;
+        }
+    }
+
     public Traductor(TablaSimbolos ts, ErrorManager errManager){
         this.ts = ts;
         tabs = 0;
@@ -24,7 +38,27 @@ public class Traductor {
         typeMap.put(0,"i32");
         typeMap.put(1,"f32");
 
+        initTablaOps();
     }
+
+
+
+    private void initTablaOps() {
+        // Operaciones
+        tablaOps.put("+", new OpWasm(true, "i32.add", "f32.add"));
+        tablaOps.put("-", new OpWasm(true, "i32.sub", "f32.sub"));
+        tablaOps.put("*", new OpWasm(true, "i32.mul", "f32.mul"));
+        tablaOps.put("/", new OpWasm(true, "i32.div_s", "f32.div"));
+
+        // Comparaciones
+        tablaOps.put(">", new OpWasm(true, "i32.gt_s", "f32.gt"));
+        tablaOps.put("<", new OpWasm(true, "i32.lt_s", "f32.lt"));
+        tablaOps.put(">=", new OpWasm(true, "i32.ge_s", "f32.ge"));
+        tablaOps.put("<=", new OpWasm(true, "i32.le_s", "f32.le"));
+        tablaOps.put("==", new OpWasm(true, "i32.eq", "f32.eq"));
+        tablaOps.put("!=", new OpWasm(true, "i32.ne", "f32.ne"));
+    }
+
 
     // Funcion con el flujo principal del traductor.
     // Se le dan todos los tercetos y genera un archivo con el codigo de salida.
@@ -39,63 +73,57 @@ public class Traductor {
 
     // Funcion para traducir un terceto. Trata los operandos de ser necesario y genera la instruccion WASM
     // que se necesite segun el operador y, en algunos casos, el tipo de la operacion.
-    public void traducir(Terceto terceto){
-        switch (terceto.operador) {
-            case "+":
-                procesarOperandos(terceto);
-                if (terceto.tipo == Atributo.longType){
-                    agregarCodigo("i32.add");
-                } else if (terceto.tipo == Atributo.floatType){
-                    agregarCodigo("f32.add");
-                } else {
-                    throw new RuntimeException("Error al tratar el operador +");
-                }
-                break;
-            case "-":
-                procesarOperandos(terceto);
-                if (terceto.tipo == Atributo.longType){
-                    agregarCodigo("i32.sub");
-                } else if (terceto.tipo == Atributo.floatType){
-                    agregarCodigo("f32.sub");
-                } else {
-                    errManager.error("Error al procesar el tipo de dato: " + terceto.tipo, -1);
-                }
-                break;
+    public void traducir(Terceto t) {
+
+        // Operadores especiales (que no entran en la tabla)
+        switch (t.operador) {
             case ":=":
-                procesarOperando(terceto.operando2);
-                agregarCodigo("global.set $" + terceto.operando1);
-                break;
-            case "*":
-                procesarOperandos(terceto);
-                if (terceto.tipo == Atributo.longType){
-                    agregarCodigo("i32.mul");
-                } else if (terceto.tipo == Atributo.floatType){
-                    agregarCodigo("f32.mul");
-                }
-                break;
-            case "/":
-                procesarOperandos(terceto);
-                if (terceto.tipo == Atributo.longType){
-                    agregarCodigo("i32.div_s");
-                } else if (terceto.tipo == Atributo.floatType){
-                    agregarCodigo("f32.div");
-                }
-                break;
+                procesarOperando(t.operando2);
+                agregarCodigo("global.set $" + t.operando1);
+                return;
+
             case "call":
-                agregarCodigo("call $" + terceto.operando1);
-                break;
+                agregarCodigo("call $" + t.operando1);
+                return;
+
             case "return":
-                procesarOperando(terceto.operando1);
+                procesarOperando(t.operando1);
                 agregarCodigo("return");
-                break;
+                return;
+
             case "inicio_main":
-                mainName = terceto.operando1;
-                break;
+                mainName = t.operando1;
+                return;
+
             case "drop":
                 agregarCodigo("drop");
-                break;
+                return;
         }
+
+        // OPERADORES DE LA TABLA
+        OpWasm op = tablaOps.get(t.operador);
+        if (op != null) {
+
+            if (op.usaAmbosOperandos)
+                procesarOperandos(t);
+            else
+                procesarOperando(t.operando1);
+
+            if (t.tipo == Atributo.longType)
+                agregarCodigo(op.instrI32);
+
+            else if (t.tipo == Atributo.floatType)
+                agregarCodigo(op.instrF32);
+
+            else
+                errManager.error("Error al procesar el tipo de dato: " + t.tipo, -1);
+
+            return;
+        }
+
+        //errManager.error("OPERADOR DE TERCETO NO RECONOCIDO " + t, -1);
     }
+
 
     // Funcion para tratar los operandos dependiendo del tipo y uso en la tabla de simbolos.
     public void tratarOperandoTS(String lexema, Atributo atr){
@@ -111,8 +139,6 @@ public class Traductor {
             }
         }
     }
-
-
 
     // Auxiliar para ver si el terceto tiene una entrada a la TS o un indice a otro terceto.
     private boolean esNumero(String s) {
