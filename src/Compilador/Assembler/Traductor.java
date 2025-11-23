@@ -16,6 +16,8 @@ public class Traductor {
     private String mainName;
     private final ErrorManager errManager;
     private final Map<String, OpWasm> tablaOps = new HashMap<>();
+    private boolean checkOverflow = false;
+    private int indiceErrorOverflow;
 
     static class OpWasm {
         boolean usaAmbosOperandos;
@@ -74,6 +76,7 @@ public class Traductor {
     // Funcion para traducir un terceto. Trata los operandos de ser necesario y genera la instruccion WASM
     // que se necesite segun el operador y, en algunos casos, el tipo de la operacion.
     public void traducir(Terceto t) {
+        OpWasm op = tablaOps.get(t.operador);
 
         // Operadores especiales (que no entran en la tabla)
         switch (t.operador) {
@@ -107,10 +110,27 @@ public class Traductor {
             case "print":
                 procesarPrint(t.operando1);
                 return;
+
+            case "*":
+                generarCheckOverflow(t);
+                recuperarAuxiliar(t.tipo, true, true);
+                // sin return, queremos que ejecute la multiplicacion ademas de esto.
+                if (t.tipo == Atributo.longType)
+                    agregarCodigo(op.instrI32);
+
+                else if (t.tipo == Atributo.floatType)
+                    agregarCodigo(op.instrF32);
+                return ;
+
+            case "BF":
+                    // el resultado de la condicion esta en la pila
+                    agregarCodigo("i32.eqz");   //invierte 1->0 o 0->1
+                    agregarCodigo("br_if $" + t.operando2); //salto al else si el result es 1 (si la condicion era falsa)
+                    return;
         }
 
         // OPERADORES DE LA TABLA
-        OpWasm op = tablaOps.get(t.operador);
+
         if (op != null) {
 
             if (op.usaAmbosOperandos)
@@ -143,7 +163,6 @@ public class Traductor {
                 agregarCodigo("call $print_str");
             } else if (atr.type == Atributo.longType){
                 agregarCodigo("call $print_num");
-            // todo no se bien si se usa lo mismo o si sepueden imprimir
             } else if (atr.type == Atributo.floatType){
                 agregarCodigo("call $print_num");
             } else {
@@ -154,7 +173,7 @@ public class Traductor {
     }
 
 
-    // Funcion para tratar los operandos dependiendo del tipo y uso en la tabla de simbolos.
+    // Funcion para tratar los operandos dependiendo del tipo y uso en la tabla de simbolos y ponerlos en el tope de la pila
     public void tratarOperandoTS(String lexema, Atributo atr){
         if (atr.uso == Atributo.USO_PARAMETRO | atr.uso == Atributo.USO_VARIABLE){
             agregarCodigo("global.get $" + lexema);
@@ -196,6 +215,7 @@ public class Traductor {
     }
 
     // Separa las funciones de todos los tercetos.
+    // Detecta si hay operaciones de multiplicacion.
     public void separarFunciones(List<Terceto> tercetos) {
         funciones = new HashMap<>();
 
@@ -209,6 +229,8 @@ public class Traductor {
                 funciones.get(pilaNombreFuncion.peek()).add(terceto);
                 pilaNombreFuncion.pop();
             } else {
+                if (terceto.operador.equals("*"))
+                    this.checkOverflow = true;
                 funciones.get(pilaNombreFuncion.peek()).add(terceto);
             }
         }
@@ -218,8 +240,12 @@ public class Traductor {
     public void generarGlobales(){
         // Para realizar calculos de espacio en strings y generar sus instrucciones.
         ArrayList <Atributo> strings = new ArrayList<>();
+
         int espacioStrings = 0;
 
+        // Creamos variables globales para todas las entradas de la tabla de simbolos que las necesiten.
+        // Esto sera necesario para Variables y Parametros.
+        // Tambien se reserva espacio para los strings y se almacenan.
         for (Map.Entry<String, Atributo> entrada : ts.getTabla().entrySet()){
             Atributo atr = entrada.getValue();
             String clave = entrada.getKey();
@@ -233,6 +259,13 @@ public class Traductor {
                 espacioStrings += atr.strValue.length() + 1;
             }
         }
+
+        // Creamos variables auxiliares. Como maximo utilizaremos ...
+        agregarCodigo("(global $_aux1i (mut i32) (i32.const 0))");
+        agregarCodigo("(global $_aux2i (mut i32) (i32.const 0))");
+        agregarCodigo("(global $_auxiRes (mut i64) (i64.const 0))");
+        agregarCodigo("(global $_aux1f (mut f32) (f32.const 0))");
+        agregarCodigo("(global $_aux2f (mut f32) (f32.const 0))");
 
         int indiceStr = 0;
 
@@ -252,6 +285,14 @@ public class Traductor {
             str.numValue = indiceStr;
             // Sumamos la longitud para manejar el arreglo de memoria. +1 por el null char.
             indiceStr += str.strValue.length() + 1;
+        }
+
+        // Agregamos al final, si es necesario, un mensaje de error para Overflow
+        String errorOverflow = "[Runtime Error] Overflow al multiplicar.";
+        if (checkOverflow){
+            agregarCodigo("(data (i32.const " + indiceStr + ") \"" + errorOverflow + "\\00\")");
+            this.indiceErrorOverflow = indiceStr;
+            indiceStr += errorOverflow.length() + 1;
         }
     }
 
@@ -274,14 +315,18 @@ public class Traductor {
             tabs -= 1;
             agregarCodigo(")");
         }
+
+        if (checkOverflow){
+            generarFuncionOverflow();
+        }
     }
 
     // Funcion para generar el inicio de WASM, este debe estar siempre presente.
     private void generarInicio(){
         agregarCodigo("(module");
         tabs += 1;
-        agregarCodigo("(import \"console\" \"print_str\" (func $print_str (param i32)))\n");
-        agregarCodigo("(import \"console\" \"$print_num\" (func $print_num (param i32)))\n");
+        agregarCodigo("(import \"console\" \"print_str\" (func $print_str (param i32)))");
+        agregarCodigo("(import \"console\" \"$print_num\" (func $print_num (param i32)))");
     }
 
     // Funcion para cerrar exportar la funcion principal y cerrar el modulo.
@@ -304,4 +349,116 @@ public class Traductor {
     private boolean generaOverflow(String tipo, String operando){
         return false;
     }
+
+    private void guardarAuxTerceto(int tipo){
+        if (tipo == Atributo.longType)
+            agregarCodigo("global.set $" + "_aux2i");
+        if (tipo == Atributo.floatType)
+            agregarCodigo("global.set $" + "_aux2f");
+    }
+
+    private void guardarAuxTS(int tipo, String operando, String nombreAux){
+        if (tipo == Atributo.longType) {
+            tratarOperandoTS(operando, ts.obtener(operando));
+            agregarCodigo("global.set $_aux" + nombreAux +"i" );
+        }
+        else if (tipo == Atributo.floatType) {
+            tratarOperandoTS(operando, ts.obtener(operando));
+            agregarCodigo("global.set $_aux" + nombreAux +"f" );
+        }
+    }
+
+    // Funcion para guardar 2 operandos en las variables globales para utilizarlas en otras operaciones.
+    private void guardarOperandos(Terceto terceto){
+        if (esNumero(terceto.operando2)){
+            guardarAuxTerceto(terceto.tipo);
+        } else {
+            guardarAuxTS(terceto.tipo, terceto.operando2, "2");
+
+        }
+
+        if (esNumero(terceto.operando1)){
+            guardarAuxTerceto(terceto.tipo);
+        } else {
+            guardarAuxTS(terceto.tipo, terceto.operando1, "1");
+        }
+
+    }
+
+    private void recuperarAuxiliar(int tipo, boolean aux1, boolean aux2){
+        if (tipo == Atributo.longType) {
+            if (aux1)
+                agregarCodigo("global.get $" + "_aux1i");
+            if (aux2)
+                agregarCodigo("global.get $" + "_aux2i");
+        } else if (tipo == Atributo.floatType) {
+            if (aux1)
+                agregarCodigo("global.get $" + "_aux1f");
+            if (aux2)
+                agregarCodigo("global.get $" + "_aux2f");
+        }
+    }
+    private void generarFuncionOverflow(){
+        // Función que trapea si $_auxiRes no entra en el rango de i32
+        agregarCodigo("(func $integer-overflow-checker");
+        tabs++;
+
+        // Bloque principal
+        agregarCodigo("(block $fin");        // destino normal (sin overflow)
+        tabs++;
+
+        // Bloque exclusivo para overflow
+        agregarCodigo("(block $overflow");   // si salto acá → trap
+        tabs++;
+
+        // ----- check: auxiRes > MAX_INT -----
+        agregarCodigo("global.get $_auxiRes");
+        agregarCodigo("i64.const " + Integer.MAX_VALUE);
+        agregarCodigo("i64.gt_s");         // 1 si auxiRes > max
+        agregarCodigo("br_if $overflow");  // salta si hay overflow
+
+        // ----- check: auxiRes < MIN_INT -----
+        agregarCodigo("global.get $_auxiRes");
+        agregarCodigo("i64.const " + Integer.toString(Integer.MIN_VALUE));
+        agregarCodigo("i64.lt_s");         // 1 si auxiRes < min
+        agregarCodigo("br_if $overflow");  // salta si hay overflow
+
+        // Si llegó acá → no hubo overflow:
+        agregarCodigo("br $fin");
+
+        // ----- bloque overflow -----
+        tabs--;
+        agregarCodigo(")"); // end block $overflow
+        tabs++;
+        agregarCodigo("i32.const " + indiceErrorOverflow);
+        agregarCodigo("call print_str");
+        agregarCodigo("unreachable"); // trap definitivo
+
+        // ----- fin -----
+        tabs--;
+        agregarCodigo(")"); // end block $fin
+
+        tabs--;
+        agregarCodigo(")");
+    }
+
+    private void generarCheckOverflow(Terceto terceto){
+        guardarOperandos(terceto);
+        // Pasamos los 2 operandos a i64.
+        recuperarAuxiliar(terceto.tipo, true, false);
+        agregarCodigo("i64.extend_i32_s");
+
+        recuperarAuxiliar(terceto.tipo, false, true);
+        agregarCodigo("i64.extend_i32_s");
+
+        // Realizamos la operacion en i64, esto asegura que no habra overflow. La guardamos para utilizarla.
+        agregarCodigo("i64.mul");
+        agregarCodigo("global.set $" + "_auxiRes");
+
+        agregarCodigo("call $integer-overflow-checker");
+    }
+
+    // Dentro de generarInicio() o como una nueva función llamada desde ahí
+
+
 }
