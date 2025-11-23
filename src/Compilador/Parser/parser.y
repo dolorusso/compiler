@@ -441,7 +441,7 @@ inicio_do
     : DO
         {
             // Guardamos la direccion de inicio del DO.
-            $$ = generador.getUltimoTerceto();
+            $$ = generador.getUltimoTerceto() + 1;
         }
 
 comparador

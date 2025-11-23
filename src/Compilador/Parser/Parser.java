@@ -1535,7 +1535,7 @@ case 113:
 //#line 442 "parser.y"
 {
             /* Guardamos la direccion de inicio del DO.*/
-            yyval.ival = generador.getUltimoTerceto();
+            yyval.ival = generador.getUltimoTerceto() + 1;
         }
 break;
 case 114:

@@ -127,6 +127,10 @@ public class Traductor {
                     agregarCodigo("i32.eqz");   //invierte 1->0 o 0->1
                     agregarCodigo("br_if $" + t.operando2); //salto al else si el result es 1 (si la condicion era falsa)
                     return;
+            case "BI":
+                // salto incondicional a la etiqueta (operando1 contiene el numero de terceto destino)
+                agregarCodigo("br $" + t.operando1);
+                return;
         }
 
         // OPERADORES DE LA TABLA
@@ -296,24 +300,74 @@ public class Traductor {
         }
     }
 
-    // Funcion para generar el codigo de las funciones de manera correcta, con todas las instrucciones
-    // en sus respectivos bloques.
+    // Reemplazo de generarFunciones()
     public void generarFunciones(){
         for (Map.Entry<String, List<Terceto>> entrada : funciones.entrySet()){
             String nombreFuncion = entrada.getKey();
             List<Terceto> tercetos = entrada.getValue();
+
+            // Guardamos el nivel de tabs previo para controlar correctamente el cierre de la func.
+            int tabAntesFunc = tabs;
+
             String tipoFuncion = convertirTipo(tercetos.get(0).tipo);
             if (tipoFuncion != null){
                 agregarCodigo("(func $" + nombreFuncion + " (result " + tipoFuncion + ")");
             } else {
                 agregarCodigo("(func $" + nombreFuncion);
             }
-            tabs += 1;
-            for (Terceto terceto : tercetos){
+            tabs += 1; // entramos al cuerpo de la función
+
+            // --- PREPARACION: recoger todos los targets de BF/BI en esta función ---
+            Set<Integer> targetsSet = new HashSet<>();
+            for (int i = 0; i < tercetos.size(); i++){
+                Terceto t = tercetos.get(i);
+                if ("BF".equals(t.operador) || "BI".equals(t.operador)){
+                    String possibleTarget = "BF".equals(t.operador) ? t.operando2 : t.operando1;
+                    if (possibleTarget != null && possibleTarget.matches("\\d+")){
+                        targetsSet.add(Integer.parseInt(possibleTarget));
+                    }
+                }
+            }
+
+            // Lista ordenada ascendente (para abrir en orden descendente)
+            List<Integer> targets = new ArrayList<>(targetsSet);
+            Collections.sort(targets);
+            Collections.reverse(targets); // abrimos de mayor a menor (outer -> inner)
+
+            // Abrimos bloques y mantenemos pila de bloques abiertos
+            Deque<Integer> openBlocks = new ArrayDeque<>();
+            for (Integer target : targets){
+                agregarCodigo("(block $" + target);
+                tabs += 1;
+                openBlocks.addLast(target);
+            }
+
+            // --- GENERAR CODIGO: recorrer tercetos y cerrar bloques en sus targets ---
+            for (int i = 0; i < tercetos.size(); i++){
+                // Si el índice actual coincide con la etiqueta del bloque más interno, cerramos hasta que ya no coincida
+                while (!openBlocks.isEmpty() && openBlocks.peekLast() == i){
+                    // cerramos el bloque correspondiente
+                    tabs -= 1;
+                    agregarCodigo(")");
+                    openBlocks.removeLast();
+                }
+
+                // Generar el terceto normal (usar tu metodo traducir)
+                Terceto terceto = tercetos.get(i);
                 traducir(terceto);
             }
-            tabs -= 1;
+
+            // Si quedan bloques abiertos (targets al final), cerrarlos ahora
+            while (!openBlocks.isEmpty()){
+                tabs -= 1;
+                agregarCodigo(")");
+                openBlocks.removeLast();
+            }
+
+            // Ahora cerramos la funcion (solo la función)
+            tabs -= 1; // volvemos al nivel tabAntesFunc
             agregarCodigo(")");
+            // tabs queda igual a tabAntesFunc
         }
 
         if (checkOverflow){
@@ -321,12 +375,13 @@ public class Traductor {
         }
     }
 
+
     // Funcion para generar el inicio de WASM, este debe estar siempre presente.
     private void generarInicio(){
         agregarCodigo("(module");
         tabs += 1;
         agregarCodigo("(import \"console\" \"print_str\" (func $print_str (param i32)))");
-        agregarCodigo("(import \"console\" \"$print_num\" (func $print_num (param i32)))");
+        agregarCodigo("(import \"console\" \"print_num\" (func $print_num (param i32)))");
     }
 
     // Funcion para cerrar exportar la funcion principal y cerrar el modulo.
