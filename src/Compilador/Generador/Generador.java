@@ -234,7 +234,7 @@ public class Generador {
         // Checkeo dependiendo de la semantica del parametro.
         if (id.uso == Atributo.USO_PARAMETRO){
             if (id.esCR){
-                return "La variable "+ IDCOMP + " no puede ser usada para leer.";
+                return "La variable "+ IDCOMP + " no puede ser usada para leer debido a semantica CR.";
             }
             return null;
         }
@@ -244,7 +244,8 @@ public class Generador {
             return null;
         }
 
-        // Lo demas no se puede leer.
+
+
         return "La variable "+ IDCOMP + " no puede ser usada para leer.";
     }
 
@@ -253,6 +254,7 @@ public class Generador {
         if (id.uso == Atributo.USO_VARIABLE || id.uso == Atributo.USO_PARAMETRO){
             return null;
         }
+
         return "La variable "+ IDCOMP +" no puede ser usada para escribir.";
     }
 
@@ -261,16 +263,18 @@ public class Generador {
         if (id.uso == Atributo.USO_FUNCION){
             return null;
         }
+
         return "La variable "+ IDCOMP +" no puede ser usada para llamada.";
     }
 
     // Funcion para abstraer codigo de checkeos de IDs.
     public String validarLecturaYAlcance(String id, TablaSimbolos ts) {
-        String mensaje = puedoLeer(id, ts);
+
+        String mensaje = checkearAlcance(id, ts);
         if (mensaje != null)
             return mensaje;
 
-        mensaje = checkearAlcance(id, ts);
+         mensaje = puedoLeer(id, ts);
         if (mensaje != null)
             return mensaje;
 

@@ -26,6 +26,7 @@ public class Atributo {
     public static final String USO_PARAMETRO = "parametro";
     public static final String USO_FUNCION = "funcion";
     public static final String USO_IDLEX = "id lexico";
+    public static final String USO_AUXILIAR = "auxiliar";
 
 
     public Atributo(String strValue, String uso){

@@ -858,9 +858,9 @@ public Parser(ErrorManager.Nivel nivel){
     this.errManager = ErrorManager.getInstance();
     errManager.setNivel(nivel);
     this.generador = new Generador();
-    al.ts.insertar("-1L", new Atributo(0,-1,"auxiliar"));
-    al.ts.insertar("0L", new Atributo(0,0,"auxiliar"));
-    this.traductor = new Traductor(al.ts);
+    al.ts.insertar("-1L", new Atributo(0,-1,Atributo.USO_AUXILIAR));
+    al.ts.insertar("0L", new Atributo(0,0,Atributo.USO_AUXILIAR));
+    this.traductor = new Traductor(al.ts,errManager);
 }
 
 public int yylex(){

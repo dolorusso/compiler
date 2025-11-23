@@ -1,16 +1,12 @@
 A
 {
     long A.X;
-    long A.Y;
-    long A.Z;
-    if (A.X > 30L){
-        if (A.X > 30L){
-            A.X := 2L;
-        } else {
-                  A.X := 5L;
-              }endif;
-        A.X := 3L;
-    }else {
-        A.X := 1L;
-    }endif;
+    A.X := 3L - A.X;
+    long F(long Y){
+        long A.F.Z;
+        A.F.Z := A.X + A.F.Y;
+        return (3L);
+    }
+
+    A.F(10L -> Y);
 }
