@@ -8,13 +8,13 @@ import Compilador.Lexer.TablaSimbolos;
 import java.util.*;
 
 public class Traductor {
-    private StringBuilder codigoGenerado = new StringBuilder();
+    private final StringBuilder codigoGenerado = new StringBuilder();
     private Map<String, List<Terceto>> funciones;
-    private TablaSimbolos ts;
-    private Map<Integer,String> typeMap;
+    private final TablaSimbolos ts;
+    private final Map<Integer,String> typeMap;
     private int tabs;
     private String mainName;
-    private ErrorManager errManager;
+    private final ErrorManager errManager;
     public Traductor(TablaSimbolos ts, ErrorManager errManager){
         this.ts = ts;
         tabs = 0;
@@ -37,6 +37,8 @@ public class Traductor {
         System.out.println(codigoGenerado.toString());
     }
 
+    // Funcion para traducir un terceto. Trata los operandos de ser necesario y genera la instruccion WASM
+    // que se necesite segun el operador y, en algunos casos, el tipo de la operacion.
     public void traducir(Terceto terceto){
         switch (terceto.operador) {
             case "+":
@@ -95,6 +97,7 @@ public class Traductor {
         }
     }
 
+    // Funcion para tratar los operandos dependiendo del tipo y uso en la tabla de simbolos.
     public void tratarOperandoTS(String lexema, Atributo atr){
         if (atr.uso == Atributo.USO_PARAMETRO | atr.uso == Atributo.USO_VARIABLE){
             agregarCodigo("global.get $" + lexema);
@@ -109,6 +112,16 @@ public class Traductor {
         }
     }
 
+
+
+    // Auxiliar para ver si el terceto tiene una entrada a la TS o un indice a otro terceto.
+    private boolean esNumero(String s) {
+        // Cualquier digito. Permite enteros, positivos o negativos.
+        return s.matches("-?\\d+");
+    }
+
+    // Funcion para verificar si se esta frente a un terceto o una entrada de la TS.
+    // En caso de ser una entrada de la TS, se realiza el tratamiento necesario.
     private void procesarOperando(String operando) {
 
         if (esNumero(operando)) {
@@ -121,13 +134,7 @@ public class Traductor {
         tratarOperandoTS(operando, t);
     }
 
-    // Auxiliar para ver si el terceto tiene una entrada a la TS o un indice a otro terceto.
-    private boolean esNumero(String s) {
-        // Permite enteros, positivos o negativos
-        return s.matches("-?\\d+");
-    }
-
-
+    // Funcion para acortar llamados en operaciones de 2 operandos.
     public void procesarOperandos(Terceto operacion){
         procesarOperando(operacion.operando1);
         procesarOperando(operacion.operando2);
@@ -151,7 +158,8 @@ public class Traductor {
             }
         }
     }
-    //"(global $nombre (mut tipo) (valor_inicial))"
+
+    // Funcion para generar todas las variables que se utilizaran durante el programa.
     public void generarGlobales(){
         for (Map.Entry<String, Atributo> entrada : ts.getTabla().entrySet()){
             Atributo atr = entrada.getValue();
@@ -166,6 +174,8 @@ public class Traductor {
         }
     }
 
+    // Funcion para generar el codigo de las funciones de manera correcta, con todas las instrucciones
+    // en sus respectivos bloques.
     public void generarFunciones(){
         for (Map.Entry<String, List<Terceto>> entrada : funciones.entrySet()){
             String nombreFuncion = entrada.getKey();
@@ -185,12 +195,13 @@ public class Traductor {
         }
     }
 
-
+    // Funcion para generar el inicio de WASM, este debe estar siempre presente.
     private void generarInicio(){
         codigoGenerado.append("(module\n");
         tabs += 1;
     }
 
+    // Funcion para cerrar exportar la funcion principal y cerrar el modulo.
     private void generarFin(){
         agregarCodigo("(export \"main\" (func $"+ mainName +"))");
         tabs -= 1;
@@ -202,6 +213,7 @@ public class Traductor {
         codigoGenerado.append("\t".repeat(tabs)).append(linea).append("\n");
     }
 
+    // Funcion para convertir el tipo de Atributo a uno de WASM.
     private String convertirTipo(int tipo){
         return typeMap.get(tipo);
     }
