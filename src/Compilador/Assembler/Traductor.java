@@ -104,7 +104,9 @@ public class Traductor {
                 agregarCodigo("f32.convert_i32_s");
                 return;
 
-
+            case "print":
+                procesarPrint(t.operando1);
+                return;
         }
 
         // OPERADORES DE LA TABLA
@@ -129,6 +131,26 @@ public class Traductor {
         }
 
         //errManager.error("OPERADOR DE TERCETO NO RECONOCIDO " + t, -1);
+    }
+
+    private void procesarPrint(String operando1) {
+        if (esNumero(operando1)){
+            agregarCodigo("call $print_num");
+        } else {
+            Atributo atr = ts.obtener(operando1);
+            if (atr.type == Atributo.stringType){
+                agregarCodigo("i32.const " + (int)atr.numValue);
+                agregarCodigo("call $print_str");
+            } else if (atr.type == Atributo.longType){
+                agregarCodigo("call $print_num");
+            // todo no se bien si se usa lo mismo o si sepueden imprimir
+            } else if (atr.type == Atributo.floatType){
+                agregarCodigo("call $print_num");
+            } else {
+                errManager.error("Error al procesar el tipo de dato: " + atr.type, -1);
+            }
+        }
+
     }
 
 
@@ -213,6 +235,10 @@ public class Traductor {
         }
 
         int indiceStr = 0;
+
+        // Calculamos la cantidad de paginas que hay que pedir en memoria para almacenar todos los strings.
+        // Se calcula como el techo de la cantidad de bytes en strings sobre el tamanio de pagina.
+        // ceil(a / b) == (a + b - 1) / b
         int pageSize = 65536;
         int pages = (espacioStrings + pageSize - 1) / pageSize;
         if (espacioStrings > 0){
@@ -252,8 +278,10 @@ public class Traductor {
 
     // Funcion para generar el inicio de WASM, este debe estar siempre presente.
     private void generarInicio(){
-        codigoGenerado.append("(module\n");
+        agregarCodigo("(module");
         tabs += 1;
+        agregarCodigo("(import \"console\" \"print_str\" (func $print_str (param i32)))\n");
+        agregarCodigo("(import \"console\" \"$print_num\" (func $print_num (param i32)))\n");
     }
 
     // Funcion para cerrar exportar la funcion principal y cerrar el modulo.
