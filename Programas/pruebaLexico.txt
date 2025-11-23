@@ -8,5 +8,10 @@ A
         return (3L);
     }
 
-    A.F(10L -> Y);
+    A.X := A.F(10L -> Y);
+    print(&012&);
+    print(&345&);
+    print(&678&);
+    print(&hola&);
+
 }

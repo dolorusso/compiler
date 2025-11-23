@@ -98,6 +98,13 @@ public class Traductor {
             case "drop":
                 agregarCodigo("drop");
                 return;
+
+            case "trunc":
+                procesarOperando(t.operando1);
+                agregarCodigo("f32.convert_i32_s");
+                return;
+
+
         }
 
         // OPERADORES DE LA TABLA
@@ -187,16 +194,38 @@ public class Traductor {
 
     // Funcion para generar todas las variables que se utilizaran durante el programa.
     public void generarGlobales(){
+        // Para realizar calculos de espacio en strings y generar sus instrucciones.
+        ArrayList <Atributo> strings = new ArrayList<>();
+        int espacioStrings = 0;
+
         for (Map.Entry<String, Atributo> entrada : ts.getTabla().entrySet()){
             Atributo atr = entrada.getValue();
             String clave = entrada.getKey();
             if ((atr.uso == Atributo.USO_VARIABLE || atr.uso == Atributo.USO_PARAMETRO)){
                 if (atr.type == Atributo.longType){
                     String tipoAssembly = convertirTipo(atr.type);
-
                     agregarCodigo("(global $" + clave + " (mut " + tipoAssembly + ") ("+tipoAssembly+".const " + (int)(atr.numValue) + "))");
                 }
+            } else if (atr.uso == Atributo.USO_CONSTANTE && atr.type == Atributo.stringType) {
+                strings.add(atr);
+                espacioStrings += atr.strValue.length() + 1;
             }
+        }
+
+        int indiceStr = 0;
+        int pageSize = 65536;
+        int pages = (espacioStrings + pageSize - 1) / pageSize;
+        if (espacioStrings > 0){
+            agregarCodigo("(memory (export \"mem\") " + pages + ")");
+        }
+
+        for (Atributo str : strings){
+            // Agregamos el codigo junto con un null char para saber el final.
+            agregarCodigo("(data (i32.const " + indiceStr + ") \"" + str.strValue + "\\00\")");
+            // Guardamos el indice para poder referenciarlo luego.
+            str.numValue = indiceStr;
+            // Sumamos la longitud para manejar el arreglo de memoria. +1 por el null char.
+            indiceStr += str.strValue.length() + 1;
         }
     }
 
@@ -242,5 +271,9 @@ public class Traductor {
     // Funcion para convertir el tipo de Atributo a uno de WASM.
     private String convertirTipo(int tipo){
         return typeMap.get(tipo);
+    }
+
+    private boolean generaOverflow(String tipo, String operando){
+        return false;
     }
 }
