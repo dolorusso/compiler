@@ -254,6 +254,9 @@ parametro_real
 
 control
 	: sentencia_IF
+	    {
+	        generador.agregarTerceto("endif", "-", "-");
+	    }
 	| do_until
 	;
 
@@ -264,20 +267,22 @@ sentencia_IF
 	        errManager.debug("IF detectado (sin ELSE)", al.getLine());
 
             // Calculamos el indice del terceto siguiente a la ultima instruccion del bloque then.
-            int afterThen = generador.getUltimoTerceto() + 1;
+            int afterThen = generador.getUltimoTerceto() + 2; //+2 por terceto endif
 
             // Backpatch BF para saltar a afterThen (no hay else).
             generador.rellenarOperando($1, afterThen, 2);
+
 	    }
 	| inicio_if sentencia_ejecutable ENDIF ';'
     	{
     	    errManager.debug("IF detectado (sin ELSE)", al.getLine());
 
             // Calculamos el indice del terceto siguiente a la ultima instruccion del bloque then.
-            int afterThen = generador.getUltimoTerceto() + 1;
+            int afterThen = generador.getUltimoTerceto() + 2;
 
             // Backpatch BF para saltar a afterThen (no hay else).
             generador.rellenarOperando($1, afterThen, 2);
+
     	}
 	| inicio_if cuerpo_opt else_opt
 	    {
@@ -285,6 +290,7 @@ sentencia_IF
 
             // rellenamos Backpatch BF para saltar al inicio del else
             generador.rellenarOperando($1, $3, 2);
+
 	    }
     | inicio_if sentencia_ejecutable else_opt
         {
@@ -292,6 +298,7 @@ sentencia_IF
 
             // rellenamos Backpatch BF para saltar al inicio del else
             generador.rellenarOperando($1, $3, 2);
+
         }
 	| inicio_if cuerpo_opt ENDIF error
         { errManager.error(" Falta delimitador de sentencias ;.", al.getLine()); }
@@ -316,13 +323,16 @@ sentencia_IF
 	;
 
 inicio_if
-    : IF condicional_opt
+    : inicio_if_sin_condicion condicional_opt
         {
             // $2 = indice de terceto condicion.
             // Generar BF con destino desconocido.
             int idxBF = generador.generarBF($2);
             $$ = idxBF;
         }
+
+inicio_if_sin_condicion
+    : IF { generador.agregarTerceto("if_inicio", "-", "-"); }
 
 else_opt
     : inicio_else cuerpo_opt ENDIF ';'
@@ -331,8 +341,8 @@ else_opt
             //Lo pasamos para arriba asi se rellena el BF
             $$ = $1 + 1;
 
-            // Calculamos el indice del terceto siguiente a la ultima instruccion del bloque then.
-            int afterElse = generador.getUltimoTerceto() + 1;
+            // Calculamos el indice del terceto siguiente a la ultima instruccion del bloque else.
+            int afterElse = generador.getUltimoTerceto() + 2;
 
             // Backpatch BI para saltar a afterElse.
             generador.rellenarOperando($1, afterElse, 1);
@@ -341,8 +351,8 @@ else_opt
         {
             $$ = $1 + 1;
 
-            // Calculamos el indice del terceto siguiente a la ultima instruccion del bloque then.
-            int afterElse = generador.getUltimoTerceto() + 1;
+            // Calculamos el indice del terceto siguiente a la ultima instruccion del bloque else.
+            int afterElse = generador.getUltimoTerceto() + 2;
 
             // Backpatch BI para saltar a afterElse.
             generador.rellenarOperando($1, afterElse, 1);
@@ -441,6 +451,7 @@ inicio_do
     : DO
         {
             // Guardamos la direccion de inicio del DO.
+            generador.agregarTerceto("do_inicio","-","-");
             $$ = generador.getUltimoTerceto() + 1;
         }
 

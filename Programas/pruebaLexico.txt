@@ -1,15 +1,17 @@
 A
 {
     long A.X;
-    A.X := 3L - A.X;
-    long F(long Y){
-        long A.F.Z;
-        A.F.Z := A.X + A.F.Y;
-        return (3L);
-    }
+    do {
+        A.X := 1;
+        do {
+            A.X := 1;
+            if ( 4L > 3L){
+                print(&if&);
+            } else {
+                print(&else&);
+            } endif;
+        } until ( A.X < 3L);
+    } until ( A.X < 3L);
 
-    A.X := A.F(10L -> Y);
-    print(3.4 + 4.6);
-
-
+    print(&AFUERA&);
 }

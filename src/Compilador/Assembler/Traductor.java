@@ -18,6 +18,8 @@ public class Traductor {
     private final Map<String, OpWasm> tablaOps = new HashMap<>();
     private boolean checkOverflow = false;
     private int indiceErrorOverflow;
+    private Stack<Integer> auxUnidades = new Stack<>();
+    private int contadorUnidaes = 0;
 
     static class OpWasm {
         boolean usaAmbosOperandos;
@@ -123,13 +125,43 @@ public class Traductor {
                 return ;
 
             case "BF":
-                    // el resultado de la condicion esta en la pila
+                if (Integer.parseInt(t.operando1) > Integer.parseInt(t.operando2)){
+                    agregarCodigo("i32.eqz");
+                    agregarCodigo("br_if $do_" + auxUnidades.peek());
+                    auxUnidades.pop();
+                    tabs--;
+                    agregarCodigo(")");
+                } else {
                     agregarCodigo("i32.eqz");   //invierte 1->0 o 0->1
-                    agregarCodigo("br_if $" + t.operando2); //salto al else si el result es 1 (si la condicion era falsa)
-                    return;
+                    agregarCodigo("br_if $else_" + auxUnidades.peek());
+                }
+                return;
+            // el resultado de la condicion esta en la pila
+
             case "BI":
-                // salto incondicional a la etiqueta (operando1 contiene el numero de terceto destino)
-                agregarCodigo("br $" + t.operando1);
+                agregarCodigo("br $endif_" + auxUnidades.peek());
+                auxUnidades.pop();
+                tabs--;
+                agregarCodigo(")");
+                return;
+            case "endif":
+                tabs--;
+                agregarCodigo(")");
+                return;
+            case "if_inicio":
+                agregarCodigo("(block $endif_" + contadorUnidaes);
+                tabs++;
+                agregarCodigo("(block $else_" + contadorUnidaes);
+                tabs++;
+                auxUnidades.push(contadorUnidaes);
+                contadorUnidaes++;
+
+                return;
+            case "do_inicio":
+                agregarCodigo("(loop $do_" + contadorUnidaes);
+                tabs++;
+                auxUnidades.push(contadorUnidaes);
+                contadorUnidaes++;
                 return;
         }
 
@@ -300,14 +332,32 @@ public class Traductor {
         }
     }
 
-    // Reemplazo de generarFunciones()
+    private class BlockInfo implements Comparable<BlockInfo> {
+        public int inicioBloque;
+        public int finBloque;
+        public boolean esLoop;
+
+        public BlockInfo(int inicio, int fin, boolean loop) {
+            inicioBloque = inicio;
+            finBloque = fin;
+            esLoop = loop;
+        }
+
+        @Override
+        public int compareTo(BlockInfo other) {
+            return Integer.compare(this.inicioBloque, other.inicioBloque);
+        }
+
+        @Override
+        public String toString() {
+            return("Bloque: " + inicioBloque + " - " + finBloque + " - " + esLoop);
+        }
+    }
+
     public void generarFunciones(){
         for (Map.Entry<String, List<Terceto>> entrada : funciones.entrySet()){
             String nombreFuncion = entrada.getKey();
             List<Terceto> tercetos = entrada.getValue();
-
-            // Guardamos el nivel de tabs previo para controlar correctamente el cierre de la func.
-            int tabAntesFunc = tabs;
 
             String tipoFuncion = convertirTipo(tercetos.get(0).tipo);
             if (tipoFuncion != null){
@@ -315,65 +365,22 @@ public class Traductor {
             } else {
                 agregarCodigo("(func $" + nombreFuncion);
             }
-            tabs += 1; // entramos al cuerpo de la función
+            tabs += 1; // dentro de la funcion
 
-            // --- PREPARACION: recoger todos los targets de BF/BI en esta función ---
-            Set<Integer> targetsSet = new HashSet<>();
-            for (int i = 0; i < tercetos.size(); i++){
-                Terceto t = tercetos.get(i);
-                if ("BF".equals(t.operador) || "BI".equals(t.operador)){
-                    String possibleTarget = "BF".equals(t.operador) ? t.operando2 : t.operando1;
-                    if (possibleTarget != null && possibleTarget.matches("\\d+")){
-                        targetsSet.add(Integer.parseInt(possibleTarget));
-                    }
-                }
-            }
-
-            // Lista ordenada ascendente (para abrir en orden descendente)
-            List<Integer> targets = new ArrayList<>(targetsSet);
-            Collections.sort(targets);
-            Collections.reverse(targets); // abrimos de mayor a menor (outer -> inner)
-
-            // Abrimos bloques y mantenemos pila de bloques abiertos
-            Deque<Integer> openBlocks = new ArrayDeque<>();
-            for (Integer target : targets){
-                agregarCodigo("(block $" + target);
-                tabs += 1;
-                openBlocks.addLast(target);
-            }
-
-            // --- GENERAR CODIGO: recorrer tercetos y cerrar bloques en sus targets ---
-            for (int i = 0; i < tercetos.size(); i++){
-                // Si el índice actual coincide con la etiqueta del bloque más interno, cerramos hasta que ya no coincida
-                while (!openBlocks.isEmpty() && openBlocks.peekLast() == i){
-                    // cerramos el bloque correspondiente
-                    tabs -= 1;
-                    agregarCodigo(")");
-                    openBlocks.removeLast();
-                }
-
-                // Generar el terceto normal (usar tu metodo traducir)
-                Terceto terceto = tercetos.get(i);
+            for (Terceto terceto : tercetos){
                 traducir(terceto);
             }
 
-            // Si quedan bloques abiertos (targets al final), cerrarlos ahora
-            while (!openBlocks.isEmpty()){
-                tabs -= 1;
-                agregarCodigo(")");
-                openBlocks.removeLast();
-            }
-
-            // Ahora cerramos la funcion (solo la función)
-            tabs -= 1; // volvemos al nivel tabAntesFunc
+            // cerrar la funcion
+            tabs -= 1;
             agregarCodigo(")");
-            // tabs queda igual a tabAntesFunc
         }
 
         if (checkOverflow){
             generarFuncionOverflow();
         }
     }
+
 
 
     // Funcion para generar el inicio de WASM, este debe estar siempre presente.
@@ -478,7 +485,7 @@ public class Traductor {
         agregarCodigo("i64.lt_s");         // 1 si auxiRes < min
         agregarCodigo("br_if $overflow");  // salta si hay overflow
 
-        // Si llegó acá → no hubo overflow:
+        // Si llego aca → no hubo overflow:
         agregarCodigo("br $fin");
 
         // ----- bloque overflow -----
