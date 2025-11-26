@@ -1,4 +1,4 @@
 P17{
-    long P9.X;
-    long P9.X;
+    long P17.X;
+    long P17.X;
 }

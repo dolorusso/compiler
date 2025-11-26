@@ -29,6 +29,7 @@ public class Traductor {
     private int indiceErrorPerdidaInformacion;
     private int indiceErrorRecursion;
 
+    // Clase auxiliar para traducir operaciones de los tercetos segun operacion y tipo.
     static class OpWasm {
         boolean usaAmbosOperandos;
         String instrI32;
@@ -53,19 +54,6 @@ public class Traductor {
         initTablaOps();
     }
 
-    // funcion para generar un archivo a partir de codigoGenerado.
-    public void generarArchivo(){
-        //  codigo para
-        try {
-            FileWriter fw = new FileWriter("src/Compilador/Assembler/output.wat");
-            BufferedWriter bw = new BufferedWriter(fw);
-            bw.write(codigoGenerado.toString());
-            bw.close();
-        } catch (IOException e) {
-            ErrorManager.getInstance().error("Error al generar archivo de salida", -1);
-        }
-    }
-
     //guardo como se hacen las operaciones en i32  f32
     private void initTablaOps() {
         // Operaciones
@@ -83,6 +71,17 @@ public class Traductor {
         tablaOps.put("!=", new OpWasm(true, "i32.ne", "f32.ne"));
     }
 
+    // Funcion para generar un archivo a partir de codigoGenerado.
+    public void generarArchivo(){
+        try {
+            FileWriter fw = new FileWriter("src/Compilador/Assembler/output.wat");
+            BufferedWriter bw = new BufferedWriter(fw);
+            bw.write(codigoGenerado.toString());
+            bw.close();
+        } catch (IOException e) {
+            ErrorManager.getInstance().error("Error al generar archivo de salida", -1);
+        }
+    }
 
     // Funcion con el flujo principal del traductor.
     // Se le dan todos los tercetos y genera un archivo con el codigo de salida.
@@ -92,7 +91,7 @@ public class Traductor {
         generarGlobales();
         generarFunciones();
         generarFin();
-        System.out.println(codigoGenerado.toString());
+        System.out.println(codigoGenerado);
         generarArchivo();
     }
 
@@ -164,13 +163,13 @@ public class Traductor {
                     agregarCodigo("br_if $else_" + auxUnidades.peek());
                 }
                 return;
-            // el resultado de la condicion esta en la pila
 
             case "BI":
                 agregarCodigo("br $endif_" + auxUnidades.peek());
                 auxUnidades.pop();
                 agregarCodigo(")");
                 return;
+
             case "endif":
                 tabs--;
                 agregarCodigo(")");
@@ -182,6 +181,7 @@ public class Traductor {
 
                 }
                 return;
+
             case "if_inicio":
                 agregarCodigo("(block $endif_" + contadorUnidades);
                 tabs++;
@@ -189,8 +189,8 @@ public class Traductor {
                 tabs++;
                 auxUnidades.push(contadorUnidades);
                 contadorUnidades++;
-
                 return;
+
             case "do_inicio":
                 agregarCodigo("(loop $do_" + contadorUnidades);
                 tabs++;
@@ -219,10 +219,9 @@ public class Traductor {
 
             return;
         }
-
-        //errManager.error("OPERADOR DE TERCETO NO RECONOCIDO " + t, -1);
     }
 
+    // Funcion para procesar print.
     private void procesarPrint(String operando1) {
         if (esNumero(operando1)){
             agregarCodigo("call $print_num");
@@ -396,28 +395,9 @@ public class Traductor {
         }
     }
 
-    private class BlockInfo implements Comparable<BlockInfo> {
-        public int inicioBloque;
-        public int finBloque;
-        public boolean esLoop;
-
-        public BlockInfo(int inicio, int fin, boolean loop) {
-            inicioBloque = inicio;
-            finBloque = fin;
-            esLoop = loop;
-        }
-
-        @Override
-        public int compareTo(BlockInfo other) {
-            return Integer.compare(this.inicioBloque, other.inicioBloque);
-        }
-
-        @Override
-        public String toString() {
-            return("Bloque: " + inicioBloque + " - " + finBloque + " - " + esLoop);
-        }
-    }
-
+    // Funcion con flujo principal de traduccion.
+    // Toma como entrada una mapa con los tercetos separados por funcion y construye todas las funciones,
+    // traduciendo todos los tercetos en una unica pasada.
     public void generarFunciones(){
         for (Map.Entry<String, List<Terceto>> entrada : funciones.entrySet()){
             boolean esMain = false;
@@ -446,10 +426,12 @@ public class Traductor {
             agregarCodigo(")");
         }
 
+        // Si detectamos previamente que hay multiplicaciones, checkeamos el overflow.
         if (checkOverflow){
             generarFuncionOverflow();
         }
 
+        // Si previamente que hay trunc, checkeamos perdida de informacion en conversion.
         if (checkTrunc){
             generarFuncionPerdidaInformacion();
         }
@@ -482,7 +464,7 @@ public class Traductor {
         return typeMap.get(tipo);
     }
 
-
+    // Funcion para guardar un valor de la pila en variableauxiliar dependiendo del tipo.
     private void guardarAux(int tipo, String nombreAux){
         if (tipo == Atributo.longType)
             agregarCodigo("global.set $_aux" + nombreAux +"i" );
@@ -505,6 +487,7 @@ public class Traductor {
 
     }
 
+    // Funcion para recuperar los auxiliares guardados.
     private void recuperarAuxiliar(int tipo, boolean aux1, boolean aux2){
         if (tipo == Atributo.longType) {
             if (aux1)
@@ -519,6 +502,8 @@ public class Traductor {
         }
     }
 
+    // Funcion para generar la funcion que checkea el overflow.
+    // Supone como entrada que en los auxiliares se tienen los numeros a multiplicar.
     private void generarFuncionOverflow(){
         agregarCodigo("(func $integer-overflow-checker");
         tabs++;
@@ -572,6 +557,7 @@ public class Traductor {
         agregarCodigo(")");
     }
 
+    // Funcion que maneja la logica previa y posterior al checkeo. Asegura el estado de la pila.
     private void generarCheckOverflow(Terceto terceto){
         guardarOperandos(terceto);
         agregarCodigo("call $integer-overflow-checker");
@@ -607,6 +593,7 @@ public class Traductor {
 
     }
 
+    // Funcion que maneja la logica previa y posterior al checkeo. Asegura el estado de la pila.
     private void generarCheckTrunc(Terceto terceto){
         procesarOperando(terceto.operando1);
         // Siempre se procesara un float dentro del trunc, se almacena.
@@ -625,6 +612,8 @@ public class Traductor {
         recuperarAuxiliar(terceto.tipo, true, false);
     }
 
+    // Funcion que maneja la logica de verificacion de recursion, junto con las flags puestas
+    // antes y despues de todos los calls, asegura que no haya llamados recursivos de ningun tipo.
     private void generarCheckRecursion(Terceto terceto) {
         String nombreFuncion = terceto.operando1;
         // Agregamos codigo necesario para checkear la recursion.
@@ -641,7 +630,6 @@ public class Traductor {
         agregarCodigo("unreachable");
         tabs--;
         agregarCodigo(")");
-
 
     }
 

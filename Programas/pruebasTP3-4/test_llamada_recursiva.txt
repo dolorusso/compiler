@@ -1,11 +1,11 @@
 P10{
     long P10.X;
-    P10.X := 0;
+    P10.X := 0L;
     long F1(long Y){
-        if (P10.X => 1)
+        if (P10.X => 1L)
             P10.F1(1->Y);
         endif;
-        P10.X := P10.X + 1;
+        P10.X := P10.X + 1L;
         print(& llegue con &);
         print(P10.X);
         return (0L);
