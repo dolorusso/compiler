@@ -564,7 +564,7 @@ public class Traductor {
         agregarCodigo(")"); // end block $overflow
         tabs++;
         agregarCodigo("i32.const " + indiceErrorOverflow);
-        agregarCodigo("call print_str");
+        agregarCodigo("call $print_str");
         agregarCodigo("unreachable"); // trap definitivo
 
         tabs--;
