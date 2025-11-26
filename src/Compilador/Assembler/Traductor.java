@@ -552,7 +552,7 @@ public class Traductor {
         agregarCodigo("call $integer-overflow-checker");
     }
 
-    // Funcion que genera los checkeos para saber si hubo perdida de informacion en trunc.
+    // Funcion que genera funcion para los checkeos para saber si hubo perdida de informacion en trunc.
     // se supone previamente que se tiene $_auxi1 con el truncado y $_auxf1 con el original.
     private void generarFuncionPerdidaInformacion(){
         agregarCodigo("(func $trunc-checker");
@@ -566,7 +566,7 @@ public class Traductor {
         // Se convierte en entero a float para comparar con el resultado original.
         agregarCodigo("f32.convert_i32_s");
         recuperarAuxiliar(Atributo.floatType, true,false);
-        agregarCodigo("f32.ne"); // Ne para usar el if correctamente
+        agregarCodigo("f32.eq");
         agregarCodigo("br_if $else_truncar");
         agregarCodigo("i32.const " + indiceErrorPerdidaInformacion);
         agregarCodigo("call $print_str");
@@ -580,7 +580,6 @@ public class Traductor {
         agregarCodigo(")"); // cierre funcion
 
     }
-    // Dentro de generarInicio() o como una nueva función llamada desde ahí
 
     private void generarCheckTrunc(Terceto terceto){
         procesarOperando(terceto.operando1);
