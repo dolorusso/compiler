@@ -111,7 +111,11 @@ public class Traductor {
             case "call":
                 if (!esMain)
                     generarCheckRecursion(t);
+                agregarCodigo("i32.const 1");
+                agregarCodigo("global.set $activa_" + t.operando1);
                 agregarCodigo("call $" + t.operando1);
+                agregarCodigo("i32.const 0");
+                agregarCodigo("global.set $activa_" + t.operando1);
                 return;
 
             case "return":
@@ -218,10 +222,6 @@ public class Traductor {
 
         //errManager.error("OPERADOR DE TERCETO NO RECONOCIDO " + t, -1);
     }
-
-
-
-
 
     private void procesarPrint(String operando1) {
         if (esNumero(operando1)){
@@ -433,8 +433,6 @@ public class Traductor {
                 esMain = true;
             }
             tabs += 1; // dentro de la funcion
-            agregarCodigo("i32.const 1");
-            agregarCodigo("global.set $activa_" + nombreFuncion);
 
             for (Terceto terceto : tercetos){
                 traducir(terceto, esMain);
@@ -559,7 +557,7 @@ public class Traductor {
         // Si llego aca, no hubo overflow.
         agregarCodigo("br $fin");
 
-        // ----- bloque overflow -----
+        // bloque overflow.
         tabs--;
         agregarCodigo(")"); // end block $overflow
         tabs++;
