@@ -2,7 +2,7 @@ P10{
     long P10.X;
     P10.X := 0;
     long F1(long Y){
-        if (P10.X > 1)
+        if (P10.X => 1)
             P10.F1(1->Y);
         endif;
         P10.X := P10.X + 1;
@@ -13,6 +13,6 @@ P10{
     print(& iteracion 1 &);
     P10.F1(-1L->Y);
     print(& ----- &);
-    print(& iteracion 2 &);
+    print(& iteracion 2 &); @ no deberia llegar, exeption
     P10.F1(-1L->Y);
 }
