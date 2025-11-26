@@ -5,6 +5,9 @@ import Compilador.Generador.Terceto;
 import Compilador.Lexer.Atributo;
 import Compilador.Lexer.TablaSimbolos;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.*;
 
 public class Traductor {
@@ -45,6 +48,18 @@ public class Traductor {
         initTablaOps();
     }
 
+    // funcion para generar un archivo a partir de codigoGenerado.
+    public void generarArchivo(){
+        //  codigo para
+        try {
+            FileWriter fw = new FileWriter("src/Compilador/Assembler/output.wat");
+            BufferedWriter bw = new BufferedWriter(fw);
+            bw.write(codigoGenerado.toString());
+            bw.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
 
     private void initTablaOps() {
@@ -73,6 +88,7 @@ public class Traductor {
         generarFunciones();
         generarFin();
         System.out.println(codigoGenerado.toString());
+        generarArchivo();
     }
 
     // Funcion para traducir un terceto. Trata los operandos de ser necesario y genera la instruccion WASM
@@ -147,6 +163,13 @@ public class Traductor {
             case "endif":
                 tabs--;
                 agregarCodigo(")");
+                if (t.operando1.equals("if")){
+                    tabs--;
+                    agregarCodigo("br $endif_" + auxUnidades.peek());
+                    agregarCodigo(")");
+                    auxUnidades.pop();
+
+                }
                 return;
             case "if_inicio":
                 agregarCodigo("(block $endif_" + contadorUnidaes);
@@ -198,8 +221,10 @@ public class Traductor {
                 agregarCodigo("i32.const " + (int)atr.numValue);
                 agregarCodigo("call $print_str");
             } else if (atr.type == Atributo.longType){
+                agregarCodigo("global.get $" + operando1);
                 agregarCodigo("call $print_num");
             } else if (atr.type == Atributo.floatType){
+                agregarCodigo("global.get $" + operando1);
                 agregarCodigo("call $print_num");
             } else {
                 errManager.error("Error al procesar el tipo de dato: " + atr.type, -1);
@@ -312,6 +337,8 @@ public class Traductor {
         int pages = (espacioStrings + pageSize - 1) / pageSize;
         if (espacioStrings > 0){
             agregarCodigo("(memory (export \"mem\") " + pages + ")");
+        } else {
+            agregarCodigo("(memory (export \"mem\") 1)");
         }
 
         for (Atributo str : strings){

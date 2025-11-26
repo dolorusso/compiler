@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prueba WASM</title>
+    <style>
+        body { font-family: monospace; padding: 20px; background-color: #f0f0f0; }
+        #output {
+            background-color: #1e1e1e; color: #00ff00;
+            padding: 15px; border-radius: 5px; min-height: 200px;
+            white-space: pre-wrap; box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        }
+        .error { color: #ff4444; }
+        button { padding: 10px 20px; font-size: 16px; cursor: pointer; }
+    </style>
+</head>
+<body>
+<h1>Ejecutor WebAssembly</h1>
+<p>Esta página ejecuta tu archivo .wasm generado por tu compilador.</p>
+
+<button id="btn" onclick="loadWasm()">Ejecutar .wasm</button>
+
+<br><br>
+<div id="output">Esperando...</div>
+
+<script>
+    // Siempre este archivo
+    const WASM_FILENAME = "output.wasm";
+    let wasmMemory;
+
+    function logScreen(text) {
+        document.getElementById('output').innerHTML += text;
+        console.log("[WASM]", text);
+    }
+
+    function clear() {
+        document.getElementById('output').innerHTML = "";
+    }
+
+    function getStringFromMem(offset) {
+        if (!wasmMemory) return "[Error: memoria no inicializada]";
+        const bytes = new Uint8Array(wasmMemory.buffer);
+
+        let end = offset;
+        const MAX = bytes.length;
+        while (end < MAX && bytes[end] !== 0) end++;
+        return new TextDecoder().decode(bytes.subarray(offset, end));
+    }
+
+    const importObject = {
+        console: {
+            print_str: (ptr) => logScreen(getStringFromMem(ptr)),
+            print_num: (v) => logScreen(String(v)),
+        }
+    };
+
+    async function loadWasm() {
+        const btn = document.getElementById('btn');
+        btn.disabled = true;
+
+        clear();
+
+        console.log(`Cargando ${WASM_FILENAME}...\n`);
+
+        try {
+            const response = await fetch(WASM_FILENAME);
+            if (!response.ok)
+                throw new Error(`No se pudo cargar el archivo (${response.status})`);
+
+            const { instance } = await WebAssembly.instantiateStreaming(response, importObject);
+            wasmMemory = instance.exports.mem;   // ✔ CORRECTO
+
+            logScreen("Ejecutando main()...\n");
+            instance.exports.main();
+
+            console.log("Exports:", Object.keys(instance.exports));
+
+        } catch (err) {
+            logScreen(`<span class='error'>\n[Error] ${err.message}</span>`);
+        }
+
+        btn.disabled = false;
+    }
+
+    window.onload = loadWasm;
+</script>
+</body>
+</html>

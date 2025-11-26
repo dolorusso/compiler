@@ -1,7 +1,7 @@
 package Compilador.ErrorHandler;
 
 public class ErrorManager {
-
+    public boolean hayError;
 
     public enum Nivel {
         ERROR, WARNING, DEBUG
@@ -22,6 +22,7 @@ public class ErrorManager {
 
     // Métodos principales:
     public void error(String msg, int linea) {
+        hayError = true;
         System.err.println("[ERROR] Línea " + linea + ": " + msg);
     }
 

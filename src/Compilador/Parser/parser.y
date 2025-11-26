@@ -14,7 +14,7 @@
 %start programa
 
 %type <sval> constante factor termino expresion parametro_real cuerpo_expresion llamada_funcion inicio_lambda comparador
-%type <sval>  lambda cuerpo_print ids inicio_programa
+%type <sval>  lambda cuerpo_print ids inicio_programa sentencia_IF
 %token <sval> CTEL CTEF INVALID ID IDCOMP CADENASTR MENORIGUAL MAYORIGUAL IGUALIGUAL DISTINTO '>' '<'
 
 %type <ival> lista_identificadores tipo inicio_if else_opt inicio_else condicional_opt condicion inicio_do
@@ -255,7 +255,7 @@ parametro_real
 control
 	: sentencia_IF
 	    {
-	        generador.agregarTerceto("endif", "-", "-");
+	        generador.agregarTerceto("endif", $1, "-");
 	    }
 	| do_until
 	;
@@ -271,6 +271,7 @@ sentencia_IF
 
             // Backpatch BF para saltar a afterThen (no hay else).
             generador.rellenarOperando($1, afterThen, 2);
+            $$ = "if";
 
 	    }
 	| inicio_if sentencia_ejecutable ENDIF ';'
@@ -282,7 +283,7 @@ sentencia_IF
 
             // Backpatch BF para saltar a afterThen (no hay else).
             generador.rellenarOperando($1, afterThen, 2);
-
+            $$ = "if";
     	}
 	| inicio_if cuerpo_opt else_opt
 	    {
@@ -290,7 +291,7 @@ sentencia_IF
 
             // rellenamos Backpatch BF para saltar al inicio del else
             generador.rellenarOperando($1, $3, 2);
-
+            $$ = "else";
 	    }
     | inicio_if sentencia_ejecutable else_opt
         {
@@ -298,7 +299,7 @@ sentencia_IF
 
             // rellenamos Backpatch BF para saltar al inicio del else
             generador.rellenarOperando($1, $3, 2);
-
+            $$ = "else";
         }
 	| inicio_if cuerpo_opt ENDIF error
         { errManager.error(" Falta delimitador de sentencias ;.", al.getLine()); }
@@ -931,7 +932,10 @@ public void run()
     yyparse();
     errManager.debug("Tabla de simbolos resultante" + '\n' +  al.ts.toString());
     errManager.debug("Tercetos resultante" + '\n' +  generador.imprimirTercetos());
-    traductor.traducir(generador.getTercetos());
+    if (!errManager.hayError)
+        traductor.traducir(generador.getTercetos());
+    else
+        errManager.error("Error en compilacion", al.getLine());
 }
 
 public void yyerror(String s) {

@@ -269,11 +269,11 @@ state 2
 
 	llamada_funcion  goto 16
 	ids  goto 17
-	lista_identificadores  goto 18
-	tipo  goto 19
-	inicio_if  goto 20
-	inicio_do  goto 21
-	sentencia_IF  goto 22
+	sentencia_IF  goto 18
+	lista_identificadores  goto 19
+	tipo  goto 20
+	inicio_if  goto 21
+	inicio_do  goto 22
 	lista_sentencias  goto 23
 	sentencia  goto 24
 	sentencia_declarativa  goto 25
@@ -307,11 +307,11 @@ state 3
 
 	llamada_funcion  goto 16
 	ids  goto 17
-	lista_identificadores  goto 18
-	tipo  goto 19
-	inicio_if  goto 20
-	inicio_do  goto 21
-	sentencia_IF  goto 22
+	sentencia_IF  goto 18
+	lista_identificadores  goto 19
+	tipo  goto 20
+	inicio_if  goto 21
+	inicio_do  goto 22
 	lista_sentencias  goto 37
 	sentencia  goto 24
 	sentencia_declarativa  goto 25
@@ -355,11 +355,11 @@ state 5
 
 	llamada_funcion  goto 16
 	ids  goto 17
-	lista_identificadores  goto 18
-	tipo  goto 19
-	inicio_if  goto 20
-	inicio_do  goto 21
-	sentencia_IF  goto 22
+	sentencia_IF  goto 18
+	lista_identificadores  goto 19
+	tipo  goto 20
+	inicio_if  goto 21
+	inicio_do  goto 22
 	lista_sentencias  goto 40
 	sentencia  goto 24
 	sentencia_declarativa  goto 25
@@ -519,6 +519,12 @@ state 17
 
 
 state 18
+	control : sentencia_IF .  (69)
+
+	.  reduce 69
+
+
+state 19
 	sentencia_declarativa : lista_identificadores . ';'  (16)
 	sentencia_declarativa : lista_identificadores . error  (17)
 	lista_identificadores : lista_identificadores . ',' IDCOMP  (59)
@@ -534,7 +540,7 @@ state 18
 	.  error
 
 
-state 19
+state 20
 	inicio_funcion : tipo . ID parametros_formales_opt  (29)
 	inicio_funcion : tipo . parametros_formales_opt  (31)
 	inicio_funcion : tipo . IDCOMP parametros_formales_opt  (32)
@@ -549,7 +555,7 @@ state 19
 	parametros_formales_opt  goto 81
 
 
-state 20
+state 21
 	sentencia_IF : inicio_if . cuerpo_opt ENDIF ';'  (71)
 	sentencia_IF : inicio_if . sentencia_ejecutable ENDIF ';'  (72)
 	sentencia_IF : inicio_if . cuerpo_opt else_opt  (73)
@@ -579,11 +585,11 @@ state 20
 
 	llamada_funcion  goto 16
 	ids  goto 17
-	inicio_if  goto 20
+	sentencia_IF  goto 18
+	inicio_if  goto 21
 	else_opt  goto 87
 	inicio_else  goto 88
-	inicio_do  goto 21
-	sentencia_IF  goto 22
+	inicio_do  goto 22
 	sentencia_ejecutable  goto 89
 	asignacion  goto 28
 	control  goto 29
@@ -596,7 +602,7 @@ state 20
 	inicio_if_sin_condicion  goto 35
 
 
-state 21
+state 22
 	do_until : inicio_do . cuerpo_opt UNTIL condicional_opt ';'  (109)
 	do_until : inicio_do . cuerpo_opt UNTIL condicional_opt error  (110)
 	do_until : inicio_do . UNTIL condicional_opt ';'  (111)
@@ -615,9 +621,9 @@ state 21
 
 	llamada_funcion  goto 16
 	ids  goto 17
-	inicio_if  goto 20
-	inicio_do  goto 21
-	sentencia_IF  goto 22
+	sentencia_IF  goto 18
+	inicio_if  goto 21
+	inicio_do  goto 22
 	sentencia_ejecutable  goto 94
 	asignacion  goto 28
 	control  goto 29
@@ -628,12 +634,6 @@ state 21
 	do_until  goto 34
 	cuerpo_opt  goto 95
 	inicio_if_sin_condicion  goto 35
-
-
-state 22
-	control : sentencia_IF .  (69)
-
-	.  reduce 69
 
 
 state 23
@@ -654,11 +654,11 @@ state 23
 
 	llamada_funcion  goto 16
 	ids  goto 17
-	lista_identificadores  goto 18
-	tipo  goto 19
-	inicio_if  goto 20
-	inicio_do  goto 21
-	sentencia_IF  goto 22
+	sentencia_IF  goto 18
+	lista_identificadores  goto 19
+	tipo  goto 20
+	inicio_if  goto 21
+	inicio_do  goto 22
 	sentencia  goto 97
 	sentencia_declarativa  goto 25
 	sentencia_ejecutable  goto 26
@@ -806,11 +806,11 @@ state 37
 
 	llamada_funcion  goto 16
 	ids  goto 17
-	lista_identificadores  goto 18
-	tipo  goto 19
-	inicio_if  goto 20
-	inicio_do  goto 21
-	sentencia_IF  goto 22
+	sentencia_IF  goto 18
+	lista_identificadores  goto 19
+	tipo  goto 20
+	inicio_if  goto 21
+	inicio_do  goto 22
 	sentencia  goto 97
 	sentencia_declarativa  goto 25
 	sentencia_ejecutable  goto 26
@@ -860,11 +860,11 @@ state 40
 
 	llamada_funcion  goto 16
 	ids  goto 17
-	lista_identificadores  goto 18
-	tipo  goto 19
-	inicio_if  goto 20
-	inicio_do  goto 21
-	sentencia_IF  goto 22
+	sentencia_IF  goto 18
+	lista_identificadores  goto 19
+	tipo  goto 20
+	inicio_if  goto 21
+	inicio_do  goto 22
 	sentencia  goto 97
 	sentencia_declarativa  goto 25
 	sentencia_ejecutable  goto 26
@@ -1532,11 +1532,11 @@ state 86
 
 	llamada_funcion  goto 16
 	ids  goto 17
-	inicio_if  goto 20
+	sentencia_IF  goto 18
+	inicio_if  goto 21
 	else_opt  goto 173
 	inicio_else  goto 88
-	inicio_do  goto 21
-	sentencia_IF  goto 22
+	inicio_do  goto 22
 	sentencia_ejecutable  goto 94
 	asignacion  goto 28
 	control  goto 29
@@ -1581,9 +1581,9 @@ state 88
 
 	llamada_funcion  goto 16
 	ids  goto 17
-	inicio_if  goto 20
-	inicio_do  goto 21
-	sentencia_IF  goto 22
+	sentencia_IF  goto 18
+	inicio_if  goto 21
+	inicio_do  goto 22
 	sentencia_ejecutable  goto 180
 	asignacion  goto 28
 	control  goto 29
@@ -1633,9 +1633,9 @@ state 90
 
 	llamada_funcion  goto 16
 	ids  goto 17
-	inicio_if  goto 20
-	inicio_do  goto 21
-	sentencia_IF  goto 22
+	sentencia_IF  goto 18
+	inicio_if  goto 21
+	inicio_do  goto 22
 	sentencia_ejecutable  goto 186
 	asignacion  goto 28
 	control  goto 29
@@ -1705,9 +1705,9 @@ state 93
 
 	llamada_funcion  goto 16
 	ids  goto 17
-	inicio_if  goto 20
-	inicio_do  goto 21
-	sentencia_IF  goto 22
+	sentencia_IF  goto 18
+	inicio_if  goto 21
+	inicio_do  goto 22
 	sentencia_ejecutable  goto 94
 	asignacion  goto 28
 	control  goto 29
@@ -1807,11 +1807,11 @@ state 102
 
 	llamada_funcion  goto 16
 	ids  goto 17
-	lista_identificadores  goto 18
-	tipo  goto 19
-	inicio_if  goto 20
-	inicio_do  goto 21
-	sentencia_IF  goto 22
+	sentencia_IF  goto 18
+	lista_identificadores  goto 19
+	tipo  goto 20
+	inicio_if  goto 21
+	inicio_do  goto 22
 	lista_sentencias  goto 194
 	sentencia  goto 24
 	sentencia_declarativa  goto 25
@@ -2050,9 +2050,9 @@ state 120
 
 	llamada_funcion  goto 16
 	ids  goto 17
-	inicio_if  goto 20
-	inicio_do  goto 21
-	sentencia_IF  goto 22
+	sentencia_IF  goto 18
+	inicio_if  goto 21
+	inicio_do  goto 22
 	sentencia_ejecutable  goto 94
 	asignacion  goto 28
 	control  goto 29
@@ -2650,9 +2650,9 @@ state 174
 
 	llamada_funcion  goto 16
 	ids  goto 17
-	inicio_if  goto 20
-	inicio_do  goto 21
-	sentencia_IF  goto 22
+	sentencia_IF  goto 18
+	inicio_if  goto 21
+	inicio_do  goto 22
 	sentencia_ejecutable  goto 186
 	asignacion  goto 28
 	control  goto 29
@@ -2702,9 +2702,9 @@ state 178
 
 	llamada_funcion  goto 16
 	ids  goto 17
-	inicio_if  goto 20
-	inicio_do  goto 21
-	sentencia_IF  goto 22
+	sentencia_IF  goto 18
+	inicio_if  goto 21
+	inicio_do  goto 22
 	sentencia_ejecutable  goto 94
 	asignacion  goto 28
 	control  goto 29
@@ -2868,11 +2868,11 @@ state 194
 
 	llamada_funcion  goto 16
 	ids  goto 17
-	lista_identificadores  goto 18
-	tipo  goto 19
-	inicio_if  goto 20
-	inicio_do  goto 21
-	sentencia_IF  goto 22
+	sentencia_IF  goto 18
+	lista_identificadores  goto 19
+	tipo  goto 20
+	inicio_if  goto 21
+	inicio_do  goto 22
 	sentencia  goto 97
 	sentencia_declarativa  goto 25
 	sentencia_ejecutable  goto 26
@@ -3068,9 +3068,9 @@ state 218
 
 	llamada_funcion  goto 16
 	ids  goto 17
-	inicio_if  goto 20
-	inicio_do  goto 21
-	sentencia_IF  goto 22
+	sentencia_IF  goto 18
+	inicio_if  goto 21
+	inicio_do  goto 22
 	sentencia_ejecutable  goto 94
 	asignacion  goto 28
 	control  goto 29
@@ -3097,9 +3097,9 @@ state 219
 
 	llamada_funcion  goto 16
 	ids  goto 17
-	inicio_if  goto 20
-	inicio_do  goto 21
-	sentencia_IF  goto 22
+	sentencia_IF  goto 18
+	inicio_if  goto 21
+	inicio_do  goto 22
 	sentencia_ejecutable  goto 186
 	asignacion  goto 28
 	control  goto 29
@@ -3587,9 +3587,9 @@ state 276
 
 	llamada_funcion  goto 16
 	ids  goto 17
-	inicio_if  goto 20
-	inicio_do  goto 21
-	sentencia_IF  goto 22
+	sentencia_IF  goto 18
+	inicio_if  goto 21
+	inicio_do  goto 22
 	sentencia_ejecutable  goto 186
 	asignacion  goto 28
 	control  goto 29

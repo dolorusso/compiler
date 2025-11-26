@@ -42,7 +42,12 @@ public class Generador {
 
     // Funcion para devolver el ambito actual.
     public String getCurrentScope(){
-        return scopeStack.peek();
+        try {
+            return scopeStack.peek();
+        } catch (EmptyStackException e) {
+            ErrorManager.getInstance().error("Declaracion de programa incorrecta", -1);
+            return "";
+        }
     }
 
     // Funcion para agregar a la pila de ambitos un nuevo ambito.

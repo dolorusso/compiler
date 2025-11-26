@@ -1,17 +1,26 @@
 A
 {
     long A.X;
-    do {
-        A.X := 1;
-        do {
-            A.X := 1;
-            if ( 4L > 3L){
-                print(&if&);
-            } else {
-                print(&else&);
-            } endif;
-        } until ( A.X < 3L);
-    } until ( A.X < 3L);
+    long A.Y;
 
-    print(&AFUERA&);
+    A.X := 2L;
+    A.Y := 7L;
+
+    if (A.X > 1L){
+        print(&A1&);
+
+        if (A.Y < 5L)
+            print(&A2&);
+        else{
+            print(&A3&);
+            if (A.Y == 7L)
+                print(&A4&);
+            endif;
+        }
+        endif;
+
+    } else
+        print(&B&);
+    endif;
 }
+@ Imprimir
