@@ -359,16 +359,18 @@ public class Traductor {
         }
 
         // Agregamos al final, si es necesario, un mensaje de error para Overflow
-        String errorOverflow = "[Runtime Error] Overflow al multiplicar.";
         if (checkOverflow){
+            String errorOverflow = "[Runtime Error] Overflow al multiplicar.";
             agregarCodigo("(data (i32.const " + indiceStr + ") \"" + errorOverflow + "\\00\")");
             this.indiceErrorOverflow = indiceStr;
             indiceStr += errorOverflow.length() + 1;
         }
 
+        // Agregamos al final, si es necesario, un mensaje de error para perdida de informacion en conversion
         if (checkTrunc){
             String errorTrunc = "[Runtime Error] Truncamiento genera perdida de informacion.";
             agregarCodigo("(data (i32.const " + indiceStr + ") \"" + errorTrunc + "\\00\")");
+            this.indiceErrorPerdidaInformacion = indiceStr;
             indiceStr += errorTrunc.length() + 1;
         }
     }
