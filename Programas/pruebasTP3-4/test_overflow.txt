@@ -4,10 +4,10 @@ P8{
     print(&funciona: &);
     print(P8.X);
 
-    P8.X := 107374182L * 2L;
+    P8.X := 1073741823L * 2L;
     print(&funciona: &);
     print(P8.X);
-
-    P8.X := 107374183L * 2L;
+    print(& ---- &);
+    P8.X := 1073741824L * 2L;
     print(&aca no llega, overflow &);
 }

@@ -5,6 +5,6 @@ P6{
     P6.X := 10L + 5L * 2L;
     P6.Y := 20L;
     print(P6.X/P6.Y);
-    print(P6.X*2+P6.Y*-1);
+    print(P6.X*2+P6.Y*-1L);
 
 }

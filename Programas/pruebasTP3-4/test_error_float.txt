@@ -2,6 +2,6 @@
 P2
 {
     float P2.B;
-    B := 1.2;
-    print(B);
+    P2.B := 1.2;
+    print(P2.B);
 }

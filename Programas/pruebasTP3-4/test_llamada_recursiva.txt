@@ -10,6 +10,9 @@ P10{
         print(P10.X);
         return (0L);
     }
+    print(& iteracion 1 &);
     P10.F1(-1L->Y);
-
+    print(& ----- &);
+    print(& iteracion 2 &);
+    P10.F1(-1L->Y);
 }

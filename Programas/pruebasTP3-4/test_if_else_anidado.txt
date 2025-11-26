@@ -2,9 +2,8 @@
 A
 {
     long A.X;
-    long A.Y;
-    A.X := 0L;
-    A.Y := 0L;
+    A.X := 3L;
+
     if (A.X >= 3L){
         print(&if&);
         if (A.X >= 2L)
