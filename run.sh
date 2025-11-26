@@ -11,8 +11,8 @@ ASSEMBLER_DIR="src/Compilador/Assembler"
 WAT_FILE="$ASSEMBLER_DIR/output.wat"
 WASM_FILE="$ASSEMBLER_DIR/output.wasm"
 
-# Binario local de wat2wasm (version Linux)
-WAT2WASM="$ASSEMBLER_DIR/wat2wasm-linux"
+# wat2wasm del sistema
+WAT2WASM="wat2wasm"
 
 # Script que ejecuta la pagina en el navegador
 RUN_WASM_SCRIPT="$ASSEMBLER_DIR/run_wasm.sh"
@@ -39,17 +39,16 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
-# Verificar que se genero output.wat
+# Verificar que se generó output.wat
 if [ ! -f "$WAT_FILE" ]; then
-    echo "Error: no se genero $WAT_FILE."
+    echo "Error: no se generó $WAT_FILE."
     exit 1
 fi
 
-# Verificar que wat2wasm existe y es ejecutable
-if [ ! -x "$WAT2WASM" ]; then
-    echo "Error: no se encontro un wat2wasm valido en:"
-    echo "  $WAT2WASM"
-    echo "Debe existir y tener permisos de ejecucion."
+# Verificar que wat2wasm está instalado
+if ! command -v $WAT2WASM &> /dev/null; then
+    echo "Error: wat2wasm no está instalado."
+    echo "Instálalo con: sudo apt install wabt"
     exit 1
 fi
 
@@ -57,13 +56,13 @@ fi
 echo "Convirtiendo WAT a WASM..."
 "$WAT2WASM" "$WAT_FILE" -o "$WASM_FILE"
 if [ $? -ne 0 ]; then
-    echo "Error: fallo la conversion con wat2wasm."
+    echo "Error: falló la conversión con wat2wasm."
     exit 1
 fi
 
-echo "Se genero el archivo: $WASM_FILE"
+echo "Se generó el archivo: $WASM_FILE"
 
-# Ejecutar el script que abre la pagina web
+# Ejecutar el script que abre la página web
 if [ ! -f "$RUN_WASM_SCRIPT" ]; then
     echo "Error: no existe $RUN_WASM_SCRIPT."
     exit 1
