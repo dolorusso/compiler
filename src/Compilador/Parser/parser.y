@@ -754,6 +754,9 @@ retorno
 	        errManager.debug("Retorno detectado. Linea: " + al.getLine());
 	        generador.agregarTerceto("return", $2, "-");
 	    }
+	| RETURN expresion
+        { errManager.error("Faltan ambos parentesis del return", al.getLine()); }
+
 	;
 
 cuerpo_expresion
@@ -930,11 +933,12 @@ public void declararVariable(String IDCOMP, int tipo){
 public void run()
 {
     yyparse();
-    errManager.debug("Tabla de simbolos resultante" + '\n' +  al.ts.toString());
-    errManager.debug("Tercetos resultante" + '\n' +  generador.imprimirTercetos());
-    if (!errManager.hayError)
+    errManager.entrega("Tabla de simbolos resultante\n" +  al.ts.toString());
+    errManager.entrega("Tercetos resultante\n" +  generador.imprimirTercetos());
+    if (!errManager.hayError){
+        errManager.entrega("Codigo resultante\n");
         traductor.traducir(generador.getTercetos());
-    else
+    } else
         errManager.error("Error en compilacion", al.getLine());
 }
 

@@ -14,7 +14,7 @@ public class Main {
         }
 
         AnalizadorLexico al = AnalizadorLexico.getInstance(path);
-        Parser p = new Parser(ErrorManager.Nivel.DEBUG);
+        Parser p = new Parser(ErrorManager.Nivel.WARNING);
         p.run();
    }
 }

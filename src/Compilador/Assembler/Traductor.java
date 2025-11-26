@@ -19,8 +19,8 @@ public class Traductor {
     private String mainName;
     private final ErrorManager errManager;
     private final Map<String, OpWasm> tablaOps = new HashMap<>();
-    private Stack<Integer> auxUnidades = new Stack<>();
-    private int contadorUnidaes = 0;
+    private final Stack<Integer> auxUnidades = new Stack<>();
+    private int contadorUnidades = 0;
 
     private boolean checkOverflow = false;
     private boolean checkTrunc;
@@ -62,7 +62,7 @@ public class Traductor {
             bw.write(codigoGenerado.toString());
             bw.close();
         } catch (IOException e) {
-            e.printStackTrace();
+            ErrorManager.getInstance().error("Error al generar archivo de salida", -1);
         }
     }
 
@@ -183,19 +183,19 @@ public class Traductor {
                 }
                 return;
             case "if_inicio":
-                agregarCodigo("(block $endif_" + contadorUnidaes);
+                agregarCodigo("(block $endif_" + contadorUnidades);
                 tabs++;
-                agregarCodigo("(block $else_" + contadorUnidaes);
+                agregarCodigo("(block $else_" + contadorUnidades);
                 tabs++;
-                auxUnidades.push(contadorUnidaes);
-                contadorUnidaes++;
+                auxUnidades.push(contadorUnidades);
+                contadorUnidades++;
 
                 return;
             case "do_inicio":
-                agregarCodigo("(loop $do_" + contadorUnidaes);
+                agregarCodigo("(loop $do_" + contadorUnidades);
                 tabs++;
-                auxUnidades.push(contadorUnidaes);
-                contadorUnidaes++;
+                auxUnidades.push(contadorUnidades);
+                contadorUnidades++;
                 return;
         }
 
@@ -247,7 +247,7 @@ public class Traductor {
 
     // Funcion para tratar los operandos dependiendo del tipo y uso en la tabla de simbolos y ponerlos en el tope de la pila
     public void tratarOperandoTS(String lexema, Atributo atr){
-        if (atr.uso == Atributo.USO_PARAMETRO | atr.uso == Atributo.USO_VARIABLE){
+        if (atr.uso == Atributo.USO_PARAMETRO || atr.uso == Atributo.USO_VARIABLE){
             agregarCodigo("global.get $" + lexema);
         } else if (atr.uso == Atributo.USO_CONSTANTE || atr.uso == Atributo.USO_AUXILIAR){
             if (atr.type == Atributo.longType){
@@ -508,14 +508,14 @@ public class Traductor {
     private void recuperarAuxiliar(int tipo, boolean aux1, boolean aux2){
         if (tipo == Atributo.longType) {
             if (aux1)
-                agregarCodigo("global.get $" + "_aux1i");
+                agregarCodigo("global.get $_aux1i");
             if (aux2)
-                agregarCodigo("global.get $" + "_aux2i");
+                agregarCodigo("global.get $_aux2i");
         } else if (tipo == Atributo.floatType) {
             if (aux1)
-                agregarCodigo("global.get $" + "_aux1f");
+                agregarCodigo("global.get $_aux1f");
             if (aux2)
-                agregarCodigo("global.get $" + "_aux2f");
+                agregarCodigo("global.get $_aux2f");
         }
     }
 

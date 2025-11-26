@@ -466,10 +466,9 @@ public class Generador {
     //-------------------------------------------FUNCIONES DE ASIGNACION MULTIPLE-------------------------------------//
     //----------------------------------------------------------------------------------------------------------------//
 
-    public String agregarConstanteMultiple(String idConstante, TablaSimbolos ts){
+    public void agregarConstanteMultiple(String idConstante, TablaSimbolos ts){
         // No checkeamos que este declarada o exista ya que tenerla en el ejecutable implica que existe en la TS.
         asignacionMultipleCTEAux.add(idConstante);
-        return null;
     }
 
     public String agregarIDMultiple(String IDCOMP, TablaSimbolos ts){
@@ -479,7 +478,6 @@ public class Generador {
 
     // Funcion que recorre las listas auxiliares verificando la compatibilidad de los pares.
     // (Aunque ahora no sea tan necesario por que solo se pueden declarar LONGS, seria la practica correcta).
-    // Se realiza todo en una funcion ya que simplifica bastante la logica.
     public String generarAsignacionMultiple(TablaSimbolos ts){
         if (asignacionMultipleCTEAux.size() > asignacionMultipleIDAux.size())
             return "Debe haber mayor o igual cantidad de IDs que Constantes en asignacion multiple.";

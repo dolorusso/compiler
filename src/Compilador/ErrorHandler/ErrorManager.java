@@ -4,7 +4,7 @@ public class ErrorManager {
     public boolean hayError;
 
     public enum Nivel {
-        ERROR, WARNING, DEBUG
+        ERROR, WARNING, DEBUG, ENTREGA
     }
 
     private static final ErrorManager instance = new ErrorManager();
@@ -23,12 +23,12 @@ public class ErrorManager {
     // Métodos principales:
     public void error(String msg, int linea) {
         hayError = true;
-        System.err.println("[ERROR] Línea " + linea + ": " + msg);
+        System.err.println("[ERROR] Linea " + linea + ": " + msg);
     }
 
     public void warning(String msg, int linea) {
         if (nivelActual.ordinal() >= Nivel.WARNING.ordinal())
-            System.out.println("[WARNING] Línea " + linea + ": " + msg);
+            System.out.println("[WARNING] Linea " + linea + ": " + msg);
     }
 
     public void warning(String msg) {
@@ -44,4 +44,8 @@ public class ErrorManager {
         if (nivelActual.ordinal() >= Nivel.DEBUG.ordinal())
             System.out.println("[DEBUG] Linea "+ linea +": " + msg);
     }
+    public void entrega(String msg) {
+        System.out.println("\n\n[RESULTADO] " + msg);
+    }
+
 }
