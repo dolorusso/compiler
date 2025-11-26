@@ -19,12 +19,15 @@ public class Traductor {
     private String mainName;
     private final ErrorManager errManager;
     private final Map<String, OpWasm> tablaOps = new HashMap<>();
-    private boolean checkOverflow = false;
-    private int indiceErrorOverflow;
-    private int indiceErrorPerdidaInformacion;
     private Stack<Integer> auxUnidades = new Stack<>();
     private int contadorUnidaes = 0;
+
+    private boolean checkOverflow = false;
     private boolean checkTrunc;
+    private boolean checkRecursion = false;
+    private int indiceErrorOverflow;
+    private int indiceErrorPerdidaInformacion;
+    private int indiceErrorRecursion;
 
     static class OpWasm {
         boolean usaAmbosOperandos;
@@ -95,7 +98,7 @@ public class Traductor {
 
     // Funcion para traducir un terceto. Trata los operandos de ser necesario y genera la instruccion WASM
     // que se necesite segun el operador y, en algunos casos, el tipo de la operacion.
-    public void traducir(Terceto t) {
+    public void traducir(Terceto t, boolean esMain) {
         OpWasm op = tablaOps.get(t.operador);
 
         // Operadores especiales (que no entran en la tabla)
@@ -106,6 +109,8 @@ public class Traductor {
                 return;
 
             case "call":
+                if (!esMain)
+                    generarCheckRecursion(t);
                 agregarCodigo("call $" + t.operando1);
                 return;
 
@@ -131,9 +136,11 @@ public class Traductor {
                 return;
 
             case "*":
-                generarCheckOverflow(t);
-                recuperarAuxiliar(t.tipo, true, true);
-                // sin return, queremos que ejecute la multiplicacion ademas de esto.
+                // Si son enteros, verificamos overflow.
+                if (t.tipo == Atributo.longType) {
+                    generarCheckOverflow(t);
+                }
+                // Hacemos la logica aca ya que tiene un tratamiento distinto.
                 if (t.tipo == Atributo.longType)
                     agregarCodigo(op.instrI32);
 
@@ -212,11 +219,9 @@ public class Traductor {
         //errManager.error("OPERADOR DE TERCETO NO RECONOCIDO " + t, -1);
     }
 
-    private void generarCheckPerdidaInformacion(Terceto t) {
-        // No checkeamos el tipo. Trunc es siempre resultado entero.
-        recuperarAuxiliar(t.tipo, true, false);
 
-    }
+
+
 
     private void procesarPrint(String operando1) {
         if (esNumero(operando1)){
@@ -300,6 +305,9 @@ public class Traductor {
                     this.checkOverflow = true;
                 if (terceto.operador.equals("trunc"))
                     this.checkTrunc = true;
+                if (terceto.operador.equals("call"))
+                    // No hay forma de ver que este llamado sea o no dentro de una funcion.
+                    this.checkRecursion = true;
                 funciones.get(pilaNombreFuncion.peek()).add(terceto);
             }
         }
@@ -336,6 +344,11 @@ public class Traductor {
         agregarCodigo("(global $_aux1f (mut f32) (f32.const 0))");
         agregarCodigo("(global $_aux2f (mut f32) (f32.const 0))");
 
+        // Creamos una flag para cada funcion que contendra si esta activa o no. Inicializada en 0.
+        for (Map.Entry<String, List<Terceto>> entrada : funciones.entrySet()){
+            agregarCodigo("(global $activa_" + entrada.getKey() + " (mut i32) (i32.const 0))");
+        }
+
         int indiceStr = 0;
 
         // Calculamos la cantidad de paginas que hay que pedir en memoria para almacenar todos los strings.
@@ -358,7 +371,7 @@ public class Traductor {
             indiceStr += str.strValue.length() + 1;
         }
 
-        // Agregamos al final, si es necesario, un mensaje de error para Overflow
+        // Agregamos al final, si es necesario, un mensaje de error para Overflow.
         if (checkOverflow){
             String errorOverflow = "[Runtime Error] Overflow al multiplicar.";
             agregarCodigo("(data (i32.const " + indiceStr + ") \"" + errorOverflow + "\\00\")");
@@ -366,12 +379,20 @@ public class Traductor {
             indiceStr += errorOverflow.length() + 1;
         }
 
-        // Agregamos al final, si es necesario, un mensaje de error para perdida de informacion en conversion
+        // Agregamos al final, si es necesario, un mensaje de error para perdida de informacion en conversion.
         if (checkTrunc){
             String errorTrunc = "[Runtime Error] Truncamiento genera perdida de informacion.";
             agregarCodigo("(data (i32.const " + indiceStr + ") \"" + errorTrunc + "\\00\")");
             this.indiceErrorPerdidaInformacion = indiceStr;
             indiceStr += errorTrunc.length() + 1;
+        }
+
+        // Agregamos al final, si es necesario, un mensaje de error para cuando se detecte llamadas que puedan ser recursivas.
+        if (checkRecursion){
+            String errorRecursion = "[Runtime Error] Recursion detectada.";
+            agregarCodigo("(data (i32.const " + indiceStr + ") \"" + errorRecursion + "\\00\")");
+            this.indiceErrorRecursion = indiceStr;
+            indiceStr += errorRecursion.length() + 1;
         }
     }
 
@@ -399,6 +420,7 @@ public class Traductor {
 
     public void generarFunciones(){
         for (Map.Entry<String, List<Terceto>> entrada : funciones.entrySet()){
+            boolean esMain = false;
             String nombreFuncion = entrada.getKey();
             List<Terceto> tercetos = entrada.getValue();
 
@@ -406,16 +428,23 @@ public class Traductor {
             if (tipoFuncion != null){
                 agregarCodigo("(func $" + nombreFuncion + " (result " + tipoFuncion + ")");
             } else {
+                // Solamente la funcion main no tendra resultado.
                 agregarCodigo("(func $" + nombreFuncion);
+                esMain = true;
             }
             tabs += 1; // dentro de la funcion
+            agregarCodigo("i32.const 1");
+            agregarCodigo("global.set $activa_" + nombreFuncion);
 
             for (Terceto terceto : tercetos){
-                traducir(terceto);
+                traducir(terceto, esMain);
             }
 
             // cerrar la funcion
+            agregarCodigo("i32.const 0");
+            agregarCodigo("global.set $activa_" + nombreFuncion);
             tabs -= 1;
+
             agregarCodigo(")");
         }
 
@@ -455,9 +484,6 @@ public class Traductor {
         return typeMap.get(tipo);
     }
 
-    private boolean generaOverflow(String tipo, String operando){
-        return false;
-    }
 
     private void guardarAux(int tipo, String nombreAux){
         if (tipo == Atributo.longType)
@@ -494,32 +520,43 @@ public class Traductor {
                 agregarCodigo("global.get $" + "_aux2f");
         }
     }
+
     private void generarFuncionOverflow(){
-        // Función que trapea si $_auxiRes no entra en el rango de i32
         agregarCodigo("(func $integer-overflow-checker");
         tabs++;
 
-        // Bloque principal
-        agregarCodigo("(block $fin");        // destino normal (sin overflow)
+        // Bloque principal, destino normal (sin overflow)
+        agregarCodigo("(block $fin");
         tabs++;
 
         // Bloque exclusivo para overflow
-        agregarCodigo("(block $overflow");   // si salto aca → trap
+        agregarCodigo("(block $overflow");
         tabs++;
 
-        // ----- check: auxiRes > MAX_INT -----
+        // Pasamos los 2 operandos a i64.
+        recuperarAuxiliar(Atributo.longType, true, false);
+        agregarCodigo("i64.extend_i32_s");
+
+        recuperarAuxiliar(Atributo.longType, false, true);
+        agregarCodigo("i64.extend_i32_s");
+
+        // Realizamos la operacion en i64, esto asegura que no habra overflow. La guardamos para utilizarla.
+        agregarCodigo("i64.mul");
+        agregarCodigo("global.set $" + "_auxiRes");
+
+        // Checkear auxiRes > MAX_INT.
         agregarCodigo("global.get $_auxiRes");
         agregarCodigo("i64.const " + Integer.MAX_VALUE);
         agregarCodigo("i64.gt_s");         // 1 si auxiRes > max
         agregarCodigo("br_if $overflow");  // salta si hay overflow
 
-        // ----- check: auxiRes < MIN_INT -----
+        // Checkear auxiRes < MIN_INT.
         agregarCodigo("global.get $_auxiRes");
-        agregarCodigo("i64.const " + Integer.toString(Integer.MIN_VALUE));
+        agregarCodigo("i64.const " + Integer.MIN_VALUE);
         agregarCodigo("i64.lt_s");         // 1 si auxiRes < min
         agregarCodigo("br_if $overflow");  // salta si hay overflow
 
-        // Si llego aca → no hubo overflow:
+        // Si llego aca, no hubo overflow.
         agregarCodigo("br $fin");
 
         // ----- bloque overflow -----
@@ -530,7 +567,6 @@ public class Traductor {
         agregarCodigo("call print_str");
         agregarCodigo("unreachable"); // trap definitivo
 
-        // ----- fin -----
         tabs--;
         agregarCodigo(")"); // end block $fin
 
@@ -540,18 +576,8 @@ public class Traductor {
 
     private void generarCheckOverflow(Terceto terceto){
         guardarOperandos(terceto);
-        // Pasamos los 2 operandos a i64.
-        recuperarAuxiliar(terceto.tipo, true, false);
-        agregarCodigo("i64.extend_i32_s");
-
-        recuperarAuxiliar(terceto.tipo, false, true);
-        agregarCodigo("i64.extend_i32_s");
-
-        // Realizamos la operacion en i64, esto asegura que no habra overflow. La guardamos para utilizarla.
-        agregarCodigo("i64.mul");
-        agregarCodigo("global.set $" + "_auxiRes");
-
         agregarCodigo("call $integer-overflow-checker");
+        recuperarAuxiliar(Atributo.longType, true, true);
     }
 
     // Funcion que genera funcion para los checkeos para saber si hubo perdida de informacion en trunc.
@@ -599,6 +625,26 @@ public class Traductor {
 
         agregarCodigo("call $" + "trunc-checker");
         recuperarAuxiliar(terceto.tipo, true, false);
+    }
+
+    private void generarCheckRecursion(Terceto terceto) {
+        String nombreFuncion = terceto.operando1;
+        // Agregamos codigo necesario para checkear la recursion.
+        agregarCodigo("(block $rec_" + nombreFuncion);
+        tabs++;
+        // Obtenemos la flag si la funcion esta activa o no.
+        agregarCodigo("global.get $activa_" + nombreFuncion);
+        agregarCodigo("i32.eqz");
+        // Si eqz = 0, es por que flag = 1, por lo que no se debe saltar y se debe dar error.
+        // Si eqz = 1, es por que flag = 0, por lo que debo romper el bloque y continuar flujo normal.
+        agregarCodigo("br_if $rec_" + nombreFuncion);
+        agregarCodigo("i32.const "+ indiceErrorRecursion);
+        agregarCodigo("call $print_str");
+        agregarCodigo("unreachable");
+        tabs--;
+        agregarCodigo(")");
+
+
     }
 
 }

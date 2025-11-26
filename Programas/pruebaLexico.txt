@@ -2,13 +2,6 @@ A
 {
     long A.X;
     long A.Y;
-
-    A.X := 2L;
-    A.Y := trunc(2.0 + 3.5);
-    print(&no deberia imprimir esto&);
-
-    if (2L > 3L){
-        print(&aaa&);
-    }
-    endif;
+    A.X := 10L * 9L * 3L;
+    print(A.X);
 }

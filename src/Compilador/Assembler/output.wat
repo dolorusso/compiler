@@ -8,49 +8,56 @@
 	(global $_auxiRes (mut i64) (i64.const 0))
 	(global $_aux1f (mut f32) (f32.const 0))
 	(global $_aux2f (mut f32) (f32.const 0))
+	(global $activa_A (mut i32) (i32.const 0))
 	(memory (export "mem") 1)
-	(data (i32.const 0) "aaa\00")
-	(data (i32.const 4) "[Runtime Error] Truncamiento genera perdida de informacion.\00")
+	(data (i32.const 0) "[Runtime Error] Overflow al multiplicar.\00")
 	(func $A
-		i32.const 2
-		global.set $A.X
-		f32.const 2.0
-		f32.const 3.5
-		f32.add
-		global.set $_aux1f
-		global.get $_aux1f
-		i32.trunc_f32_s
+		i32.const 1
+		global.set $activa_A
+		i32.const 9
+		global.set $_aux2i
+		i32.const 10
 		global.set $_aux1i
-		call $trunc-checker
+		call $integer-overflow-checker
 		global.get $_aux1i
-		global.set $A.Y
-		(block $endif_0
-			(block $else_0
-				i32.const 2
-				i32.const 3
-				i32.gt_s
-				i32.eqz
-				br_if $else_0
-				i32.const 0
-				call $print_str
-			)
-		br $endif_0
-		)
+		global.get $_aux2i
+		i32.mul
+		i32.const 3
+		global.set $_aux2i
+		global.set $_aux1i
+		call $integer-overflow-checker
+		global.get $_aux1i
+		global.get $_aux2i
+		i32.mul
+		global.set $A.X
+		global.get $A.X
+		call $print_num
+		i32.const 0
+		global.set $activa_A
 	)
-	(func $trunc-checker
-		(block $endif_truncar
-			(block $else_truncar
+	(func $integer-overflow-checker
+		(block $fin
+			(block $overflow
 				global.get $_aux1i
-				f32.convert_i32_s
-				global.get $_aux1f
-				f32.ne
-				br_if $else_truncar
+				i64.extend_i32_s
+				global.get $_aux2i
+				i64.extend_i32_s
+				i64.mul
+				global.set $_auxiRes
+				global.get $_auxiRes
+				i64.const 2147483647
+				i64.gt_s
+				br_if $overflow
+				global.get $_auxiRes
+				i64.const -2147483648
+				i64.lt_s
+				br_if $overflow
+				br $fin
+			)
 				i32.const 0
-				call $print_str
+				call print_str
 				unreachable
 			)
-		br $endif_truncar
 		)
+		(export "main" (func $A))
 	)
-	(export "main" (func $A))
-)
