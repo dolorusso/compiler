@@ -21,8 +21,10 @@ public class Traductor {
     private final Map<String, OpWasm> tablaOps = new HashMap<>();
     private boolean checkOverflow = false;
     private int indiceErrorOverflow;
+    private int indiceErrorPerdidaInformacion;
     private Stack<Integer> auxUnidades = new Stack<>();
     private int contadorUnidaes = 0;
+    private boolean checkTrunc;
 
     static class OpWasm {
         boolean usaAmbosOperandos;
@@ -61,7 +63,7 @@ public class Traductor {
         }
     }
 
-
+    //guardo como se hacen las operaciones en i32  f32
     private void initTablaOps() {
         // Operaciones
         tablaOps.put("+", new OpWasm(true, "i32.add", "f32.add"));
@@ -121,8 +123,7 @@ public class Traductor {
                 return;
 
             case "trunc":
-                procesarOperando(t.operando1);
-                agregarCodigo("f32.convert_i32_s");
+                generarCheckTrunc(t);
                 return;
 
             case "print":
@@ -157,7 +158,6 @@ public class Traductor {
             case "BI":
                 agregarCodigo("br $endif_" + auxUnidades.peek());
                 auxUnidades.pop();
-                tabs--;
                 agregarCodigo(")");
                 return;
             case "endif":
@@ -210,6 +210,12 @@ public class Traductor {
         }
 
         //errManager.error("OPERADOR DE TERCETO NO RECONOCIDO " + t, -1);
+    }
+
+    private void generarCheckPerdidaInformacion(Terceto t) {
+        // No checkeamos el tipo. Trunc es siempre resultado entero.
+        recuperarAuxiliar(t.tipo, true, false);
+
     }
 
     private void procesarPrint(String operando1) {
@@ -292,6 +298,8 @@ public class Traductor {
             } else {
                 if (terceto.operador.equals("*"))
                     this.checkOverflow = true;
+                if (terceto.operador.equals("trunc"))
+                    this.checkTrunc = true;
                 funciones.get(pilaNombreFuncion.peek()).add(terceto);
             }
         }
@@ -357,6 +365,12 @@ public class Traductor {
             this.indiceErrorOverflow = indiceStr;
             indiceStr += errorOverflow.length() + 1;
         }
+
+        if (checkTrunc){
+            String errorTrunc = "[Runtime Error] Truncamiento genera perdida de informacion.";
+            agregarCodigo("(data (i32.const " + indiceStr + ") \"" + errorTrunc + "\\00\")");
+            indiceStr += errorTrunc.length() + 1;
+        }
     }
 
     private class BlockInfo implements Comparable<BlockInfo> {
@@ -406,6 +420,10 @@ public class Traductor {
         if (checkOverflow){
             generarFuncionOverflow();
         }
+
+        if (checkTrunc){
+            generarFuncionPerdidaInformacion();
+        }
     }
 
 
@@ -439,38 +457,25 @@ public class Traductor {
         return false;
     }
 
-    private void guardarAuxTerceto(int tipo){
+    private void guardarAux(int tipo, String nombreAux){
         if (tipo == Atributo.longType)
-            agregarCodigo("global.set $" + "_aux2i");
-        if (tipo == Atributo.floatType)
-            agregarCodigo("global.set $" + "_aux2f");
-    }
-
-    private void guardarAuxTS(int tipo, String operando, String nombreAux){
-        if (tipo == Atributo.longType) {
-            tratarOperandoTS(operando, ts.obtener(operando));
             agregarCodigo("global.set $_aux" + nombreAux +"i" );
-        }
-        else if (tipo == Atributo.floatType) {
-            tratarOperandoTS(operando, ts.obtener(operando));
+        if (tipo == Atributo.floatType)
             agregarCodigo("global.set $_aux" + nombreAux +"f" );
-        }
     }
 
     // Funcion para guardar 2 operandos en las variables globales para utilizarlas en otras operaciones.
     private void guardarOperandos(Terceto terceto){
-        if (esNumero(terceto.operando2)){
-            guardarAuxTerceto(terceto.tipo);
-        } else {
-            guardarAuxTS(terceto.tipo, terceto.operando2, "2");
-
+        if (! esNumero(terceto.operando2)){
+            tratarOperandoTS(terceto.operando2, ts.obtener(terceto.operando2));
         }
+        guardarAux(terceto.tipo, "2");
 
-        if (esNumero(terceto.operando1)){
-            guardarAuxTerceto(terceto.tipo);
-        } else {
-            guardarAuxTS(terceto.tipo, terceto.operando1, "1");
+        if (! esNumero(terceto.operando1)){
+            tratarOperandoTS(terceto.operando1, ts.obtener(terceto.operando1));
         }
+        guardarAux(terceto.tipo, "1");
+
 
     }
 
@@ -497,7 +502,7 @@ public class Traductor {
         tabs++;
 
         // Bloque exclusivo para overflow
-        agregarCodigo("(block $overflow");   // si salto acá → trap
+        agregarCodigo("(block $overflow");   // si salto aca → trap
         tabs++;
 
         // ----- check: auxiRes > MAX_INT -----
@@ -547,7 +552,52 @@ public class Traductor {
         agregarCodigo("call $integer-overflow-checker");
     }
 
+    // Funcion que genera los checkeos para saber si hubo perdida de informacion en trunc.
+    // se supone previamente que se tiene $_auxi1 con el truncado y $_auxf1 con el original.
+    private void generarFuncionPerdidaInformacion(){
+        agregarCodigo("(func $trunc-checker");
+        tabs++;
+        agregarCodigo("(block $endif_truncar");
+        tabs++;
+        agregarCodigo("(block $else_truncar");
+        tabs++;
+        // Se pone en la pila el entero truncado
+        recuperarAuxiliar(Atributo.longType, true,false);
+        // Se convierte en entero a float para comparar con el resultado original.
+        agregarCodigo("f32.convert_i32_s");
+        recuperarAuxiliar(Atributo.floatType, true,false);
+        agregarCodigo("f32.ne"); // Ne para usar el if correctamente
+        agregarCodigo("br_if $else_truncar");
+        agregarCodigo("i32.const " + indiceErrorPerdidaInformacion);
+        agregarCodigo("call $print_str");
+        agregarCodigo("unreachable");
+        tabs--;
+        agregarCodigo(")"); // cierre else_truncar
+        tabs--;
+        agregarCodigo("br $endif_truncar");
+        agregarCodigo(")"); // cierre endif_truncar
+        tabs--;
+        agregarCodigo(")"); // cierre funcion
+
+    }
     // Dentro de generarInicio() o como una nueva función llamada desde ahí
 
+    private void generarCheckTrunc(Terceto terceto){
+        procesarOperando(terceto.operando1);
+        // Siempre se procesara un float dentro del trunc, se almacena.
+        guardarAux(Atributo.floatType,"1");
+
+        // Se recupera ese float y se realiza la conversion.
+        recuperarAuxiliar(Atributo.floatType, true, false);
+        agregarCodigo("i32.trunc_f32_s");
+        // t.tipo siempre es int para trunc.
+        guardarAux(terceto.tipo,"1");
+        // Luego de esta operacion, se tiene almacenado en los auxiliares
+        // Aux1f: un float con lo que se debe truncar
+        // Aux1i: un int con el numero truncado.
+
+        agregarCodigo("call $" + "trunc-checker");
+        recuperarAuxiliar(terceto.tipo, true, false);
+    }
 
 }

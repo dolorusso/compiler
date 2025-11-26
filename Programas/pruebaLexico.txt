@@ -4,23 +4,10 @@ A
     long A.Y;
 
     A.X := 2L;
-    A.Y := 7L;
+    A.Y := trunc(2.0 + 3.5);
 
-    if (A.X > 1L){
-        print(&A1&);
-
-        if (A.Y < 5L)
-            print(&A2&);
-        else{
-            print(&A3&);
-            if (A.Y == 7L)
-                print(&A4&);
-            endif;
-        }
-        endif;
-
-    } else
-        print(&B&);
+    if (2L > 3L){
+        print(&aaa&);
+    }
     endif;
 }
-@ Imprimir
