@@ -1,0 +1,9 @@
+P12{
+    long F(long X){
+        return (P12.F.X);
+    }
+
+    long F(long Y){
+        return (P12.F.Y);
+    }
+}

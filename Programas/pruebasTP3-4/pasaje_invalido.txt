@@ -12,5 +12,7 @@ P15{
     print(&X &);
     print(P15.X);
     print(& --- &);
+    print(&Y &);
+    print(P15.Y);
 
 }

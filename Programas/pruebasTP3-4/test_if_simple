@@ -1,0 +1,11 @@
+@ Programa valido. If anidado.
+A
+{
+    long A.X;
+    A.X := 0L;
+    if (A.X >= 3L){
+        print(&if&);
+    } else
+        print(&else&);
+    endif;
+}

@@ -1,0 +1,29 @@
+P11
+{
+    long P11.X;
+    long P11.Y;
+    long P11.Z;
+
+    P11.X, P11.Y, P11.Z = 10L, 20L, 30L;
+    print(&X &);
+    print(P11.X);
+    print(& --- &);
+    print(&Y &);
+    print(P11.Y);
+    print(& --- &);
+    print(&Z &);
+    print(P11.Z);
+    print(& --- &);
+
+
+    P11.X, P11.Y, P11.Z = 10L, 20L;
+    print(&X &);
+    print(P11.X);
+    print(& --- &);
+    print(&Y &);
+    print(P11.Y);
+    print(& --- &);
+    print(&Z &);
+    print(P11.Z);
+    print(& --- &);
+}

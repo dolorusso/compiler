@@ -1,0 +1,11 @@
+P14{
+    long P14.X;
+
+    long FUNC(long Y){
+        long P14.FUNC.F;
+        return (0L);
+    }
+
+    P14.FUNC.F := 10L;
+
+}

@@ -1,0 +1,10 @@
+P11{
+    long P11.X;
+    P11.X := trunc (9.5 + 0.5);
+    print(&funciona: &);
+    print(P11.X);
+
+    P11.X := trunc (9.5 + 0.6);
+    print(&aca no llega: &);
+    print(P11.X);
+}

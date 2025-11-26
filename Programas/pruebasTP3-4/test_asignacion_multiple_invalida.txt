@@ -1,0 +1,29 @@
+P1
+{
+    long P1.X;
+    long P1.Y;
+    long P1.Z;
+
+    P1.X, P1.Y, P1.Z = 10L, 20L, 30L;
+    print(&X &);
+    print(P1.X);
+    print(& --- &);
+    print(&Y &);
+    print(P1.Y);
+    print(& --- &);
+    print(&Z &);
+    print(P1.Z);
+    print(& --- &);
+
+     P1.X, P1.Y = 10L, 20L, 30L;
+    print(&X &);
+    print(P1.X);
+    print(& --- &);
+    print(&Y &);
+    print(P1.Y);
+    print(& --- &);
+    print(&Z &);
+    print(P1.Z);
+    print(& --- &);
+
+}

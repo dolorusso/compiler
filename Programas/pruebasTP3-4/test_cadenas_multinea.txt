@@ -1,0 +1,6 @@
+@ Programa valido. Print simple de cadena en 2 lineas.
+P3
+{
+print(&Hola
+      Mundo&);
+}

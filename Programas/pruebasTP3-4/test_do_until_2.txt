@@ -1,0 +1,19 @@
+@ Valido. Do until anidado.
+P5
+{
+    long P5.X;
+    long P5.Y;
+    P5.X := 0;
+
+    do{
+        print(&X&);
+        print(P5.X);
+        P5.X := P5.X + 1L;
+        P5.Y:=0;
+        do{
+            print(&Y&);
+            print(P5.Y);
+            P5.Y := P5.Y + 1L;
+        } until (P5.Y > 5L);
+    } until (P5.X > 10L);
+}

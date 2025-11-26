@@ -1,0 +1,12 @@
+P9{
+    long P9.X;
+
+    P9.X := 10L;
+
+    P9.X := trunc( 10.0 + 20.0 );
+
+    P9.X := 10L + trunc( 1.5 + 2.5 );
+
+    P9.X := trunc( 10.0 + 20L ); @ Error en compilacion de tipos incompatibles.
+
+}

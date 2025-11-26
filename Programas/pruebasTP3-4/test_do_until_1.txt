@@ -1,0 +1,10 @@
+@ Valido. Do until simple.
+P4
+{
+    long P4.X;
+    P4.X := 0;
+    do{
+        print(P4.X);
+        P4.X := P4.X + 1L;
+    } until (P4.X > 10L);
+}

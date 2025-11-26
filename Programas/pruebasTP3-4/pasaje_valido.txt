@@ -1,0 +1,27 @@
+P15{
+    long P15.X;
+    long P15.Y;
+    P15.X := 0L;
+    P15.Y := 0L;
+
+    print(&X &);
+    print(P15.X);
+    print(& --- &);
+    print(&Y &);
+    print(P15.Y);
+    print(& --- DESPUES:  &);
+
+    long F1(long A, cr long B){
+       P15.F1.A := 10L;
+       P15.F1.B := 10L;
+       return (0L);
+    }
+
+    P15.F1(P15.X->A, P15.Y->B);
+    print(&X &);
+    print(P15.X);
+    print(& --- &);
+    print(&Y &);
+    print(P15.Y);
+
+}

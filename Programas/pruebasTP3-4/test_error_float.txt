@@ -1,0 +1,7 @@
+@ Programa erroneo. Declara un float.
+P2
+{
+    float P2.B;
+    B := 1.2;
+    print(B);
+}

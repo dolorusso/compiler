@@ -1,0 +1,13 @@
+P8{
+    long P8.X;
+    P8.X := 214748364L;
+    print(&funciona: &);
+    print(P8.X);
+
+    P8.X := 107374182L * 2L;
+    print(&funciona: &);
+    print(P8.X);
+
+    P8.X := 107374183L * 2L;
+    print(&aca no llega, overflow &);
+}
