@@ -1,11 +1,18 @@
-P15{
-    long P15.X;
-    P15.X := 0L;
-
-    long F1(lambda A){
-       P15.F1.A(10L -> L);
-       return (0L);
+P10 {
+    long P10.X;
+    P10.X := 0L;
+    long F1(long Y){
+        if (P10.X >= 1L)
+            P10.F1(1L->Y);
+        endif;
+        P10.X := P10.X + 1L;
+        print(& llegue con &);
+        print(P10.X);
+        return (0L);
     }
-
-    P15.F1( (long L){ P15.X := 10L} -> A);
+    print(& iteracion 1 &);
+    P10.F1(-1L->Y);
+    print(& ----- &);
+    print(& iteracion 2 &); @ no deberia llegar, exeption
+    P10.F1(-1L->Y);
 }

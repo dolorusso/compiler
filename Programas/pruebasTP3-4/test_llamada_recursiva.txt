@@ -1,9 +1,9 @@
-P10{
+P10 {
     long P10.X;
     P10.X := 0L;
     long F1(long Y){
-        if (P10.X => 1L)
-            P10.F1(1->Y);
+        if (P10.X >= 1L)
+            P10.F1(1L->Y);
         endif;
         P10.X := P10.X + 1L;
         print(& llegue con &);
