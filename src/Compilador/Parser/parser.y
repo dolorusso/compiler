@@ -938,8 +938,10 @@ public void run()
     if (!errManager.hayError){
         errManager.entrega("Codigo resultante\n");
         traductor.traducir(generador.getTercetos());
-    } else
+    } else{
         errManager.error("Error en compilacion", al.getLine());
+        throw new RuntimeException("Error en compilacion, no se procedera a la traduccion.");
+    }
 }
 
 public void yyerror(String s) {

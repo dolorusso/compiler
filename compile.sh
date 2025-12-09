@@ -47,7 +47,6 @@ fi
 
 echo "Ejecutando compilador sobre: $INPUT_FILE"
 java -jar "$OUT_DIR/$JAR_NAME" "$INPUT_FILE"
-
 if [ ! -f "$WAT_FILE" ]; then
     echo "Error: el compilador no generó $WAT_FILE"
     exit 1

@@ -879,13 +879,15 @@ public void run()
     if (!errManager.hayError){
         errManager.entrega("Codigo resultante\n");
         traductor.traducir(generador.getTercetos());
-    } else
+    } else{
         errManager.error("Error en compilacion", al.getLine());
+        throw new RuntimeException("Error en compilacion, no se procedera a la traduccion.");
+    }
 }
 
 public void yyerror(String s) {
 }
-//#line 816 "Parser.java"
+//#line 818 "Parser.java"
 //###############################################################
 // method: yylexdebug : check lexer state
 //###############################################################
@@ -2051,7 +2053,7 @@ case 187:
 //#line 862 "parser.y"
 { yyval.sval = val_peek(0).sval; }
 break;
-//#line 1977 "Parser.java"
+//#line 1979 "Parser.java"
 //########## END OF USER-SUPPLIED ACTIONS ##########
     }//switch
     //#### Now let's reduce... ####
