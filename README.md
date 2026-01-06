@@ -1,6 +1,3 @@
-Aquí tenés la versión **sin emojis**, con tono académico y con el flujo recomendado ampliado tal como pediste.
-
----
 
 # README
 
